@@ -19,7 +19,8 @@ function normalizePayload(payload) {
       products: Array.isArray(data?.products) ? data.products : [],
       tasks: Array.isArray(data?.tasks) ? data.tasks : [],
       customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
-      creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {}
+      creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
+      creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
     }
   };
 }
