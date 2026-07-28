@@ -4246,6 +4246,15 @@
       padding: 0 22px 14px;
     }
 
+    .creator-top-search {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 0 26px 18px;
+    }
+
     .creator-search {
       min-width: min(100%, 360px);
       height: 42px;
@@ -4345,6 +4354,16 @@
       border: 1px solid rgba(255, 255, 255, 0.75);
     }
 
+    .creator-avatar.clickable {
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .creator-avatar.clickable:hover {
+      transform: translateY(-1px) scale(1.04);
+      box-shadow: 0 14px 30px rgba(12, 15, 20, 0.22);
+    }
+
     .creator-avatar img {
       width: 100%;
       height: 100%;
@@ -4432,6 +4451,114 @@
 
     .creator-modal-form {
       padding-top: 22px;
+    }
+
+    .avatar-input-row {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .avatar-preview {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #0b0d10, #303743);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 950;
+      border: 1px solid rgba(12, 15, 20, 0.1);
+    }
+
+    .avatar-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .avatar-input-row input[type="file"] {
+      width: 100%;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 10px;
+      color: #4b5563;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .creator-pager {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 22px 22px;
+    }
+
+    .creator-pager span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .history-summary {
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin: 18px 26px 6px;
+      padding: 16px;
+      border: 1px solid var(--soft);
+      border-radius: 20px;
+      background: #fff;
+    }
+
+    .history-summary .creator-avatar {
+      width: 64px;
+      height: 64px;
+    }
+
+    .history-summary b,
+    .history-summary small {
+      display: block;
+    }
+
+    .history-summary small {
+      margin-top: 5px;
+      color: var(--muted);
+      font-weight: 780;
+      line-height: 1.55;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 10px;
+      padding: 14px 26px 26px;
+    }
+
+    .history-item {
+      border: 1px solid var(--soft);
+      border-radius: 18px;
+      background: #fff;
+      padding: 14px 16px;
+    }
+
+    .history-item b,
+    .history-item small {
+      display: block;
+    }
+
+    .history-item small {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.65;
+      font-weight: 760;
     }
 
     .row-action {
@@ -5042,6 +5169,10 @@
           </div>
           <div class="creator-hub">
             <div class="metrics" id="creatorMetrics"></div>
+            <div class="creator-top-search">
+              <input class="creator-search" id="creatorSearch" type="search" placeholder="搜索达人、产品、状态、负责人" />
+              <div class="creator-note">头像可用于区分达人；头达头像可点击查看历史维护记录。</div>
+            </div>
             <div class="creator-grid">
               <div class="creator-insight">
                 <h3>产品覆盖 Top</h3>
@@ -5052,7 +5183,104 @@
                 <div class="list" id="creatorActionList"></div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div class="panel section-gap">
+          <div class="panel-head">
+            <div>
+              <h2>头达跟进</h2>
+              <p class="sub">优先看近7日GMV、合作佣金、广告佣金，并直接维护跟进状态。</p>
+            </div>
+            <span class="badge amber" id="headCreatorCount">0 位头达</span>
+          </div>
+          <div class="table-wrap">
+            <table class="creator-head-table">
+              <thead>
+                <tr>
+                  <th>达人</th>
+                  <th>视频/直播</th>
+                  <th>带货产品</th>
+                  <th>近7日GMV(k)</th>
+                  <th>合作佣金</th>
+                  <th>广告佣金</th>
+                  <th>合作情况</th>
+                  <th>跟进状态</th>
+                  <th>负责人</th>
+                  <th>更新日期</th>
+                  <th>下次跟进</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="headCreatorRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel section-gap">
+          <div class="panel-head">
+            <div>
+              <h2>达人登记明细</h2>
+              <p class="sub">默认隐藏完整联系方式和收货地址；当前只展示脱敏联系信息，并支持平台内编辑维护。</p>
+            </div>
+            <span class="badge blue" id="creatorRowCount">0 条记录</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>来源</th>
+                  <th>达人</th>
+                  <th>联系方式</th>
+                  <th>日期/更新</th>
+                  <th>是否发视频</th>
+                  <th>直播状态</th>
+                  <th>带货产品</th>
+                  <th>跟进状态</th>
+                  <th>负责人</th>
+                  <th>下次跟进</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="creatorRows"></tbody>
+            </table>
+          </div>
+          <div class="creator-pager">
+            <button class="small-btn" id="creatorPrevPage" type="button">上一页</button>
+            <span id="creatorPageInfo">第 1 / 1 页</span>
+            <button class="small-btn" id="creatorNextPage" type="button">下一页</button>
+          </div>
+          <div class="creator-toolbar">
+            <div class="creator-note">隐私配置：联系方式已脱敏，收货地址未导入页面。</div>
+          </div>
+        </div>
+
+        <div class="panel section-gap">
+          <div class="panel-head">
+            <div>
+              <h2>达人信息录入</h2>
+              <p class="sub">新增普通达人或头达，支持头像录入，便于后续按人跟进和复盘。</p>
+            </div>
+            <span class="badge green">新增通道</span>
+          </div>
+          <div class="creator-hub">
             <form class="form-grid" id="creatorForm">
+              <div class="field">
+                <label>达人头像</label>
+                <div class="avatar-input-row">
+                  <span class="avatar-preview" id="creatorAvatarPreview">头像</span>
+                  <input name="avatarFile" id="creatorAvatarFile" type="file" accept="image/*" />
+                </div>
+              </div>
+              <div class="field">
+                <label>达人类型</label>
+                <select name="tier">
+                  <option>自建达人</option>
+                  <option>头达</option>
+                  <option>腰部达人</option>
+                  <option>普通达人</option>
+                </select>
+              </div>
               <div class="field">
                 <label>达人昵称</label>
                 <input name="name" placeholder="creator name" required />
@@ -5099,78 +5327,17 @@
                 <input name="gmvK" type="number" step="0.1" />
               </div>
               <div class="field half">
+                <label>合作情况</label>
+                <textarea name="relationship" placeholder="记录样品、佣金、内容链接、合作意向等。"></textarea>
+              </div>
+              <div class="field half">
                 <label>跟进备注</label>
-                <textarea name="followNote" placeholder="记录沟通进度、样品、内容链接、佣金谈判等。"></textarea>
+                <textarea name="followNote" placeholder="记录沟通进度、下一步动作和复查指标。"></textarea>
               </div>
               <div class="form-actions">
                 <button class="primary" type="submit">新增达人</button>
               </div>
             </form>
-          </div>
-        </div>
-
-        <div class="panel section-gap">
-          <div class="panel-head">
-            <div>
-              <h2>头达跟进</h2>
-              <p class="sub">优先看近7日GMV、合作佣金、广告佣金，并直接维护跟进状态。</p>
-            </div>
-            <span class="badge amber" id="headCreatorCount">0 位头达</span>
-          </div>
-          <div class="table-wrap">
-            <table class="creator-head-table">
-              <thead>
-                <tr>
-                  <th>达人</th>
-                  <th>视频/直播</th>
-                  <th>带货产品</th>
-                  <th>近7日GMV(k)</th>
-                  <th>合作佣金</th>
-                  <th>广告佣金</th>
-                  <th>合作情况</th>
-                  <th>跟进状态</th>
-                  <th>负责人</th>
-                  <th>更新日期</th>
-                  <th>下次跟进</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody id="headCreatorRows"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="panel section-gap">
-          <div class="panel-head">
-            <div>
-              <h2>达人登记明细</h2>
-              <p class="sub">默认隐藏完整联系方式和收货地址；当前只展示脱敏联系信息，并支持平台内编辑维护。</p>
-            </div>
-            <span class="badge blue" id="creatorRowCount">0 条记录</span>
-          </div>
-          <div class="creator-toolbar">
-            <input class="creator-search" id="creatorSearch" type="search" placeholder="搜索达人、产品、状态" />
-            <div class="creator-note">隐私配置：联系方式已脱敏，收货地址未导入页面。</div>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>来源</th>
-                  <th>达人</th>
-                  <th>联系方式</th>
-                  <th>日期/更新</th>
-                  <th>是否发视频</th>
-                  <th>直播状态</th>
-                  <th>带货产品</th>
-                  <th>跟进状态</th>
-                  <th>负责人</th>
-                  <th>下次跟进</th>
-                  <th>操作</th>
-                </tr>
-              </thead>
-              <tbody id="creatorRows"></tbody>
-            </table>
           </div>
         </div>
       </section>
@@ -6225,6 +6392,14 @@
       </div>
       <form class="form-grid creator-modal-form" id="creatorEditForm">
         <input name="id" type="hidden" />
+        <input name="avatar" type="hidden" />
+        <div class="field">
+          <label>达人头像</label>
+          <div class="avatar-input-row">
+            <span class="avatar-preview" id="creatorEditAvatarPreview">头像</span>
+            <input name="avatarFile" id="creatorEditAvatarFile" type="file" accept="image/*" />
+          </div>
+        </div>
         <div class="field">
           <label>达人昵称</label>
           <input name="name" />
@@ -6300,6 +6475,18 @@
       </form>
     </div>
   </div>
+  <div class="modal-backdrop" id="creatorHistoryModal" hidden>
+    <div class="creator-modal" role="dialog" aria-modal="true" aria-labelledby="creatorHistoryTitle">
+      <div class="creator-modal-head">
+        <div>
+          <span>头达历史</span>
+          <h3 id="creatorHistoryTitle">达人分析记录</h3>
+        </div>
+        <button class="small-btn" id="closeCreatorHistoryModal" type="button">关闭</button>
+      </div>
+      <div id="creatorHistoryContent"></div>
+    </div>
+  </div>
   <div class="toast" id="toast">已保存</div>
 
   <script src="assets/creator-data.js"></script>
@@ -6314,7 +6501,8 @@
       products: [],
       tasks: [],
       customCreators: [],
-      creatorEdits: {}
+      creatorEdits: {},
+      creatorHistory: []
     };
 
     const sampleData = {
@@ -6641,6 +6829,8 @@
     }
 
     let state = loadState();
+    let creatorPage = 1;
+    const creatorPageSize = 10;
     let cloudReady = false;
     let cloudSaveTimer = null;
     let lastCloudSaved = "";
@@ -6660,7 +6850,8 @@
         products: Array.isArray(data?.products) ? data.products : [],
         tasks: Array.isArray(data?.tasks) ? data.tasks : [],
         customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
-        creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {}
+        creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
+        creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
       };
     }
 
@@ -7301,6 +7492,75 @@
       }[char]));
     }
 
+    function readImageAsDataUrl(file, maxSize = 320) {
+      if (!file || !file.size) return Promise.resolve("");
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(reader.error);
+        reader.onload = () => {
+          const img = new Image();
+          img.onerror = () => resolve(String(reader.result || ""));
+          img.onload = () => {
+            const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+            const width = Math.max(1, Math.round(img.width * scale));
+            const height = Math.max(1, Math.round(img.height * scale));
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", 0.82));
+          };
+          img.src = String(reader.result || "");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function avatarPreviewHtml(src, name = "") {
+      return src ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(name || "达人头像")}">` : escapeHtml(creatorInitials(name || "头像"));
+    }
+
+    function setAvatarPreview(id, src, name = "") {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = avatarPreviewHtml(src, name);
+    }
+
+    function creatorHistoryFor(id) {
+      return (state.creatorHistory || [])
+        .filter((item) => item.creatorId === id)
+        .sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)));
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "-";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return escapeHtml(value);
+      return date.toLocaleString("zh-CN", { hour12: false });
+    }
+
+    function appendCreatorHistory(record, data, action = "编辑") {
+      state.creatorHistory ||= [];
+      state.creatorHistory.push({
+        id: crypto.randomUUID(),
+        creatorId: record.id,
+        savedAt: new Date().toISOString(),
+        action,
+        name: data.name || record.name || "",
+        product: data.product || record.product || "",
+        gmvK: Number(data.gmvK || record.gmvK || 0),
+        followStatus: data.followStatus || "待跟进",
+        owner: data.owner || "",
+        nextDate: data.nextDate || "",
+        relationship: data.relationship || "",
+        followNote: data.followNote || ""
+      });
+      if (state.creatorHistory.length > 600) {
+        state.creatorHistory = state.creatorHistory.slice(-600);
+      }
+    }
+
     function creatorRecords() {
       return [
         ...(window.IMPORTED_CREATOR_DATA?.records || []),
@@ -7312,6 +7572,7 @@
       const existing = state.creatorEdits?.[id] || {};
       return {
         name: existing.name || "",
+        avatar: existing.avatar || "",
         contact: existing.contact || "",
         source: existing.source || "",
         tier: existing.tier || "",
@@ -7333,7 +7594,7 @@
     function creatorDisplayRecord(record) {
       const edit = creatorEditFor(record.id);
       const merged = { ...record };
-      ["name", "contact", "source", "tier", "period", "product", "videoStatus", "liveStatus", "relationship"].forEach((key) => {
+      ["name", "avatar", "contact", "source", "tier", "period", "product", "videoStatus", "liveStatus", "relationship"].forEach((key) => {
         if (edit[key] !== "") merged[key] = edit[key];
       });
       ["gmvK", "commission", "adCommission"].forEach((key) => {
@@ -7348,17 +7609,19 @@
       return text.slice(0, 2).toUpperCase();
     }
 
-    function creatorAvatar(record) {
+    function creatorAvatar(record, clickable = false) {
+      const attrs = clickable ? ` data-creator-history="${escapeHtml(record.id)}" title="查看头达历史记录"` : "";
+      const cls = clickable ? "creator-avatar clickable" : "creator-avatar";
       if (record.avatar) {
-        return `<span class="creator-avatar"><img src="${escapeHtml(record.avatar)}" alt="${escapeHtml(record.name || "达人头像")}" loading="lazy"></span>`;
+        return `<span class="${cls}"${attrs}><img src="${escapeHtml(record.avatar)}" alt="${escapeHtml(record.name || "达人头像")}" loading="lazy"></span>`;
       }
-      return `<span class="creator-avatar">${escapeHtml(creatorInitials(record.name))}</span>`;
+      return `<span class="${cls}"${attrs}>${escapeHtml(creatorInitials(record.name))}</span>`;
     }
 
-    function creatorProfile(record) {
+    function creatorProfile(record, clickableAvatar = false) {
       return `
         <div class="creator-profile">
-          ${creatorAvatar(record)}
+          ${creatorAvatar(record, clickableAvatar)}
           <span><b>${escapeHtml(record.name || "-")}</b><small>${escapeHtml(record.source || "-")} · ${escapeHtml(record.tier || "-")}</small></span>
         </div>
       `;
@@ -7409,6 +7672,10 @@
         const text = [item.source, item.tier, item.name, item.product, item.videoStatus, item.liveStatus, item.relationship, item.note, edit.followStatus, edit.owner, edit.followNote].join(" ").toLowerCase();
         return text.includes(query);
       }) : records;
+      const totalCreatorPages = Math.max(1, Math.ceil(filtered.length / creatorPageSize));
+      creatorPage = Math.min(Math.max(1, creatorPage), totalCreatorPages);
+      const pageStart = (creatorPage - 1) * creatorPageSize;
+      const pageRows = filtered.slice(pageStart, pageStart + creatorPageSize);
 
       document.getElementById("creatorImportMeta").textContent = `迁移${importedCount}条 · 平台新增${customCount}条`;
       document.getElementById("creatorMetrics").innerHTML = [
@@ -7449,7 +7716,7 @@
           const edit = creatorEditFor(item.id);
           return `
           <tr>
-            <td>${creatorProfile(item)}<small>${escapeHtml(item.contact || "-")}</small></td>
+            <td>${creatorProfile(item, true)}<small>${escapeHtml(item.contact || "-")}</small></td>
             <td>${statusBadge(item.videoStatus || item.liveStatus, Number(item.gmvK || 0) > 0 ? "hot" : "")}</td>
             <td>${escapeHtml(item.product || "-")}</td>
             <td><b>${Number(item.gmvK || 0).toFixed(1)}</b></td>
@@ -7466,7 +7733,10 @@
         }).join("") : `<tr><td colspan="12"><div class="empty">暂无头达数据。</div></td></tr>`;
 
       document.getElementById("creatorRowCount").textContent = `${filtered.length}/${records.length} 条记录`;
-      document.getElementById("creatorRows").innerHTML = filtered.length ? filtered.map((item) => {
+      document.getElementById("creatorPageInfo").textContent = `第 ${creatorPage} / ${totalCreatorPages} 页 · 每页10条`;
+      document.getElementById("creatorPrevPage").disabled = creatorPage <= 1;
+      document.getElementById("creatorNextPage").disabled = creatorPage >= totalCreatorPages;
+      document.getElementById("creatorRows").innerHTML = pageRows.length ? pageRows.map((item) => {
         const edit = creatorEditFor(item.id);
         return `
         <tr>
@@ -7495,6 +7765,7 @@
       const edit = creatorEditFor(record.id);
       const form = document.getElementById("creatorEditForm");
       form.elements.id.value = record.id;
+      form.elements.avatar.value = record.avatar || "";
       form.elements.name.value = record.name || "";
       form.elements.contact.value = record.contact || record.email || "";
       form.elements.source.value = record.source || "";
@@ -7510,6 +7781,8 @@
       form.elements.nextDate.value = edit.nextDate || "";
       form.elements.relationship.value = record.relationship || record.note || "";
       form.elements.followNote.value = edit.followNote || "";
+      form.elements.avatarFile.value = "";
+      setAvatarPreview("creatorEditAvatarPreview", record.avatar || "", record.name || "");
       document.getElementById("creatorModalTitle").textContent = record.name || "编辑达人";
       document.getElementById("deleteCustomCreator").style.display = state.customCreators?.some((item) => item.id === record.id) ? "" : "none";
     }
@@ -7525,12 +7798,46 @@
       document.getElementById("creatorModal").hidden = true;
     }
 
-    function saveCreatorEdit(form) {
+    function openCreatorHistory(id) {
+      const record = findCreator(id);
+      if (!record) return;
+      const history = creatorHistoryFor(id);
+      document.getElementById("creatorHistoryTitle").textContent = `${record.name || "达人"} · 历史记录`;
+      document.getElementById("creatorHistoryContent").innerHTML = `
+        <div class="history-summary">
+          ${creatorAvatar(record)}
+          <div>
+            <b>${escapeHtml(record.name || "-")}</b>
+            <small>带货产品：${escapeHtml(record.product || "-")}<br>近7日GMV：${Number(record.gmvK || 0).toFixed(1)}K · 合作情况：${escapeHtml(record.relationship || record.note || "-")}</small>
+          </div>
+        </div>
+        <div class="history-list">
+          ${history.length ? history.map((item) => `
+            <div class="history-item">
+              <b>${escapeHtml(item.action || "编辑")} · ${formatDateTime(item.savedAt)}</b>
+              <small>状态：${escapeHtml(item.followStatus || "-")} · 负责人：${escapeHtml(item.owner || "-")} · 下次跟进：${escapeHtml(item.nextDate || "-")}</small>
+              <p>${escapeHtml(item.relationship || "暂无合作情况")}</p>
+              <p>${escapeHtml(item.followNote || "暂无跟进备注")}</p>
+            </div>
+          `).join("") : `<div class="empty">暂无历史编辑记录。之后每次保存整行都会自动沉淀。</div>`}
+        </div>
+      `;
+      document.getElementById("creatorHistoryModal").hidden = false;
+    }
+
+    function closeCreatorHistory() {
+      document.getElementById("creatorHistoryModal").hidden = true;
+    }
+
+    async function saveCreatorEdit(form) {
       const data = Object.fromEntries(new FormData(form).entries());
       const id = data.id;
       const record = findCreator(id);
       if (!record) return;
+      const avatarFile = form.elements.avatarFile.files?.[0];
+      const avatar = avatarFile ? await readImageAsDataUrl(avatarFile) : data.avatar || record.avatar || "";
       const nextRecord = {
+        avatar,
         name: data.name,
         contact: data.contact,
         source: data.source,
@@ -7551,6 +7858,7 @@
       }
       state.creatorEdits ||= {};
       state.creatorEdits[id] = {
+        avatar: nextRecord.avatar,
         name: nextRecord.name,
         contact: nextRecord.contact,
         source: nextRecord.source,
@@ -7568,6 +7876,7 @@
         nextDate: data.nextDate || "",
         followNote: data.followNote || ""
       };
+      appendCreatorHistory({ ...record, id }, { ...data, avatar, gmvK: nextRecord.gmvK }, "保存整行");
       saveState();
       closeCreatorEditor();
       showToast("达人整行已保存");
@@ -7586,14 +7895,16 @@
       renderCreatorCenter();
     }
 
-    function saveCreator(form) {
+    async function saveCreator(form) {
       const data = Object.fromEntries(new FormData(form).entries());
       const id = crypto.randomUUID();
+      const avatarFile = form.elements.avatarFile.files?.[0];
+      const avatar = avatarFile ? await readImageAsDataUrl(avatarFile) : "";
       const record = {
         id,
         source: "平台新增",
-        tier: "自建达人",
-        avatar: "",
+        tier: data.tier || "自建达人",
+        avatar,
         name: data.name,
         contact: data.contact,
         email: "",
@@ -7605,20 +7916,28 @@
         gmvK: Number(data.gmvK || 0),
         commission: 0,
         adCommission: 0,
-        relationship: "",
-        note: ""
+        relationship: data.relationship || "",
+        note: data.followNote || ""
       };
       state.customCreators ||= [];
       state.customCreators.push(record);
       state.creatorEdits ||= {};
       state.creatorEdits[id] = {
+        avatar,
+        tier: record.tier,
+        product: record.product,
+        videoStatus: record.videoStatus,
+        gmvK: record.gmvK,
+        relationship: record.relationship,
         followStatus: data.followStatus || "待跟进",
         owner: data.owner || "",
         nextDate: data.nextDate || "",
         followNote: data.followNote || ""
       };
+      appendCreatorHistory(record, { ...data, avatar, gmvK: record.gmvK }, "新增达人");
       saveState();
       form.reset();
+      setAvatarPreview("creatorAvatarPreview", "", "");
       showToast("达人已新增");
       renderCreatorCenter();
     }
@@ -7757,7 +8076,15 @@
             ["source", "来源"], ["tier", "类型"], ["name", "达人昵称"], ["contact", "脱敏联系方式"], ["period", "日期/更新"],
             ["videoStatus", "视频状态"], ["liveStatus", "直播状态"], ["product", "带货产品"], ["gmvK", "近7日GMV(k)"],
             ["commission", "合作佣金"], ["adCommission", "广告佣金"], ["followStatus", "跟进状态"], ["owner", "负责人"],
-            ["nextDate", "下次跟进"], ["followNote", "跟进备注"]
+            ["nextDate", "下次跟进"], ["relationship", "合作情况"], ["followNote", "跟进备注"]
+          ]
+        },
+        {
+          title: "达人历史",
+          rows: state.creatorHistory || [],
+          columns: [
+            ["savedAt", "保存时间"], ["action", "动作"], ["name", "达人昵称"], ["product", "带货产品"], ["gmvK", "近7日GMV(k)"],
+            ["followStatus", "跟进状态"], ["owner", "负责人"], ["nextDate", "下次跟进"], ["relationship", "合作情况"], ["followNote", "跟进备注"]
           ]
         }
       ];
@@ -7829,9 +8156,9 @@
       saveTask(event.currentTarget);
     });
 
-    document.getElementById("creatorForm").addEventListener("submit", (event) => {
+    document.getElementById("creatorForm").addEventListener("submit", async (event) => {
       event.preventDefault();
-      saveCreator(event.currentTarget);
+      await saveCreator(event.currentTarget);
     });
 
     document.getElementById("resetForm").addEventListener("click", () => {
@@ -7861,7 +8188,32 @@
     document.getElementById("createTasksFromAnomalies").addEventListener("click", createTasksFromAnomalies);
 
     document.getElementById("creatorSearch").addEventListener("input", () => {
+      creatorPage = 1;
       renderCreatorCenter();
+    });
+
+    document.getElementById("creatorPrevPage").addEventListener("click", () => {
+      creatorPage = Math.max(1, creatorPage - 1);
+      renderCreatorCenter();
+    });
+
+    document.getElementById("creatorNextPage").addEventListener("click", () => {
+      creatorPage += 1;
+      renderCreatorCenter();
+    });
+
+    document.getElementById("creatorAvatarFile").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      const dataUrl = file ? await readImageAsDataUrl(file) : "";
+      setAvatarPreview("creatorAvatarPreview", dataUrl, document.querySelector("#creatorForm [name='name']").value || "");
+    });
+
+    document.getElementById("creatorEditAvatarFile").addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      const form = document.getElementById("creatorEditForm");
+      const dataUrl = file ? await readImageAsDataUrl(file) : form.elements.avatar.value;
+      form.elements.avatar.value = dataUrl || "";
+      setAvatarPreview("creatorEditAvatarPreview", dataUrl || "", form.elements.name.value || "");
     });
 
     document.getElementById("closeCreatorModal").addEventListener("click", closeCreatorEditor);
@@ -7870,21 +8222,37 @@
       if (event.target.id === "creatorModal") closeCreatorEditor();
     });
 
-    document.getElementById("creatorEditForm").addEventListener("submit", (event) => {
+    document.getElementById("closeCreatorHistoryModal").addEventListener("click", closeCreatorHistory);
+
+    document.getElementById("creatorHistoryModal").addEventListener("click", (event) => {
+      if (event.target.id === "creatorHistoryModal") closeCreatorHistory();
+    });
+
+    document.getElementById("creatorEditForm").addEventListener("submit", async (event) => {
       event.preventDefault();
-      saveCreatorEdit(event.currentTarget);
+      await saveCreatorEdit(event.currentTarget);
     });
 
     document.getElementById("deleteCustomCreator").addEventListener("click", deleteCustomCreator);
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !document.getElementById("creatorModal").hidden) closeCreatorEditor();
+      if (event.key !== "Escape") return;
+      if (!document.getElementById("creatorHistoryModal").hidden) {
+        closeCreatorHistory();
+        return;
+      }
+      if (!document.getElementById("creatorModal").hidden) closeCreatorEditor();
     });
 
     document.addEventListener("click", (event) => {
       const nextBtn = event.target.closest("[data-task-next]");
       const deleteBtn = event.target.closest("[data-task-delete]");
+      const historyBtn = event.target.closest("[data-creator-history]");
       const editCreatorBtn = event.target.closest("[data-edit-creator]");
+      if (historyBtn) {
+        openCreatorHistory(historyBtn.dataset.creatorHistory);
+        return;
+      }
       if (editCreatorBtn) {
         openCreatorEditor(editCreatorBtn.dataset.editCreator);
         return;
