@@ -8030,7 +8030,9 @@
     const creatorPageSize = 10;
     let cloudReady = false;
     let cloudSaveTimer = null;
-    let lastCloudSaved = "";
+    let cloudSaveInFlight = false;
+    let cloudSaveQueued = false;
+    let cloudBaseline = normalizeState({});
     let activeAiAnalysisContext = null;
 
     function loadState() {
@@ -8071,12 +8073,89 @@
       return location.protocol !== "file:";
     }
 
-    function cloudPayload() {
+    const cloudArrayKeys = {
+      entries: "id",
+      products: "id",
+      tasks: "id",
+      reports: "id",
+      reportAnalyses: "key",
+      customCreators: "id",
+      creatorHistory: "id"
+    };
+
+    function cloudRecordMap(records, keyField) {
+      const map = new Map();
+      (records || []).forEach((record, index) => {
+        const key = String(record?.[keyField] || `legacy:${index}:${JSON.stringify(record)}`);
+        map.set(key, record);
+      });
+      return map;
+    }
+
+    function buildCloudPatch(baseData, nextData) {
+      const base = normalizeState(baseData);
+      const next = normalizeState(nextData);
+      const collections = {};
+
+      Object.entries(cloudArrayKeys).forEach(([name, keyField]) => {
+        const baseMap = cloudRecordMap(base[name], keyField);
+        const nextMap = cloudRecordMap(next[name], keyField);
+        const upserts = [];
+        const deletes = [];
+
+        nextMap.forEach((record, key) => {
+          const previous = baseMap.get(key);
+          if (!previous || JSON.stringify(previous) !== JSON.stringify(record)) upserts.push(record);
+        });
+        baseMap.forEach((_, key) => {
+          if (!nextMap.has(key)) deletes.push(key);
+        });
+        collections[name] = { upserts, deletes };
+      });
+
+      const editUpserts = {};
+      const editDeletes = [];
+      Object.entries(next.creatorEdits).forEach(([key, value]) => {
+        if (!Object.hasOwn(base.creatorEdits, key) || JSON.stringify(base.creatorEdits[key]) !== JSON.stringify(value)) {
+          editUpserts[key] = value;
+        }
+      });
+      Object.keys(base.creatorEdits).forEach((key) => {
+        if (!Object.hasOwn(next.creatorEdits, key)) editDeletes.push(key);
+      });
+
       return {
-        version: "v1",
-        updatedAt: new Date().toISOString(),
-        data: normalizeState(state)
+        collections,
+        creatorEdits: { upserts: editUpserts, deletes: editDeletes }
       };
+    }
+
+    function applyCloudPatch(baseData, patch) {
+      const next = normalizeState(baseData);
+      Object.entries(cloudArrayKeys).forEach(([name, keyField]) => {
+        const operations = patch?.collections?.[name] || { upserts: [], deletes: [] };
+        const deleted = new Set((operations.deletes || []).map(String));
+        const records = cloudRecordMap(next[name], keyField);
+        deleted.forEach((key) => records.delete(key));
+        (operations.upserts || []).forEach((record, index) => {
+          const key = String(record?.[keyField] || `incoming:${index}:${JSON.stringify(record)}`);
+          if (!deleted.has(key)) records.set(key, record);
+        });
+        next[name] = [...records.values()];
+      });
+
+      next.creatorEdits = { ...next.creatorEdits, ...(patch?.creatorEdits?.upserts || {}) };
+      (patch?.creatorEdits?.deletes || []).forEach((key) => delete next.creatorEdits[key]);
+      return next;
+    }
+
+    function cloudPatchIsEmpty(patch) {
+      const collectionChanges = Object.values(patch.collections).some((operations) => {
+        return operations.upserts.length || operations.deletes.length;
+      });
+      return !collectionChanges
+        && !Object.keys(patch.creatorEdits.upserts).length
+        && !patch.creatorEdits.deletes.length;
     }
 
     async function loadCloudState() {
@@ -8091,11 +8170,12 @@
         const payload = await response.json();
         if (payload?.data) {
           state = normalizeState(payload.data);
+          cloudBaseline = normalizeState(payload.data);
           localStorage.setItem(storeKey, JSON.stringify(state));
-          lastCloudSaved = JSON.stringify(normalizeState(state));
           setSyncStatus("已同步", "");
           return true;
         }
+        cloudBaseline = normalizeState({});
         setSyncStatus("云端待初始化", "saving");
         return false;
       } catch (error) {
@@ -8107,21 +8187,50 @@
 
     async function saveCloudState() {
       if (!cloudReady || !cloudAvailable()) return;
-      const snapshot = JSON.stringify(normalizeState(state));
-      if (snapshot === lastCloudSaved) return;
+      if (cloudSaveInFlight) {
+        cloudSaveQueued = true;
+        return;
+      }
+
+      const snapshot = normalizeState(structuredClone(state));
+      const patch = buildCloudPatch(cloudBaseline, snapshot);
+      if (cloudPatchIsEmpty(patch)) {
+        return;
+      }
+
+      cloudSaveInFlight = true;
+      cloudSaveQueued = false;
+      let saved = false;
       setSyncStatus("保存中", "saving");
       try {
         const response = await fetch(cloudEndpoint, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(cloudPayload())
+          body: JSON.stringify({ version: "v2", patch })
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        lastCloudSaved = snapshot;
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+
+        const remoteState = normalizeState(payload.data);
+        const pendingPatch = buildCloudPatch(snapshot, normalizeState(state));
+        state = applyCloudPatch(remoteState, pendingPatch);
+        cloudBaseline = remoteState;
+        localStorage.setItem(storeKey, JSON.stringify(state));
+        saved = true;
         setSyncStatus("已同步", "");
+        render();
       } catch (error) {
         console.warn("Cloud save failed", error);
         setSyncStatus("同步失败", "error");
+      } finally {
+        cloudSaveInFlight = false;
+        const needsAnotherSave = cloudSaveQueued
+          || (saved && JSON.stringify(normalizeState(state)) !== JSON.stringify(cloudBaseline));
+        cloudSaveQueued = false;
+        if (needsAnotherSave) {
+          clearTimeout(cloudSaveTimer);
+          cloudSaveTimer = setTimeout(saveCloudState, 80);
+        }
       }
     }
 
