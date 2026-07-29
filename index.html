@@ -5531,7 +5531,6 @@
       </nav>
       <div class="top-actions">
         <span class="sync-pill local" id="syncStatus">本地模式</span>
-        <button class="ghost" id="seedSevenDays" type="button">载入7天</button>
         <button class="ghost" id="exportJson" type="button">导出JSON</button>
         <button class="ghost" id="exportCsv" type="button">导出CSV</button>
         <button class="ghost" id="importJson" type="button">导入</button>
@@ -10938,18 +10937,6 @@
     document.getElementById("resetForm").addEventListener("click", () => {
       document.getElementById("dailyForm").reset();
       document.querySelector("#dailyForm [name='date']").value = today;
-    });
-
-    document.getElementById("seedSevenDays").addEventListener("click", () => {
-      if (cloudAvailable() && !window.confirm("载入7天演示数据会覆盖当前共享经营数据，确定继续吗？")) return;
-      state = normalizeState(buildSevenDayData());
-      const latestSimulationDate = [...state.reports].map((report) => report.date).sort().at(-1) || today;
-      document.getElementById("weeklyAnchor").value = latestSimulationDate;
-      document.getElementById("weeklyRole").value = "售后组";
-      saveState();
-      showToast("前7天完整闭环模拟数据已载入");
-      render();
-      setView("reports");
     });
 
     document.getElementById("exportJson").addEventListener("click", exportJsonData);
