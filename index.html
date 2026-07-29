@@ -127,9 +127,20 @@
 
     .report-layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+      grid-template-columns: 1fr;
       gap: 18px;
       align-items: start;
+    }
+
+    .report-overview-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .report-overview-grid .section-gap {
+      margin-top: 0;
     }
 
     .report-summary {
@@ -227,6 +238,616 @@
       font-size: 13px;
       line-height: 1.62;
     }
+
+    .report-role-fields {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 12px;
+    }
+
+    #reportForm {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .report-template-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 4px 2px 0;
+    }
+
+    .report-template-head h3,
+    .weekly-head h3 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    .report-template-head p,
+    .weekly-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .report-matrix {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .report-matrix table {
+      min-width: 920px;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: auto;
+    }
+
+    .report-matrix th,
+    .report-matrix td {
+      padding: 10px 8px;
+      border-right: 1px solid var(--soft);
+      border-bottom: 1px solid var(--soft);
+      text-align: center;
+      vertical-align: middle;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .report-matrix th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f4f5f7;
+      color: #3d4450;
+      font-weight: 800;
+    }
+
+    .report-matrix th:first-child,
+    .report-matrix td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      min-width: 128px;
+      background: #fbfbfc;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .report-matrix th:first-child { z-index: 3; background: #eef0f3; }
+    .report-matrix tr:last-child td { border-bottom: 0; }
+    .report-matrix th:last-child,
+    .report-matrix td:last-child { border-right: 0; }
+
+    .report-matrix input,
+    .report-matrix select {
+      width: 78px;
+      min-height: 36px;
+      border: 1px solid rgba(12, 15, 20, 0.1);
+      border-radius: 10px;
+      background: #fff;
+      padding: 0 8px;
+      color: var(--ink);
+      text-align: center;
+      outline: none;
+    }
+
+    .report-matrix select { width: 92px; }
+
+    .report-matrix input:focus,
+    .report-matrix select:focus {
+      border-color: rgba(44, 110, 232, 0.5);
+      box-shadow: 0 0 0 3px rgba(44, 110, 232, 0.08);
+    }
+
+    .store-group {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .report-common-title {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+      color: #292f38;
+      font-size: 14px;
+      font-weight: 850;
+    }
+
+    .report-common-title::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--soft);
+    }
+
+    .report-loop {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+      padding: 14px;
+      border: 1px solid rgba(12, 15, 20, 0.08);
+      border-radius: 20px;
+      background: #f7f8fa;
+    }
+
+    .report-loop-step {
+      position: relative;
+      min-height: 66px;
+      display: grid;
+      align-content: center;
+      gap: 3px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      background: #fff;
+      text-align: center;
+    }
+
+    .report-loop-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      z-index: 2;
+      right: -11px;
+      top: 50%;
+      width: 14px;
+      color: #8b929d;
+      font-weight: 900;
+      transform: translateY(-50%);
+    }
+
+    .report-loop-step b {
+      color: #252b34;
+      font-size: 13px;
+    }
+
+    .report-loop-step span {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .report-loop-step.active {
+      background: #0b0d10;
+    }
+
+    .report-loop-step.active b { color: #fff; }
+    .report-loop-step.active span { color: rgba(255, 255, 255, 0.62); }
+
+    .template-section {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    .template-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .template-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .template-row-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: none;
+    }
+
+    .row-control {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 30px;
+      border: 1px solid rgba(12, 15, 20, 0.09);
+      border-radius: 10px;
+      background: #fff;
+      color: #343a45;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .row-control:hover {
+      border-color: rgba(44, 110, 232, 0.36);
+      color: #2c6ee8;
+      background: #f7faff;
+    }
+
+    .template-section-head b {
+      font-size: 15px;
+    }
+
+    .template-section-head small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .template-row {
+      display: grid;
+      grid-template-columns: 28px repeat(var(--cols, 4), minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .template-row-number {
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 38px;
+      border-radius: 10px;
+      background: #eef0f3;
+      color: #555d68;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .template-input {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    .template-input label {
+      color: #666e79;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .template-input input,
+    .template-input select {
+      width: 100%;
+      min-width: 0;
+      height: 38px;
+      border: 1px solid rgba(12, 15, 20, 0.1);
+      border-radius: 11px;
+      background: #fff;
+      padding: 0 10px;
+      color: var(--ink);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .template-input input:focus,
+    .template-input select:focus {
+      border-color: rgba(44, 110, 232, 0.5);
+      box-shadow: 0 0 0 3px rgba(44, 110, 232, 0.08);
+    }
+
+    .template-row.compact { --cols: 3; }
+    .template-row.five { --cols: 5; }
+    .template-row.two { --cols: 2; }
+    .template-row.one { --cols: 1; }
+
+    .template-row.is-linked {
+      padding: 8px;
+      border: 1px solid rgba(44, 110, 232, 0.18);
+      border-radius: 14px;
+      background: rgba(44, 110, 232, 0.04);
+    }
+
+    .template-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .review-queue {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border: 1px solid rgba(44, 110, 232, 0.16);
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(44, 110, 232, 0.06), rgba(255, 255, 255, 0.9));
+    }
+
+    .review-queue[hidden] { display: none; }
+
+    .review-queue-head,
+    .review-queue-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .review-queue-head b,
+    .review-queue-item b,
+    .review-queue-item small {
+      display: block;
+    }
+
+    .review-queue-head span,
+    .review-queue-item small {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .review-queue-item {
+      padding: 12px 14px;
+      border: 1px solid rgba(12, 15, 20, 0.07);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .task-result {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f6f7f9;
+      color: #555d68;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .task-modal {
+      width: min(100%, 760px);
+    }
+
+    .role-result-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .role-result-grid .template-input {
+      padding: 10px;
+      border: 1px solid var(--soft);
+      border-radius: 14px;
+      background: #f8f9fa;
+    }
+
+    .weekly-panel {
+      padding-bottom: 24px;
+    }
+
+    .weekly-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .weekly-controls input,
+    .weekly-controls select {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 0 11px;
+      color: var(--ink);
+      font-weight: 750;
+    }
+
+    .weekly-metrics {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      padding: 18px 26px;
+    }
+
+    .weekly-metric {
+      min-height: 92px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #f8f9fa;
+    }
+
+    .weekly-metric b {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 23px;
+    }
+
+    .weekly-metric span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .weekly-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+      gap: 14px;
+      padding: 0 26px;
+    }
+
+    .weekly-digest {
+      min-height: 100%;
+      white-space: pre-wrap;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #0b0d10;
+      color: rgba(255, 255, 255, 0.82);
+      padding: 18px;
+      font-size: 12px;
+      line-height: 1.72;
+    }
+
+    .weekly-insights {
+      padding: 18px 26px 0;
+    }
+
+    .weekly-insights-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    .weekly-insights-head h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .insight-card {
+      min-height: 176px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .insight-card.high { border-top: 3px solid var(--red); }
+    .insight-card.medium { border-top: 3px solid var(--amber); }
+    .insight-card.good { border-top: 3px solid var(--green); }
+    .insight-card.info { border-top: 3px solid var(--blue); }
+
+    .insight-card .insight-label {
+      display: inline-flex;
+      margin-bottom: 11px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .insight-card h4 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .insight-card p {
+      margin: 0;
+      color: #5c6470;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .insight-card strong { color: #262c35; }
+
+    .ai-analysis-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 20px;
+      padding: 20px 0 12px;
+      border-top: 1px solid var(--soft);
+    }
+
+    .ai-analysis-head h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .ai-analysis-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .ai-analysis-output {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #f8f9fa;
+      overflow: hidden;
+    }
+
+    .ai-analysis-summary {
+      padding: 20px;
+      background: #0b0d10;
+      color: #fff;
+    }
+
+    .ai-analysis-summary small {
+      color: rgba(255, 255, 255, 0.56);
+      font-weight: 800;
+    }
+
+    .ai-analysis-summary p {
+      margin: 8px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+      line-height: 1.72;
+    }
+
+    .ai-diagnosis-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1px;
+      background: var(--soft);
+    }
+
+    .ai-diagnosis {
+      padding: 18px;
+      background: #fff;
+    }
+
+    .ai-diagnosis h4 {
+      margin: 8px 0;
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .ai-diagnosis p {
+      margin: 5px 0 0;
+      color: #59616d;
+      font-size: 12px;
+      line-height: 1.62;
+    }
+
+    .ai-diagnosis p strong { color: #2d333c; }
+
+    .ai-priority-list {
+      padding: 18px 20px;
+      background: #f5f6f8;
+    }
+
+    .ai-priority-list b {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 13px;
+    }
+
+    .ai-priority-list ol {
+      margin: 0;
+      padding-left: 20px;
+      color: #4e5662;
+      font-size: 12px;
+      line-height: 1.75;
+    }
+
+    .report-card .report-matrix { margin-top: 12px; }
+    .report-card .report-matrix table { min-width: 680px; }
+    .report-card .report-matrix th,
+    .report-card .report-matrix td { padding: 8px 7px; }
 
     .digest-box {
       white-space: pre-wrap;
@@ -4449,8 +5070,9 @@
       display: grid;
       grid-template-columns: 44px 1fr;
       align-items: center;
+      justify-content: center;
       gap: 11px;
-      text-align: left;
+      text-align: center;
       min-width: 170px;
     }
 
@@ -4489,7 +5111,7 @@
     .creator-profile b,
     .creator-profile small {
       display: block;
-      text-align: left;
+      text-align: center;
     }
 
     .creator-edit {
@@ -4740,6 +5362,9 @@
       .hero-stats { grid-template-columns: repeat(2, 1fr); }
       .metrics { grid-template-columns: repeat(2, 1fr); }
       .form-grid { grid-template-columns: repeat(2, 1fr); }
+      .report-overview-grid { grid-template-columns: 1fr; }
+      #reportForm { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .weekly-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .task-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .academy-shell { grid-template-columns: 1fr; }
       .academy-nav { position: static; }
@@ -4796,6 +5421,7 @@
       h1 { font-size: 44px; }
       h1 { white-space: normal; }
       .metrics, .form-grid, .task-board { grid-template-columns: 1fr; }
+      #reportForm { grid-template-columns: 1fr; }
       .academy-shell { padding: 0 18px 18px; }
       .academy-hero { padding: 24px; }
       .academy-hero h3 { white-space: normal; }
@@ -4847,6 +5473,28 @@
       .lesson-pill-grid, .entry-grid { grid-template-columns: 1fr; }
       .report-layout, .report-cards { grid-template-columns: 1fr; }
       .report-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .weekly-grid { grid-template-columns: 1fr; }
+      .weekly-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .insight-grid { grid-template-columns: 1fr; }
+      .ai-diagnosis-list { grid-template-columns: 1fr; }
+      .template-row,
+      .template-row.compact,
+      .template-row.five,
+      .template-row.two,
+      .template-row.one {
+        grid-template-columns: 28px 1fr;
+        align-items: start;
+      }
+      .report-loop { grid-template-columns: 1fr; }
+      .report-loop-step:not(:last-child)::after {
+        content: "↓";
+        right: auto;
+        left: 50%;
+        top: auto;
+        bottom: -13px;
+        transform: translateX(-50%);
+      }
+      .role-result-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .platform-photo, .platform-photo img { min-height: 260px; }
       .question-head { align-items: flex-start; flex-direction: column; }
       .question-flow { grid-template-columns: 1fr; }
@@ -5250,19 +5898,19 @@
 
       <section id="reports" class="view">
         <div class="report-layout">
-          <div>
+          <div class="report-overview-grid">
             <div class="report-summary">
               <div class="panel-head">
                 <div>
                   <h2>今日团队日报</h2>
-                  <p class="sub">系统自动汇总售后、BD和店铺维护日报，并把任务送入任务中心。</p>
+                  <p class="sub">六店按岗位填写一次，日报自动汇总，异常任务同步进入任务中心。</p>
                 </div>
-                <span class="badge blue" id="reportProgress">0/4 已提交</span>
+                <span class="badge blue" id="reportProgress">0/7 已提交</span>
               </div>
               <div class="report-summary-grid" id="reportMetrics"></div>
             </div>
 
-            <div class="panel section-gap">
+            <div class="panel">
               <div class="panel-head">
                 <div>
                   <h2>自动汇总</h2>
@@ -5278,10 +5926,17 @@
             <div class="panel-head">
               <div>
                 <h2>提交岗位日报</h2>
-                <p class="sub">统一记录结果、异常、复查、任务和审批事项。</p>
+                <p class="sub">填写今日结果并识别异常；任务执行后必须回到后续日报复查，才能正式关闭。</p>
               </div>
             </div>
             <form class="form-grid" id="reportForm">
+              <div class="report-loop" aria-label="日报闭环流程">
+                <div class="report-loop-step active"><b>1. 记录结果</b><span>按岗位填写当天事实</span></div>
+                <div class="report-loop-step"><b>2. 识别异常</b><span>写清对象、问题和原因</span></div>
+                <div class="report-loop-step"><b>3. 生成任务</b><span>明确责任人与完成标准</span></div>
+                <div class="report-loop-step"><b>4. 回传执行</b><span>提交结果与复查证据</span></div>
+                <div class="report-loop-step"><b>5. 复查关闭</b><span>关闭、继续或升级处理</span></div>
+              </div>
               <div class="field">
                 <label>日期</label>
                 <input name="date" type="date" required />
@@ -5292,15 +5947,12 @@
                   <option>售后组</option>
                   <option>BD</option>
                   <option>店铺维护</option>
+                  <option>店群运营</option>
                 </select>
               </div>
               <div class="field">
                 <label>姓名 / 汇总人</label>
                 <input name="author" placeholder="填写姓名" required />
-              </div>
-              <div class="field">
-                <label>负责店铺</label>
-                <input name="stores" placeholder="六店 / 具体店铺" />
               </div>
               <div class="field">
                 <label>最高风险</label>
@@ -5321,26 +5973,10 @@
               <div class="field full">
                 <div class="report-help" id="reportHelp"></div>
               </div>
-              <div class="field full">
-                <label>今日结果</label>
-                <textarea name="results" rows="5" required></textarea>
-              </div>
-              <div class="field full">
-                <label>核心异常</label>
-                <textarea name="anomalies" rows="4" placeholder="每行一项；无异常填写“无”"></textarea>
-              </div>
-              <div class="field full">
-                <label>昨日复查</label>
-                <textarea name="reviews" rows="3" placeholder="事项｜复查结果｜关闭/继续/升级"></textarea>
-              </div>
-              <div class="field full">
-                <label>今日任务</label>
-                <textarea name="tasksText" rows="4" placeholder="每行一项：任务｜负责人｜截止日期｜完成标准｜复查时间"></textarea>
-              </div>
-              <div class="field full">
-                <label>即时审批记录</label>
-                <textarea name="approvals" rows="3" placeholder="事项｜建议方案｜审批结果｜后续负责人；无则填写“无”"></textarea>
-              </div>
+              <div class="report-role-fields" id="reportRoleFields"></div>
+              <div class="review-queue" id="pendingReviewQueue" hidden></div>
+              <div class="report-common-title">闭环事项</div>
+              <div class="report-role-fields" id="reportClosureFields"></div>
               <div class="form-actions">
                 <button class="ghost" id="resetReportForm" type="button">清空</button>
                 <button class="primary" type="submit">保存并同步任务</button>
@@ -5349,11 +5985,52 @@
           </div>
         </div>
 
+        <div class="panel section-gap weekly-panel">
+          <div class="panel-head">
+            <div class="weekly-head">
+              <h2>自动周报</h2>
+              <p>按所选周和岗位汇总六店日报，不需要二次填报。</p>
+            </div>
+            <div class="weekly-controls">
+              <input id="weeklyAnchor" type="date" aria-label="选择周内日期" />
+              <select id="weeklyRole" aria-label="选择岗位">
+                <option>售后组</option>
+                <option>BD</option>
+                <option>店铺维护</option>
+                <option>店群运营</option>
+              </select>
+              <button class="ghost" id="copyWeeklyDigest" type="button">复制周报</button>
+            </div>
+          </div>
+          <div class="weekly-metrics" id="weeklyMetrics"></div>
+          <div class="weekly-grid">
+            <div class="report-matrix" id="weeklyTable"></div>
+            <div class="weekly-digest" id="weeklyDigest"></div>
+          </div>
+          <div class="weekly-insights">
+            <div class="weekly-insights-head">
+              <h3>数据规则诊断</h3>
+              <span class="badge blue" id="weeklyConfidence">等待数据</span>
+            </div>
+            <div class="insight-grid" id="weeklyInsights"></div>
+            <div class="ai-analysis-head">
+              <div>
+                <h3>AI运营总监分析</h3>
+                <p>结合全部岗位、六店数据和闭环任务进行跨岗位诊断。</p>
+              </div>
+              <button class="primary" id="runAiAnalysis" type="button">生成深度分析</button>
+            </div>
+            <div class="ai-analysis-output" id="aiAnalysisOutput">
+              <div class="empty">提交日报后，系统会自动生成本周AI经营诊断。</div>
+            </div>
+          </div>
+        </div>
+
         <div class="panel section-gap">
           <div class="panel-head">
             <div>
               <h2>日报记录</h2>
-              <p class="sub">按日期倒序保留岗位日报，系统自动识别当日提交进度。</p>
+              <p class="sub">保留每天的岗位明细，旧版日报也会继续兼容显示。</p>
             </div>
             <span class="badge blue" id="reportRecordCount">0 份日报</span>
           </div>
@@ -6703,6 +7380,46 @@
       <div id="creatorHistoryContent"></div>
     </div>
   </div>
+  <div class="modal-backdrop" id="taskResultModal" hidden>
+    <div class="creator-modal task-modal" role="dialog" aria-modal="true" aria-labelledby="taskResultTitle">
+      <div class="creator-modal-head">
+        <div>
+          <span>任务执行回传</span>
+          <h3 id="taskResultTitle">提交处理结果</h3>
+        </div>
+        <button class="small-btn" id="closeTaskResultModal" type="button">关闭</button>
+      </div>
+      <form class="form-grid creator-modal-form" id="taskResultForm">
+        <input name="id" type="hidden" />
+        <div class="field full">
+          <label>任务</label>
+          <input name="title" readonly />
+        </div>
+        <div class="field half">
+          <label>实际处理结果</label>
+          <textarea name="result" placeholder="写明做了什么、处理到什么程度，以及尚未解决的部分。" required></textarea>
+        </div>
+        <div class="field half">
+          <label>完成证据</label>
+          <textarea name="evidence" placeholder="填写前台状态、订单号、截图名称、数据变化或其他可复查证据。" required></textarea>
+        </div>
+        <div class="field">
+          <label>复查时间</label>
+          <input name="reviewAt" type="datetime-local" required />
+        </div>
+        <div class="field">
+          <label>执行状态</label>
+          <select name="status">
+            <option>待复盘</option>
+            <option>处理中</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button class="primary" type="submit">保存结果并进入复查</button>
+        </div>
+      </form>
+    </div>
+  </div>
   <div class="toast" id="toast">已保存</div>
 
   <script src="assets/creator-data.js"></script>
@@ -6717,6 +7434,7 @@
       products: [],
       tasks: [],
       reports: [],
+      reportAnalyses: [],
       customCreators: [],
       creatorEdits: {},
       creatorHistory: []
@@ -6929,10 +7647,12 @@
     };
 
     const storesForSimulation = [
-      { store: "DreamWeave", owner: "运营A", baseGmv: 33000, baseOrders: 2200, sps: 3.1, product: "JZZ", sku: "white / grey", price: 21.99, stock: 5200 },
-      { store: "Dreamland", owner: "运营B", baseGmv: 24000, baseOrders: 1780, sps: 4.1, product: "酒店枕", sku: "2pcs", price: 22.99, stock: 3600 },
-      { store: "Sweet Dream", owner: "运营C", baseGmv: 11200, baseOrders: 820, sps: 3.7, product: "JZZ", sku: "purple", price: 19.99, stock: 1800 },
-      { store: "Himood", owner: "运营D", baseGmv: 5200, baseOrders: 390, sps: 4.0, product: "牙贴", sku: "standard", price: 14.99, stock: 2400 }
+      { store: "DreamWeave", owner: "陈航", baseGmv: 4400, baseOrders: 320, sps: 3.3, product: "JZZ", sku: "white / grey", price: 21.99, stock: 5200 },
+      { store: "sweet dream", owner: "陈航", baseGmv: 1550, baseOrders: 112, sps: 3.8, product: "JZZ", sku: "purple", price: 19.99, stock: 1800 },
+      { store: "Dreamland", owner: "陈航", baseGmv: 3100, baseOrders: 230, sps: 4.1, product: "酒店枕", sku: "2pcs", price: 22.99, stock: 3600 },
+      { store: "Dreamdaily", owner: "林可", baseGmv: 2200, baseOrders: 165, sps: 4.2, product: "JZZ", sku: "blue", price: 20.99, stock: 2900 },
+      { store: "MoonDream", owner: "林可", baseGmv: 1800, baseOrders: 136, sps: 4.0, product: "酒店枕", sku: "2pcs", price: 23.99, stock: 2500 },
+      { store: "Himood Smile", owner: "林可", baseGmv: 900, baseOrders: 74, sps: 4.1, product: "牙贴", sku: "standard", price: 14.99, stock: 2400 }
     ];
 
     function dateOffset(daysAgo) {
@@ -6942,26 +7662,32 @@
     function buildSevenDayData() {
       const entries = [];
       const products = [];
+      const reports = [];
+      const tasks = [];
       const wave = [0.88, 0.93, 0.9, 1.04, 1.12, 0.98, 1.18];
-      for (let dayIndex = 6; dayIndex >= 0; dayIndex -= 1) {
-        const date = dateOffset(dayIndex);
-        const position = 6 - dayIndex;
+      const completedWeek = weekRange(addDays(today, -7));
+      const dates = Array.from({ length: 7 }, (_, index) => addDays(completedWeek.start, index));
+      const dayEntries = new Map();
+      const lastTaskBySlot = new Map();
+
+      dates.forEach((date, position) => {
+        const currentEntries = [];
         storesForSimulation.forEach((cfg, storeIndex) => {
           const storeFactor = 1 + storeIndex * 0.035;
           const trend = wave[position] * storeFactor;
           const gmv = Math.round(cfg.baseGmv * trend);
           const orders = Math.round(cfg.baseOrders * (0.92 + trend * 0.1));
           const units = Math.round(orders * (1.06 + storeIndex * 0.03));
-          const sampleQty = Math.max(0, Math.round((60 + storeIndex * 36) * (0.85 + position * 0.04)));
-          const adSpend = Math.round(gmv * (storeIndex === 2 ? 0.02 : 0.055 + position * 0.002));
+          const sampleQty = Math.max(0, Math.round((18 + storeIndex * 7) * (0.85 + position * 0.04)));
+          const adSpend = Math.round(gmv * (storeIndex === 1 ? 0.025 : 0.055 + position * 0.002));
           const adRoiBase = storeIndex === 0 && position > 4 ? 4.1 : 5.2 + storeIndex * 0.35;
           const adGmv = Math.round(adSpend * adRoiBase);
-          const affiliateGmv = Math.round(gmv * (storeIndex === 0 ? 0.74 + position * 0.018 : 0.42 + storeIndex * 0.06));
-          const productCardGmv = Math.round(gmv * (storeIndex === 0 ? 0.11 + position * 0.006 : 0.28 + position * 0.012));
+          const affiliateGmv = Math.round(gmv * (storeIndex === 0 ? 0.68 + position * 0.018 : 0.34 + storeIndex * 0.045));
+          const productCardGmv = Math.round(gmv * (storeIndex === 0 ? 0.16 + position * 0.006 : 0.28 + position * 0.009));
           const returns = Math.round(orders * (storeIndex === 0 ? 0.045 + position * 0.004 : 0.018 + storeIndex * 0.004));
-          const badReviews = Math.round(orders * (storeIndex === 2 ? 0.014 + position * 0.002 : 0.004 + storeIndex * 0.0015));
-          const sps = Math.max(2.8, Number((cfg.sps - (storeIndex === 0 ? position * 0.02 : 0) + (position % 2) * 0.03).toFixed(1)));
-          entries.push({
+          const badReviews = Math.max(0, Math.round(orders * (storeIndex === 1 ? 0.012 + position * 0.001 : 0.004 + storeIndex * 0.001)));
+          const sps = Math.max(2.8, Number((cfg.sps - (storeIndex === 0 ? position * 0.03 : 0) + (position % 2) * 0.03).toFixed(1)));
+          const entry = {
             id: crypto.randomUUID(),
             date,
             store: cfg.store,
@@ -6981,7 +7707,9 @@
             badReviews,
             note: position >= 5 && storeIndex === 0 ? "联盟占比持续偏高，SPS低于3.5，需优先修退货和商品满意度。" : "正常波动，继续观察渠道结构。",
             plan: position >= 5 && storeIndex === 0 ? "复盘旧达人视频、提取退货原因、跟进商品卡优化。" : "保持主推SKU节奏，跟踪商品卡和联盟变化。"
-          });
+          };
+          entries.push(entry);
+          currentEntries.push(entry);
 
           products.push({
             id: crypto.randomUUID(),
@@ -6999,50 +7727,303 @@
             badReviews
           });
         });
+        dayEntries.set(date, currentEntries);
+      });
+
+      function simulationTaskState(position) {
+        if (position <= 2) return "已完成";
+        if (position <= 4) return "待复盘";
+        if (position === 5) return "处理中";
+        return "待处理";
       }
 
-      const tasks = [
-        {
+      function reportText(items, formatter) {
+        return items.length ? items.map((item, index) => `${index + 1}. ${formatter(item)}`).join("\n") : "无";
+      }
+
+      function makeReport({ date, position, role, author, stores, roleData, anomaly = null, taskTitle = "", taskOwner = "", approval = null }) {
+        const reportId = crypto.randomUUID();
+        const slot = `${role}|${author}`;
+        const previousTask = lastTaskBySlot.get(slot);
+        const reviews = previousTask ? [{
+          taskId: previousTask.id,
+          item: previousTask.title,
+          result: previousTask.status === "已完成" ? "指标恢复或问题未继续扩大，复查通过。" : "已收到阶段结果，继续跟踪至完成标准达成。",
+          status: previousTask.status === "已完成" ? "关闭" : "继续"
+        }] : [];
+        const anomalies = anomaly ? [{
           id: crypto.randomUUID(),
-          title: "排查 DreamWeave SPS 与退货连续偏高",
-          assignee: "运营A",
-          priority: "紧急",
-          store: "DreamWeave",
-          sku: "JZZ white / grey",
-          due: today,
-          status: "待处理",
-          source: "7天模拟",
-          action: "拆分退货原因、差评关键词、商品满意度和达人视频承诺是否一致。",
-          result: ""
-        },
-        {
+          object: anomaly.object,
+          issue: anomaly.issue,
+          impact: anomaly.impact || "",
+          reason: anomaly.reason,
+          risk: anomaly.risk
+        }] : [];
+        const taskItems = taskTitle ? [{
           id: crypto.randomUUID(),
-          title: "复盘商品卡GMV占比提升机会",
-          assignee: "产品运营",
-          priority: "重要",
-          store: "Dreamland",
-          sku: "酒店枕 2pcs",
-          due: today,
-          status: "处理中",
-          source: "7天模拟",
-          action: "对比主图、标题、价格和评价，确认商品卡承接是否还能放大。",
-          result: ""
-        },
-        {
-          id: crypto.randomUUID(),
-          title: "整理 Sweet Dream 差评关键词",
-          assignee: "客服/售后",
-          priority: "重要",
-          store: "Sweet Dream",
-          sku: "JZZ purple",
-          due: today,
-          status: "待复盘",
-          source: "7天模拟",
-          action: "提取近7天差评关键词，判断是否为颜色、材质、包装或物流问题。",
-          result: ""
+          task: taskTitle,
+          owner: taskOwner || author,
+          due: `${addDays(date, 1)}T18:00`,
+          acceptance: anomaly?.acceptance || "提交处理结果和数据证据，复查确认异常不再扩大。",
+          reviewAt: `${addDays(date, 2)}T10:00`
+        }] : [];
+        const approvals = approval ? [approval] : [];
+        const report = {
+          id: reportId,
+          date,
+          role,
+          author,
+          stores,
+          risk: anomaly?.risk || "低",
+          status: "已提交",
+          roleMetrics: roleDataMetrics(role, roleData),
+          roleData,
+          results: roleDataResults(role, roleData),
+          anomalies: reportText(anomalies, (item) => `${item.object}｜问题：${item.issue}｜原因判断：${item.reason}｜风险：${item.risk}`),
+          reviews: reportText(reviews, (item) => `${item.item}｜复查结果：${item.result}｜状态：${item.status}`),
+          tasksText: reportText(taskItems, (item) => `${item.task}｜负责人：${item.owner}｜截止：${item.due.replace("T", " ")}｜完成标准：${item.acceptance}｜复查：${item.reviewAt.replace("T", " ")}`),
+          approvals: reportText(approvals, (item) => `${item.item}｜建议方案：${item.suggestion || "无"}｜审批结果：${item.result || "待审批"}｜后续负责人：${item.owner || author}`),
+          closureItems: { anomalies, reviews, tasks: taskItems, approvals },
+          createdAt: `${date}T18:${String(10 + position).padStart(2, "0")}:00`,
+          updatedAt: `${date}T18:${String(20 + position).padStart(2, "0")}:00`
+        };
+        reports.push(report);
+
+        if (taskItems.length) {
+          const item = taskItems[0];
+          const status = simulationTaskState(position);
+          const task = {
+            id: item.id,
+            title: item.task,
+            assignee: item.owner,
+            priority: taskPriority(anomaly?.risk || "中"),
+            store: anomaly?.object || stores,
+            sku: "",
+            due: item.due,
+            status,
+            source: `${role}日报`,
+            sourceReport: reportId,
+            sourceAnomaly: anomalies[0]?.id || "",
+            action: `原因判断：${anomaly?.reason || "按日报结论执行"}\n完成标准：${item.acceptance}`,
+            acceptance: item.acceptance,
+            reviewAt: item.reviewAt,
+            result: status === "待处理" ? "" : status === "处理中" ? "已完成初步排查，正在执行调整。" : "已完成日报要求的处理动作。",
+            evidence: status === "待处理" || status === "处理中" ? "" : "后台截图、处理清单和次日指标对比已归档。",
+            reviewResult: status === "已完成" ? "复查通过，任务关闭。" : "",
+            reviewedAt: status === "已完成" ? `${addDays(date, 2)}T10:20:00` : "",
+            reviewer: status === "已完成" ? "运营负责人" : "",
+            completedAt: status === "已完成" ? `${addDays(date, 2)}T10:20:00` : ""
+          };
+          tasks.push(task);
+          lastTaskBySlot.set(slot, task);
         }
+      }
+
+      const bdPeople = [
+        { author: "张敏", stores: ["DreamWeave", "sweet dream"] },
+        { author: "李晨", stores: ["Dreamland", "Dreamdaily"] },
+        { author: "王悦", stores: ["MoonDream", "Himood Smile"] }
       ];
-      return { entries, products, tasks };
+      const operatorPeople = [
+        { author: "陈航", stores: ["DreamWeave", "sweet dream", "Dreamland"] },
+        { author: "林可", stores: ["Dreamdaily", "MoonDream", "Himood Smile"] }
+      ];
+
+      dates.forEach((date, position) => {
+        const currentEntries = dayEntries.get(date) || [];
+        const byStore = Object.fromEntries(currentEntries.map((entry) => [entry.store, entry]));
+
+        operatorPeople.forEach((person, personIndex) => {
+          const roleData = {
+            matrix: person.stores.map((store) => {
+              const entry = byStore[store];
+              return {
+                store,
+                values: {
+                  gmv: entry.gmv,
+                  orders: entry.orders,
+                  units: entry.units,
+                  productCardGmv: entry.productCardGmv,
+                  affiliateGmv: entry.affiliateGmv,
+                  adSpend: entry.adSpend,
+                  adRoi: Number((entry.adGmv / Math.max(1, entry.adSpend)).toFixed(2)),
+                  samples: entry.sampleQty
+                }
+              };
+            })
+          };
+          const hasAnomaly = personIndex === 0 && [0, 3, 6].includes(position);
+          const anomaly = hasAnomaly ? {
+            object: "DreamWeave / JZZ",
+            issue: position === 0 ? "SPS低于3.5且退货偏高" : position === 3 ? "联盟GMV占比持续升高" : "GMV上涨但广告ROI回落",
+            impact: "影响联盟能力、利润质量和后续放量稳定性",
+            reason: position === 0 ? "商品满意度偏低，差评与退货集中在产品预期差异" : position === 3 ? "旧达人视频持续出单，商品卡承接不足" : "放量素材边际效率下降",
+            risk: position === 0 ? "高" : "中",
+            acceptance: "提交渠道结构、SPS分项或广告素材数据，次日复查关键指标。"
+          } : null;
+          makeReport({
+            date,
+            position,
+            role: "店群运营",
+            author: person.author,
+            stores: person.stores.join("、"),
+            roleData,
+            anomaly,
+            taskTitle: anomaly ? (position === 0 ? "拆解 DreamWeave SPS 与退货原因" : position === 3 ? "补强 DreamWeave 商品卡承接" : "复盘广告素材与保本ROI") : "",
+            taskOwner: person.author
+          });
+        });
+
+        bdPeople.forEach((person, personIndex) => {
+          const approved = 8 + personIndex * 2 + position;
+          const sent = Math.max(0, approved - (position % 3));
+          const backlog = personIndex === 1 && position === 4;
+          const roleData = {
+            responsibleStores: person.stores.join("、"),
+            messageStatus: backlog ? "有积压" : "已处理完成",
+            backlogReason: backlog ? "达人集中回复，晚间消息未在当日清空。" : "",
+            samples: person.stores.map((store, storeIndex) => ({
+              store,
+              product: store === "Himood Smile" ? "牙贴" : store.includes("Dreamland") || store === "MoonDream" ? "酒店枕2pcs" : "JZZ",
+              approved: Math.max(1, Math.round(approved / 2) + storeIndex),
+              sent: Math.max(1, Math.round(sent / 2) + storeIndex)
+            })),
+            followups: [{ item: `重点达人 ${String.fromCharCode(65 + personIndex)}-${position + 1}`, result: position % 2 ? "已确认脚本方向，待发布。" : "完成复投沟通，已确认排期。" }],
+            oldCreatorContacts: 12 + personIndex * 3 + position,
+            confirmedReinvest: 3 + personIndex + Math.floor(position / 2),
+            reinvestResult: "已按历史GMV和内容稳定性分层跟进。",
+            otherResult: position === 6 ? "完成本周达人池清理和下周优先级标记。" : "无"
+          };
+          const anomaly = backlog ? {
+            object: `${person.stores.join(" / ")} 达人消息`,
+            issue: "联盟消息出现积压",
+            impact: "可能错过达人合作窗口",
+            reason: "高峰时段消息集中，未完成二次分流",
+            risk: "中",
+            acceptance: "次日中午前清空积压，并按达人层级补充跟进状态。"
+          } : null;
+          makeReport({
+            date,
+            position,
+            role: "BD",
+            author: person.author,
+            stores: person.stores.join("、"),
+            roleData,
+            anomaly,
+            taskTitle: anomaly ? "清空联盟消息积压并完成达人分层" : "",
+            taskOwner: person.author
+          });
+        });
+
+        const afterSalesMatrix = storesForSimulation.map((store) => {
+          const entry = byStore[store.store];
+          return {
+            store: store.store,
+            values: {
+              sps: entry.sps,
+              returns: entry.returns,
+              returnAmount: Number((entry.returns * store.price * 0.86).toFixed(2))
+            }
+          };
+        });
+        const afterSalesData = {
+          matrix: afterSalesMatrix,
+          summary: {
+            consultations: 148 + position * 9,
+            lateReplies: position === 2 ? 3 : position % 3,
+            refunds: afterSalesMatrix.reduce((sum, row) => sum + row.values.returns, 0) + 7,
+            refundAmount: Number(afterSalesMatrix.reduce((sum, row) => sum + row.values.returnAmount, 0).toFixed(2)),
+            badReviews: currentEntries.reduce((sum, entry) => sum + entry.badReviews, 0),
+            reviewsResolved: 3 + Math.floor(position / 2),
+            appeals: 2 + position % 2,
+            appealSuccess: 1 + position % 2,
+            appealProcessing: 1,
+            compensation: 4 + position,
+            unfinished: position === 6 ? 3 : 1,
+            highRisk: position >= 5 ? 2 : 1
+          }
+        };
+        const afterSalesAnomaly = [0, 3, 6].includes(position) ? {
+          object: "DreamWeave / JZZ",
+          issue: "SPS低于3.5且退货金额居六店首位",
+          impact: "联盟能力受限并侵蚀实际利润",
+          reason: "商品满意度偏低，用户预期与实际体验存在落差",
+          risk: "高",
+          acceptance: "完成退货原因和VOC分类，给出链接、产品或话术修正建议。"
+        } : null;
+        makeReport({
+          date,
+          position,
+          role: "售后组",
+          author: "周妍",
+          stores: "六店",
+          roleData: afterSalesData,
+          anomaly: afterSalesAnomaly,
+          taskTitle: afterSalesAnomaly ? "汇总 DreamWeave 退货原因与VOC" : "",
+          taskOwner: "周妍"
+        });
+
+        const maintenanceAnomaly = position === 2 ? {
+          object: "Dreamdaily / JZZ blue",
+          issue: "活动价格与日常价格配置冲突",
+          impact: "活动报名可能失败或造成价格异常",
+          reason: "活动续期后未同步校验价格区间",
+          risk: "中",
+          acceptance: "完成活动价、库存和链接状态复核并保留截图。"
+        } : position === 5 ? {
+          object: "Dreamland / 酒店枕2pcs",
+          issue: "达人建联插件运行异常",
+          impact: "当日达人触达节奏中断",
+          reason: "插件任务队列未正常继续运行",
+          risk: "中",
+          acceptance: "恢复插件运行，补齐中断时段的达人触达并保留运行记录。"
+        } : null;
+        const maintenanceData = {
+          plugins: [
+            { store: "DreamWeave", product: "JZZ", outreach: 86 + position * 3, status: "正常" },
+            { store: "Dreamland", product: "酒店枕2pcs", outreach: 54 + position * 2, status: position === 5 ? "异常" : "正常" }
+          ],
+          linksAdded: position % 3,
+          linksUpdated: 3 + position,
+          linksRestored: position % 2,
+          linksPending: position === 2 ? 2 : 0,
+          stockChanges: 4 + position,
+          priceChanges: position === 2 ? 3 : 1,
+          stockPriceRisk: maintenanceAnomaly ? "活动价冲突，已进入复核。" : "无",
+          campaignApplied: 3 + position % 3,
+          campaignSuccess: 2 + position % 2,
+          campaignPending: position === 2 ? 1 : 0,
+          shopsChecked: 6,
+          violations: position === 4 ? 1 : 0,
+          appeals: position === 4 ? 1 : 0,
+          appealSuccess: position === 6 ? 1 : 0,
+          dataTables: "链接、库存、活动和违规巡检表已更新。",
+          otherResult: "六店基础设置已完成当日复核。"
+        };
+        makeReport({
+          date,
+          position,
+          role: "店铺维护",
+          author: "赵宁",
+          stores: "六店",
+          roleData: maintenanceData,
+          anomaly: maintenanceAnomaly,
+          taskTitle: maintenanceAnomaly ? (position === 2 ? "修正 Dreamdaily 活动价格配置" : "恢复 Dreamland 建联插件运行") : "",
+          taskOwner: "赵宁",
+          approval: position === 2 ? { item: "活动价调整", suggestion: "恢复至审批价格区间后重新报名", result: "已通过", owner: "赵宁" } : null
+        });
+      });
+
+      return {
+        entries,
+        products,
+        tasks,
+        reports,
+        reportAnalyses: [],
+        customCreators: structuredClone(state?.customCreators || []),
+        creatorEdits: structuredClone(state?.creatorEdits || {}),
+        creatorHistory: structuredClone(state?.creatorHistory || [])
+      };
     }
 
     let state = loadState();
@@ -7051,6 +8032,7 @@
     let cloudReady = false;
     let cloudSaveTimer = null;
     let lastCloudSaved = "";
+    let activeAiAnalysisContext = null;
 
     function loadState() {
       try {
@@ -7067,6 +8049,7 @@
         products: Array.isArray(data?.products) ? data.products : [],
         tasks: Array.isArray(data?.tasks) ? data.tasks : [],
         reports: Array.isArray(data?.reports) ? data.reports : [],
+        reportAnalyses: Array.isArray(data?.reportAnalyses) ? data.reportAnalyses : [],
         customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
         creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
         creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
@@ -7681,40 +8664,757 @@
     }
 
     function taskCard(task) {
-      const next = task.status === "待处理" ? "处理中" : task.status === "处理中" ? "待复盘" : task.status === "待复盘" ? "已完成" : "已完成";
       const priorityClass = task.priority === "紧急" ? "priority-urgent" : task.priority === "重要" ? "priority-important" : "priority-watch";
+      const statusAction = task.status === "待处理"
+        ? `<button class="small-btn" data-task-start="${task.id}" type="button">开始处理</button>`
+        : task.status === "处理中"
+          ? `<button class="small-btn" data-task-result="${task.id}" type="button">提交执行结果</button>`
+          : task.status === "待复盘"
+            ? `<button class="small-btn" data-task-result="${task.id}" type="button">修改执行结果</button><span class="badge blue">等待日报复查</span>`
+            : `<span class="badge green">复查已关闭</span>`;
       return `
         <div class="task-card ${priorityClass}">
-          <b>${task.title}</b>
-          <p>${task.action || "暂无处理动作"}</p>
+          <b>${escapeHtml(task.title)}</b>
+          <p>${escapeHtml(task.action || "暂无处理动作")}</p>
           <div class="task-meta">
             <span class="badge ${task.priority === "紧急" ? "red" : task.priority === "重要" ? "amber" : "green"}">${task.priority}</span>
             <span class="badge">${task.assignee || "-"}</span>
             <span class="badge">${task.due || "无截止"}</span>
             ${task.reviewAt ? `<span class="badge">复查 ${task.reviewAt}</span>` : ""}
           </div>
+          ${task.result ? `<div class="task-result"><b>执行结果</b><br>${escapeHtml(task.result)}${task.evidence ? `<br><b>证据</b><br>${escapeHtml(task.evidence)}` : ""}${task.reviewResult ? `<br><b>复查结论</b><br>${escapeHtml(task.reviewResult)}` : ""}</div>` : ""}
           <div class="task-actions">
-            ${task.status !== "已完成" ? `<button class="small-btn" data-task-next="${task.id}" data-next="${next}" type="button">推进到${next}</button>` : ""}
+            ${statusAction}
             <button class="small-btn" data-task-delete="${task.id}" type="button">删除</button>
           </div>
         </div>
       `;
     }
 
-    const reportHelpText = {
-      "售后组": "今日结果建议填写：咨询、退款、退货、差评、申诉、补发/赔付和高风险订单。售后组每天只提交一份，由两人轮流汇总。",
-      "BD": "今日结果建议填写：联盟消息状态、审样寄样、重点达人跟进、老达人复投和其他重要结果。三名BD按实际负责人分别提交，系统按两份核心汇总进度展示。",
-      "店铺维护": "今日结果建议填写：链接维护、库存与价格、活动执行、六店巡检、违规申诉和必要表格更新。"
+    function openTaskResultEditor(taskId) {
+      const task = (state.tasks || []).find((item) => item.id === taskId);
+      if (!task) return;
+      const form = document.getElementById("taskResultForm");
+      form.elements.id.value = task.id;
+      form.elements.title.value = task.title || "";
+      form.elements.result.value = task.result || "";
+      form.elements.evidence.value = task.evidence || "";
+      form.elements.reviewAt.value = task.reviewAt || `${addDays(today, 1)}T10:00`;
+      form.elements.status.value = task.status === "处理中" ? "待复盘" : task.status;
+      document.getElementById("taskResultTitle").textContent = task.title || "提交处理结果";
+      document.getElementById("taskResultModal").hidden = false;
+    }
+
+    function closeTaskResultEditor() {
+      document.getElementById("taskResultModal").hidden = true;
+    }
+
+    function saveTaskResult(form) {
+      const data = Object.fromEntries(new FormData(form).entries());
+      const task = (state.tasks || []).find((item) => item.id === data.id);
+      if (!task) return;
+      task.result = data.result.trim();
+      task.evidence = data.evidence.trim();
+      task.reviewAt = data.reviewAt;
+      task.status = data.status === "处理中" ? "处理中" : "待复盘";
+      task.resultSubmittedAt = new Date().toISOString();
+      saveState();
+      closeTaskResultEditor();
+      showToast(task.status === "待复盘" ? "执行结果已提交，等待日报复查" : "执行结果已保存");
+      render();
+    }
+
+    const REPORT_STORES = [
+      { name: "DreamWeave", group: "家纺" },
+      { name: "sweet dream", group: "家纺" },
+      { name: "Dreamland", group: "家纺" },
+      { name: "Dreamdaily", group: "家纺" },
+      { name: "MoonDream", group: "家纺" },
+      { name: "Himood Smile", group: "口腔" }
+    ];
+
+    const REPORT_SCHEMAS = {
+      "售后组": {
+        help: "两名售后每天汇总一份。SPS、退货和退货金额按六店分别填写，其余售后结果填写六店合计；周报自动识别低分店铺和退货集中店铺。",
+        columns: [
+          { key: "sps", label: "SPS", unit: "", decimal: true, aggregate: "latest" },
+          { key: "consultations", label: "咨询", unit: "单" },
+          { key: "lateReplies", label: "未及时回复", unit: "单" },
+          { key: "refunds", label: "退款", unit: "单" },
+          { key: "refundAmount", label: "退款金额", unit: "$", money: true },
+          { key: "returns", label: "退货", unit: "单" },
+          { key: "returnAmount", label: "退货金额", unit: "$", money: true },
+          { key: "badReviews", label: "新增差评", unit: "条" },
+          { key: "reviewsResolved", label: "差评修改/删除", unit: "条" },
+          { key: "appeals", label: "申诉", unit: "条" },
+          { key: "appealSuccess", label: "申诉成功", unit: "条" },
+          { key: "appealProcessing", label: "申诉处理中", unit: "条" },
+          { key: "compensation", label: "补发/赔付", unit: "单" },
+          { key: "unfinished", label: "未完成", unit: "单" },
+          { key: "highRisk", label: "高风险订单", unit: "单" }
+        ]
+      },
+      "BD": {
+        help: "三名BD各自提交。插件触达量不填，日报重点记录联盟消息状态、审样寄样、重点达人跟进和老达人复投结果。",
+        columns: [
+          { key: "messageStatus", label: "联盟消息", type: "status", options: ["", "已处理完成", "有积压"], warning: "有积压" },
+          { key: "samplesApproved", label: "审样通过", unit: "个" },
+          { key: "samplesSent", label: "寄样", unit: "个" },
+          { key: "oldCreatorContacts", label: "老达人联系", unit: "人" },
+          { key: "confirmedReinvest", label: "确认合作", unit: "人" }
+        ]
+      },
+      "店铺维护": {
+        help: "六店由店铺维护统一提交。插件只记录运行状态，链接、库存、价格、活动和违规按实际完成结果填写。",
+        columns: [
+          { key: "pluginStatus", label: "插件运行", type: "status", options: ["", "正常", "异常"], warning: "异常" },
+          { key: "linksAdded", label: "新上架", unit: "条" },
+          { key: "linksUpdated", label: "修改链接", unit: "条" },
+          { key: "linksRestored", label: "恢复链接", unit: "条" },
+          { key: "linksPending", label: "待处理链接", unit: "条" },
+          { key: "stockChanges", label: "库存调整", unit: "项" },
+          { key: "priceChanges", label: "价格执行", unit: "项" },
+          { key: "campaignApplied", label: "报名/续期", unit: "项" },
+          { key: "campaignSuccess", label: "活动成功", unit: "项" },
+          { key: "campaignPending", label: "活动待处理", unit: "项" },
+          { key: "shopsChecked", label: "巡检店铺", unit: "家" },
+          { key: "violations", label: "新增违规", unit: "条" },
+          { key: "appeals", label: "提交申诉", unit: "条" },
+          { key: "appealSuccess", label: "申诉成功", unit: "条" }
+        ]
+      },
+      "店群运营": {
+        help: "两名店群运营各自提交一份，只填写本人负责店铺。先看经营结果，再写异常判断、分派任务和复查结论。",
+        columns: [
+          { key: "gmv", label: "GMV", unit: "$", money: true },
+          { key: "orders", label: "订单", unit: "单" },
+          { key: "units", label: "销量", unit: "件" },
+          { key: "productCardGmv", label: "商品卡GMV", unit: "$", money: true },
+          { key: "affiliateGmv", label: "联盟GMV", unit: "$", money: true },
+          { key: "adSpend", label: "广告成本", unit: "$", money: true },
+          { key: "adRoi", label: "广告ROI", unit: "" },
+          { key: "samples", label: "样品", unit: "个" }
+        ]
+      }
     };
+
+    function reportSchema(role) {
+      return REPORT_SCHEMAS[role] || REPORT_SCHEMAS["售后组"];
+    }
 
     function updateReportHelp() {
       const role = document.getElementById("reportRole")?.value || "售后组";
       const help = document.getElementById("reportHelp");
-      if (help) help.textContent = reportHelpText[role];
+      if (help) help.textContent = reportSchema(role).help;
+      renderReportRoleFields(role);
+      renderReportClosureFields(role);
+      renderPendingReviewQueue();
+    }
+
+    function templateField(label, key, options = {}) {
+      const type = options.type || "text";
+      if (type === "select") {
+        return `<div class="template-input"><label>${escapeHtml(label)}</label><select data-role-field="${key}">${(options.options || []).map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option || "请选择")}</option>`).join("")}</select></div>`;
+      }
+      return `<div class="template-input"><label>${escapeHtml(label)}</label><input data-role-field="${key}" type="${type}" ${type === "number" ? `min="0" step="${options.step || "1"}" inputmode="decimal"` : ""} placeholder="${escapeHtml(options.placeholder || "")}" /></div>`;
+    }
+
+    function rowField(label, part, options = {}) {
+      const type = options.type || "text";
+      if (type === "select") {
+        return `<div class="template-input"><label>${escapeHtml(label)}</label><select data-part="${part}">${(options.options || []).map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option || "请选择")}</option>`).join("")}</select></div>`;
+      }
+      return `<div class="template-input"><label>${escapeHtml(label)}</label><input data-part="${part}" type="${type}" ${type === "number" ? `min="0" step="${options.step || "1"}" inputmode="decimal"` : ""} placeholder="${escapeHtml(options.placeholder || "")}" /></div>`;
+    }
+
+    function storeOptions(includeAll = false) {
+      const options = REPORT_STORES.map((store) => store.name);
+      return includeAll ? ["", "六店", ...options] : ["", ...options];
+    }
+
+    function repeatControls(name) {
+      return `
+        <span class="template-row-actions">
+          <button class="row-control" data-remove-row="${name}" type="button">减少一行</button>
+          <button class="row-control" data-add-row="${name}" type="button">添加一行</button>
+        </span>
+      `;
+    }
+
+    function renderStoreMatrix(role) {
+      const schema = reportSchema(role);
+      const headings = schema.columns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("");
+      const rows = REPORT_STORES.map((store) => {
+        const cells = schema.columns.map((column) => {
+          if (column.type === "status") {
+            return `<td><select data-report-key="${column.key}" aria-label="${escapeHtml(store.name)} ${escapeHtml(column.label)}">${column.options.map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option || "未填写")}</option>`).join("")}</select></td>`;
+          }
+          return `<td><input data-report-key="${column.key}" type="number" min="0" step="${column.money ? "0.01" : "1"}" inputmode="decimal" aria-label="${escapeHtml(store.name)} ${escapeHtml(column.label)}" /></td>`;
+        }).join("");
+        return `<tr class="report-store-row" data-store="${escapeHtml(store.name)}"><td>${escapeHtml(store.name)}<span class="store-group">${store.group}</span></td>${cells}</tr>`;
+      }).join("");
+      return `
+        <div class="report-template-head">
+          <div>
+            <h3>${escapeHtml(role)}每日数据</h3>
+            <p>每家店一行，只填写本人负责店铺；没有自然数据的字段留空。</p>
+          </div>
+          <span class="badge blue">六店固定模板</span>
+        </div>
+        <div class="report-matrix">
+          <table>
+            <thead><tr><th>店铺</th>${headings}</tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderReportRoleFields(role) {
+      const container = document.getElementById("reportRoleFields");
+      if (!container) return;
+      if (role === "店群运营") {
+        container.innerHTML = renderStoreMatrix(role);
+        return;
+      }
+
+      if (role === "BD") {
+        container.innerHTML = `
+          <div class="report-template-head">
+            <div><h3>BD日报 · 今日结果</h3><p>按实际结果填写，普通聊天记录不需要逐条搬运。</p></div>
+            <span class="badge blue">个人提交</span>
+          </div>
+          <section class="template-section">
+            <div class="template-section-head"><b>联盟消息</b><small>不统计回复条数</small></div>
+            <div class="role-result-grid">
+              ${templateField("负责店铺", "responsibleStores", { placeholder: "例如 DreamWeave、Dreamland" })}
+              ${templateField("处理状态", "messageStatus", { type: "select", options: ["", "已处理完成", "有积压"] })}
+              ${templateField("积压原因", "backlogReason", { placeholder: "有积压时填写" })}
+            </div>
+          </section>
+          <section class="template-section" data-repeat-section="samples" data-min-rows="1">
+            <div class="template-section-head"><span class="template-section-title"><b>审样寄样</b><small>按实际数量增减行数</small></span>${repeatControls("samples")}</div>
+            ${[1, 2].map((index) => `<div class="template-row" data-role-row="samples"><span class="template-row-number">${index}</span>${rowField("店铺", "store", { type: "select", options: storeOptions() })}${rowField("产品", "product")}${rowField("通过", "approved", { type: "number" })}${rowField("寄出", "sent", { type: "number" })}</div>`).join("")}
+          </section>
+          <section class="template-section" data-repeat-section="followups" data-min-rows="1">
+            <div class="template-section-head"><span class="template-section-title"><b>重点达人跟进</b><small>写事项和明确结果</small></span>${repeatControls("followups")}</div>
+            ${[1, 2].map((index) => `<div class="template-row two" data-role-row="followups"><span class="template-row-number">${index}</span>${rowField("事项", "item")}${rowField("结果", "result")}</div>`).join("")}
+          </section>
+          <section class="template-section">
+            <div class="template-section-head"><b>老达人复投</b><small>记录联系结果</small></div>
+            <div class="role-result-grid">
+              ${templateField("联系人数", "oldCreatorContacts", { type: "number" })}
+              ${templateField("确认合作人数", "confirmedReinvest", { type: "number" })}
+              ${templateField("当前结果", "reinvestResult", { placeholder: "寄样、待回复、确认拍摄等" })}
+              ${templateField("其他重要结果", "otherResult", { placeholder: "无则留空" })}
+            </div>
+          </section>
+        `;
+        return;
+      }
+
+      if (role === "售后组") {
+        container.innerHTML = `
+          <div class="report-template-head">
+            <div><h3>售后组日报 · 今日结果</h3><p>两名售后合并提交；先填六店 SPS 与退货，再填售后合计。</p></div>
+            <span class="badge blue">团队汇总</span>
+          </div>
+          <section class="template-section">
+            <div class="template-section-head"><b>六店 SPS 与退货明细</b><small>每店独立填写，作为健康和退货诊断的唯一日报口径</small></div>
+            <div class="report-matrix">
+              <table>
+                <thead><tr><th>店铺</th><th>SPS</th><th>退货（单）</th><th>退货金额（$）</th></tr></thead>
+                <tbody>
+                  ${REPORT_STORES.map((store) => `
+                    <tr class="report-store-row" data-store="${escapeHtml(store.name)}">
+                      <td>${escapeHtml(store.name)}<span class="store-group">${store.group}</span></td>
+                      <td><input data-report-key="sps" type="number" min="0" max="5" step="0.1" inputmode="decimal" aria-label="${escapeHtml(store.name)} SPS" /></td>
+                      <td><input data-report-key="returns" type="number" min="0" step="1" inputmode="numeric" aria-label="${escapeHtml(store.name)} 退货数量" /></td>
+                      <td><input data-report-key="returnAmount" type="number" min="0" step="0.01" inputmode="decimal" aria-label="${escapeHtml(store.name)} 退货金额" /></td>
+                    </tr>
+                  `).join("")}
+                </tbody>
+              </table>
+            </div>
+          </section>
+          <section class="template-section">
+            <div class="template-section-head"><b>六店售后合计</b><small>以下字段只填一次，不与上方分店数据重复</small></div>
+            <div class="role-result-grid">
+              ${templateField("咨询（单）", "consultations", { type: "number" })}
+              ${templateField("未及时回复（单）", "lateReplies", { type: "number" })}
+              ${templateField("退款（单）", "refunds", { type: "number" })}
+              ${templateField("退款金额（$）", "refundAmount", { type: "number", step: "0.01" })}
+              ${templateField("新增差评（条）", "badReviews", { type: "number" })}
+              ${templateField("删除或修改（条）", "reviewsResolved", { type: "number" })}
+              ${templateField("申诉（条）", "appeals", { type: "number" })}
+              ${templateField("申诉成功（条）", "appealSuccess", { type: "number" })}
+              ${templateField("申诉处理中（条）", "appealProcessing", { type: "number" })}
+              ${templateField("补发/赔付（单）", "compensation", { type: "number" })}
+              ${templateField("补发/赔付未完成（单）", "unfinished", { type: "number" })}
+              ${templateField("高风险订单（单）", "highRisk", { type: "number" })}
+            </div>
+          </section>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="report-template-head">
+          <div><h3>店铺维护日报 · 今日结果</h3><p>负责六店，操作完成后仍需以店铺前台状态为准。</p></div>
+          <span class="badge blue">个人提交</span>
+        </div>
+        <section class="template-section" data-repeat-section="plugin" data-min-rows="1">
+          <div class="template-section-head"><span class="template-section-title"><b>插件建联</b><small>记录当天主要执行项</small></span>${repeatControls("plugin")}</div>
+          <div class="template-row" data-role-row="plugin"><span class="template-row-number">1</span>${rowField("店铺", "store", { type: "select", options: storeOptions(true) })}${rowField("产品", "product")}${rowField("建联", "outreach", { type: "number" })}${rowField("运行状态", "status", { type: "select", options: ["", "正常", "异常"] })}</div>
+        </section>
+        <section class="template-section">
+          <div class="template-section-head"><b>链接、库存、价格与活动</b><small>按完成结果填写</small></div>
+          <div class="role-result-grid">
+            ${templateField("新上架（条）", "linksAdded", { type: "number" })}
+            ${templateField("修改链接（条）", "linksUpdated", { type: "number" })}
+            ${templateField("恢复链接（条）", "linksRestored", { type: "number" })}
+            ${templateField("待处理链接（条）", "linksPending", { type: "number" })}
+            ${templateField("库存调整（项）", "stockChanges", { type: "number" })}
+            ${templateField("价格执行（项）", "priceChanges", { type: "number" })}
+            ${templateField("库存/价格风险", "stockPriceRisk", { placeholder: "无则留空" })}
+            ${templateField("报名/续期（项）", "campaignApplied", { type: "number" })}
+            ${templateField("活动成功（项）", "campaignSuccess", { type: "number" })}
+            ${templateField("活动待处理（项）", "campaignPending", { type: "number" })}
+          </div>
+        </section>
+        <section class="template-section">
+          <div class="template-section-head"><b>店铺巡检与其他结果</b><small>六店每日检查</small></div>
+          <div class="role-result-grid">
+            ${templateField("已检查（家）", "shopsChecked", { type: "number" })}
+            ${templateField("新增违规（条）", "violations", { type: "number" })}
+            ${templateField("提交申诉（条）", "appeals", { type: "number" })}
+            ${templateField("申诉成功（条）", "appealSuccess", { type: "number" })}
+            ${templateField("数据及表格", "dataTables", { placeholder: "完成了哪些更新" })}
+            ${templateField("其他重要结果", "otherResult", { placeholder: "无则留空" })}
+          </div>
+        </section>
+      `;
+    }
+
+    function renderReportClosureFields(role) {
+      const container = document.getElementById("reportClosureFields");
+      if (!container) return;
+      const objectLabel = role === "BD" ? "店铺 / 达人 / 链接" : role === "店铺维护" ? "店铺 / 产品 / 链接" : role === "售后组" ? "店铺 / 链接" : "店铺 / 指标";
+      const issueLabel = role === "售后组" ? "异常数据" : "问题";
+      const impactField = role === "店铺维护" ? rowField("影响", "impact") : "";
+      const approvalTitle = role === "售后组" ? "需审批" : "即时审批记录";
+      const approvalRows = role === "售后组" ? 1 : 2;
+      container.innerHTML = `
+        <section class="template-section" data-repeat-section="anomaly" data-min-rows="1">
+          <div class="template-section-head"><span class="template-section-title"><b>核心异常</b><small>与下方任务按顺序关联，未填写对应任务时系统自动创建</small></span>${repeatControls("anomaly")}</div>
+          ${[1, 2, 3].map((index) => `<div class="template-row ${role === "店铺维护" ? "five" : ""}" data-closure-row="anomaly"><span class="template-row-number">${index}</span>${rowField(objectLabel, "object")}${rowField(issueLabel, "issue")}${impactField}${rowField("原因判断", "reason")}${rowField("风险", "risk", { type: "select", options: ["", "高", "中", "低"] })}</div>`).join("")}
+        </section>
+        <section class="template-section" data-repeat-section="review" data-min-rows="1">
+          <div class="template-section-head"><span class="template-section-title"><b>昨日复查</b><small>从待复查任务带入后，选择关闭、继续或升级</small></span>${repeatControls("review")}</div>
+          ${[1, 2].map((index) => `<div class="template-row compact" data-closure-row="review"><input type="hidden" data-part="taskId" /><span class="template-row-number">${index}</span>${rowField(role === "BD" ? "达人 / 事项" : "店铺 / 事项", "item")}${rowField("复查结果", "result")}${rowField("状态", "status", { type: "select", options: ["", "关闭", "继续", "升级"] })}</div>`).join("")}
+        </section>
+        <section class="template-section" data-repeat-section="task" data-min-rows="1">
+          <div class="template-section-head"><span class="template-section-title"><b>今日任务</b><small>保存后自动进入任务中心，必须填写完成标准和复查时间</small></span>${repeatControls("task")}</div>
+          ${[1, 2, 3].map((index) => `<div class="template-row five" data-closure-row="task"><span class="template-row-number">${index}</span>${rowField("任务", "task")}${rowField("负责人", "owner")}${rowField("截止时间", "due", { type: "datetime-local" })}${rowField("完成标准", "acceptance")}${rowField("复查时间", "reviewAt", { type: "datetime-local" })}</div>`).join("")}
+        </section>
+        <section class="template-section" data-repeat-section="approval" data-min-rows="1">
+          <div class="template-section-head"><span class="template-section-title"><b>${approvalTitle}</b><small>审批仍即时进行，这里记录结果</small></span>${repeatControls("approval")}</div>
+          ${Array.from({ length: approvalRows }, (_, index) => `<div class="template-row ${role === "售后组" ? "compact" : ""}" data-closure-row="approval"><span class="template-row-number">${index + 1}</span>${rowField("事项", "item")}${rowField("建议方案", "suggestion")}${role === "售后组" ? rowField("最晚审批时间", "deadline", { type: "datetime-local" }) : `${rowField("审批结果", "result")}${rowField("后续负责人", "owner")}`}</div>`).join("")}
+        </section>
+      `;
+    }
+
+    function repeatSectionRows(section, name) {
+      return [...section.querySelectorAll(`[data-role-row="${name}"], [data-closure-row="${name}"]`)];
+    }
+
+    function renumberRepeatSection(section, name) {
+      repeatSectionRows(section, name).forEach((row, index) => {
+        const number = row.querySelector(".template-row-number");
+        if (number) number.textContent = index + 1;
+      });
+    }
+
+    function clearRepeatedRow(row) {
+      row.classList.remove("is-linked");
+      row.querySelectorAll("input, select, textarea").forEach((input) => {
+        if (input.tagName === "SELECT") input.selectedIndex = 0;
+        else input.value = "";
+      });
+    }
+
+    function addRepeatedRow(name, section = null) {
+      const target = section || document.querySelector(`[data-repeat-section="${name}"]`);
+      if (!target) return null;
+      const rows = repeatSectionRows(target, name);
+      if (!rows.length) return null;
+      const row = rows[rows.length - 1].cloneNode(true);
+      clearRepeatedRow(row);
+      target.appendChild(row);
+      renumberRepeatSection(target, name);
+      return row;
+    }
+
+    function removeRepeatedRow(name, section = null) {
+      const target = section || document.querySelector(`[data-repeat-section="${name}"]`);
+      if (!target) return;
+      const rows = repeatSectionRows(target, name);
+      const minimum = Number(target.dataset.minRows || 1);
+      if (rows.length <= minimum) {
+        showToast(`至少保留 ${minimum} 行`);
+        return;
+      }
+      rows[rows.length - 1].remove();
+      renumberRepeatSection(target, name);
+    }
+
+    function pendingReviewTasks() {
+      const form = document.getElementById("reportForm");
+      const role = form?.elements.role?.value || "售后组";
+      const author = String(form?.elements.author?.value || "").trim().toLowerCase();
+      const reportDate = form?.elements.date?.value || today;
+      return (state.tasks || []).filter((task) => {
+        if (task.status === "已完成") return false;
+        const roleMatch = task.source === `${role}日报`;
+        if (!roleMatch) return false;
+        if (task.status !== "待复盘" || !task.result || !task.evidence) return false;
+        if (task.reviewAt && String(task.reviewAt).slice(0, 10) > reportDate) return false;
+        if (!author || role === "售后组" || role === "店铺维护") return true;
+        return String(task.assignee || "").trim().toLowerCase() === author;
+      });
+    }
+
+    function renderPendingReviewQueue() {
+      const target = document.getElementById("pendingReviewQueue");
+      if (!target) return;
+      const tasks = pendingReviewTasks();
+      target.hidden = !tasks.length;
+      if (!tasks.length) {
+        target.innerHTML = "";
+        return;
+      }
+      target.innerHTML = `
+        <div class="review-queue-head">
+          <div><b>系统待复查</b><span>把执行结果带入“昨日复查”，复查后才能关闭任务。</span></div>
+          <span>${tasks.length} 项</span>
+        </div>
+        ${tasks.map((task) => `
+          <div class="review-queue-item">
+            <div>
+              <b>${escapeHtml(task.title)}</b>
+              <small>${escapeHtml(task.assignee || "未分配")}｜${escapeHtml(task.result || "尚未提交执行结果")}｜复查 ${escapeHtml(task.reviewAt || "未设置")}</small>
+            </div>
+            <button class="row-control" data-bring-review="${task.id}" type="button">带入复查</button>
+          </div>
+        `).join("")}
+      `;
+    }
+
+    function bringTaskIntoReview(taskId) {
+      const task = (state.tasks || []).find((item) => item.id === taskId);
+      const section = document.querySelector('[data-repeat-section="review"]');
+      if (!task || !section) return;
+      let row = repeatSectionRows(section, "review").find((item) => !item.querySelector('[data-part="item"]')?.value);
+      if (!row) row = addRepeatedRow("review", section);
+      if (!row) return;
+      row.querySelector('[data-part="taskId"]').value = task.id;
+      row.querySelector('[data-part="item"]').value = task.title;
+      row.querySelector('[data-part="result"]').value = "";
+      row.querySelector('[data-part="status"]').value = "";
+      row.classList.add("is-linked");
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      showToast("已带入昨日复查");
+    }
+
+    function collectMatrixMetrics() {
+      return [...document.querySelectorAll("#reportRoleFields .report-store-row")].map((row) => {
+        const raw = {};
+        let hasValue = false;
+        row.querySelectorAll("[data-report-key]").forEach((input) => {
+          const value = input.value;
+          if (value !== "") hasValue = true;
+          raw[input.dataset.reportKey] = input.type === "number" ? (value === "" ? null : Number(value)) : value;
+        });
+        return hasValue ? { store: row.dataset.store, values: raw } : null;
+      }).filter(Boolean);
+    }
+
+    function roleFieldValue(key) {
+      const input = document.querySelector(`#reportRoleFields [data-role-field="${key}"]`);
+      if (!input || input.value === "") return "";
+      return input.type === "number" ? Number(input.value) : input.value;
+    }
+
+    function roleRows(name) {
+      return [...document.querySelectorAll(`#reportRoleFields [data-role-row="${name}"]`)].map((row) => {
+        const result = {};
+        let active = false;
+        row.querySelectorAll("[data-part]").forEach((input) => {
+          const value = input.value;
+          if (value !== "") active = true;
+          result[input.dataset.part] = input.type === "number" ? (value === "" ? "" : Number(value)) : value;
+        });
+        return active ? result : null;
+      }).filter(Boolean);
+    }
+
+    function collectRoleData(role) {
+      if (role === "店群运营") return { matrix: collectMatrixMetrics() };
+      if (role === "BD") {
+        return {
+          responsibleStores: roleFieldValue("responsibleStores"),
+          messageStatus: roleFieldValue("messageStatus"),
+          backlogReason: roleFieldValue("backlogReason"),
+          samples: roleRows("samples"),
+          followups: roleRows("followups"),
+          oldCreatorContacts: roleFieldValue("oldCreatorContacts"),
+          confirmedReinvest: roleFieldValue("confirmedReinvest"),
+          reinvestResult: roleFieldValue("reinvestResult"),
+          otherResult: roleFieldValue("otherResult")
+        };
+      }
+      if (role === "售后组") {
+        const storeMetrics = collectMatrixMetrics();
+        const storeKeys = new Set(["sps", "returns", "returnAmount"]);
+        const summary = Object.fromEntries(reportSchema(role).columns
+          .filter((column) => !storeKeys.has(column.key))
+          .map((column) => [column.key, roleFieldValue(column.key)]));
+        return { matrix: storeMetrics, summary };
+      }
+      const plugins = roleRows("plugin");
+      return {
+        plugin: plugins[0] || {},
+        plugins,
+        linksAdded: roleFieldValue("linksAdded"),
+        linksUpdated: roleFieldValue("linksUpdated"),
+        linksRestored: roleFieldValue("linksRestored"),
+        linksPending: roleFieldValue("linksPending"),
+        stockChanges: roleFieldValue("stockChanges"),
+        priceChanges: roleFieldValue("priceChanges"),
+        stockPriceRisk: roleFieldValue("stockPriceRisk"),
+        campaignApplied: roleFieldValue("campaignApplied"),
+        campaignSuccess: roleFieldValue("campaignSuccess"),
+        campaignPending: roleFieldValue("campaignPending"),
+        shopsChecked: roleFieldValue("shopsChecked"),
+        violations: roleFieldValue("violations"),
+        appeals: roleFieldValue("appeals"),
+        appealSuccess: roleFieldValue("appealSuccess"),
+        dataTables: roleFieldValue("dataTables"),
+        otherResult: roleFieldValue("otherResult")
+      };
+    }
+
+    function roleDataHasValue(value) {
+      if (Array.isArray(value)) return value.some(roleDataHasValue);
+      if (value && typeof value === "object") return Object.values(value).some(roleDataHasValue);
+      return value !== "" && value !== null && value !== undefined;
+    }
+
+    function roleDataMetrics(role, data) {
+      if (role === "店群运营") return data.matrix || [];
+      if (role === "售后组") {
+        const summaryHasValue = Object.values(data.summary || {}).some((value) => value !== "" && value !== null && value !== undefined);
+        return [
+          ...(data.matrix || []),
+          ...(summaryHasValue ? [{ store: "六店汇总", values: data.summary }] : [])
+        ];
+      }
+      if (role === "店铺维护") {
+        const pluginStatus = (data.plugins || []).some((item) => item.status === "异常")
+          ? "异常"
+          : (data.plugins || []).some((item) => item.status === "正常") ? "正常" : "";
+        return [{
+          store: "六店汇总",
+          values: {
+            pluginStatus,
+            linksAdded: data.linksAdded,
+            linksUpdated: data.linksUpdated,
+            linksRestored: data.linksRestored,
+            linksPending: data.linksPending,
+            stockChanges: data.stockChanges,
+            priceChanges: data.priceChanges,
+            campaignApplied: data.campaignApplied,
+            campaignSuccess: data.campaignSuccess,
+            campaignPending: data.campaignPending,
+            shopsChecked: data.shopsChecked,
+            violations: data.violations,
+            appeals: data.appeals,
+            appealSuccess: data.appealSuccess
+          }
+        }];
+      }
+      const byStore = {};
+      (data.samples || []).forEach((row) => {
+        const store = row.store || "个人汇总";
+        byStore[store] ||= { samplesApproved: 0, samplesSent: 0 };
+        byStore[store].samplesApproved += Number(row.approved || 0);
+        byStore[store].samplesSent += Number(row.sent || 0);
+      });
+      return [
+        ...Object.entries(byStore).map(([store, values]) => ({ store, values })),
+        {
+          store: "个人汇总",
+          values: {
+            messageStatus: data.messageStatus,
+            oldCreatorContacts: data.oldCreatorContacts,
+            confirmedReinvest: data.confirmedReinvest
+          }
+        }
+      ].filter((row) => Object.values(row.values).some((value) => value !== "" && value !== null && value !== undefined));
+    }
+
+    function roleDataResults(role, data) {
+      if (role === "店群运营") return "";
+      if (role === "BD") {
+        const sampleText = (data.samples || []).map((row) => `${row.store || "未选店铺"}｜产品${row.product || "-"}｜通过${row.approved || 0}个｜寄出${row.sent || 0}个`).join("；") || "无";
+        const followupText = (data.followups || []).map((row) => `${row.item || "-"}｜${row.result || "-"}`).join("；") || "无";
+        return [
+          `1. 联盟消息：${data.messageStatus || "未填写"}${data.backlogReason ? `，原因：${data.backlogReason}` : ""}`,
+          `2. 审样寄样：${sampleText}`,
+          `3. 重点达人跟进：${followupText}`,
+          `4. 老达人复投：联系${data.oldCreatorContacts || 0}人｜确认合作${data.confirmedReinvest || 0}人｜当前结果${data.reinvestResult || "无"}`,
+          `5. 其他重要结果：${data.otherResult || "无"}`
+        ].join("\n");
+      }
+      if (role === "售后组") {
+        const storeLines = (data.matrix || []).map((row) => {
+          const values = row.values || {};
+          return `${row.store}：SPS ${values.sps === null || values.sps === undefined || values.sps === "" ? "-" : values.sps}｜退货 ${values.returns || 0}单 / ${money(values.returnAmount || 0)}`;
+        });
+        const summary = data.summary || {};
+        const totalReturns = (data.matrix || []).reduce((sum, row) => sum + Number(row.values?.returns || 0), 0);
+        const totalReturnAmount = (data.matrix || []).reduce((sum, row) => sum + Number(row.values?.returnAmount || 0), 0);
+        return [
+          `1. 六店SPS与退货：${storeLines.join("；") || "未填写"}`,
+          `2. 退货合计：${totalReturns}单 / ${money(totalReturnAmount)}`,
+          `3. 咨询：${summary.consultations || 0}单｜未及时回复：${summary.lateReplies || 0}单`,
+          `4. 退款：${summary.refunds || 0}单 / ${money(summary.refundAmount || 0)}`,
+          `5. 新增差评：${summary.badReviews || 0}条｜删除或修改：${summary.reviewsResolved || 0}条`,
+          `6. 申诉：${summary.appeals || 0}条｜成功：${summary.appealSuccess || 0}条｜处理中：${summary.appealProcessing || 0}条`,
+          `7. 补发/赔付：${summary.compensation || 0}单｜未完成：${summary.unfinished || 0}单`,
+          `8. 高风险订单：${summary.highRisk || 0}单`
+        ].join("\n");
+      }
+      const pluginText = (data.plugins || [data.plugin]).filter((item) => item && Object.keys(item).length)
+        .map((item) => `店铺${item.store || "-"}｜产品${item.product || "-"}｜建联${item.outreach || 0}｜运行${item.status || "未填写"}`)
+        .join("；") || "无";
+      return [
+        `1. 插件建联：${pluginText}`,
+        `2. 链接维护：新上架${data.linksAdded || 0}条｜修改${data.linksUpdated || 0}条｜恢复${data.linksRestored || 0}条｜待处理${data.linksPending || 0}条`,
+        `3. 库存与价格：库存调整${data.stockChanges || 0}项｜价格执行${data.priceChanges || 0}项｜风险${data.stockPriceRisk || "无"}`,
+        `4. 活动执行：报名/续期${data.campaignApplied || 0}项｜成功${data.campaignSuccess || 0}项｜待处理${data.campaignPending || 0}项`,
+        `5. 店铺巡检：已检查${data.shopsChecked || 0}家｜新增违规${data.violations || 0}条｜提交申诉${data.appeals || 0}条｜申诉成功${data.appealSuccess || 0}条`,
+        `6. 数据及表格：${data.dataTables || "无"}`,
+        `7. 其他重要结果：${data.otherResult || "无"}`
+      ].join("\n");
+    }
+
+    function closureRows(name) {
+      return [...document.querySelectorAll(`#reportClosureFields [data-closure-row="${name}"]`)].map((row) => {
+        const parts = {};
+        let active = false;
+        row.querySelectorAll("[data-part]").forEach((input) => {
+          if (input.value !== "") active = true;
+          parts[input.dataset.part] = input.value;
+        });
+        return active ? parts : null;
+      }).filter(Boolean);
+    }
+
+    function collectClosureData(role) {
+      const anomalyItems = closureRows("anomaly").map((row) => ({
+        id: crypto.randomUUID(),
+        object: row.object || "",
+        issue: row.issue || "",
+        impact: row.impact || "",
+        reason: row.reason || "",
+        risk: row.risk || ""
+      }));
+      const reviewItems = closureRows("review").map((row) => ({
+        taskId: row.taskId || "",
+        item: row.item || "",
+        result: row.result || "",
+        status: row.status || ""
+      }));
+      const taskItems = closureRows("task").map((row) => ({
+        id: crypto.randomUUID(),
+        task: row.task || "",
+        owner: row.owner || "",
+        due: row.due || "",
+        acceptance: row.acceptance || "",
+        reviewAt: row.reviewAt || ""
+      }));
+      const approvalItems = closureRows("approval").map((row) => ({
+        id: crypto.randomUUID(),
+        item: row.item || "",
+        suggestion: row.suggestion || "",
+        deadline: row.deadline || "",
+        result: row.result || "",
+        owner: row.owner || ""
+      }));
+      const anomalies = anomalyItems.map((row) => role === "店铺维护"
+        ? [row.object, row.issue, row.impact, row.reason, row.risk].join("｜")
+        : [row.object, row.issue, row.reason, row.risk].join("｜"));
+      const reviews = reviewItems.map((row) => [row.item, row.result, row.status].join("｜"));
+      const tasksText = taskItems.map((row) => [row.task, row.owner, row.due, row.acceptance, row.reviewAt].join("｜"));
+      const approvals = approvalItems.map((row) => role === "售后组"
+        ? [row.item, row.suggestion, row.deadline].join("｜")
+        : [row.item, row.suggestion, row.result, row.owner].join("｜"));
+      return {
+        anomalies: anomalies.join("\n"),
+        reviews: reviews.join("\n"),
+        tasksText: tasksText.join("\n"),
+        approvals: approvals.join("\n"),
+        items: {
+          anomalies: anomalyItems,
+          reviews: reviewItems,
+          tasks: taskItems,
+          approvals: approvalItems
+        }
+      };
     }
 
     function reportLines(value) {
       return String(value || "").split(/\n+/).map((line) => line.trim()).filter((line) => line && line !== "无");
+    }
+
+    function reportMetricValue(column, value) {
+      if (value === null || value === undefined || value === "") return "";
+      if (column.money) return money(Number(value) || 0);
+      if (column.type === "status") return String(value);
+      return `${num(Number(value) || 0)}${column.unit || ""}`;
+    }
+
+    function reportResultsText(report) {
+      if (report.results) return report.results;
+      if (!Array.isArray(report.roleMetrics) || !report.roleMetrics.length) return "无";
+      const schema = reportSchema(report.role);
+      return report.roleMetrics.map((row) => {
+        const details = schema.columns.map((column) => {
+          const value = row.values?.[column.key];
+          if (value === null || value === undefined || value === "") return "";
+          return `${column.label} ${reportMetricValue(column, value)}`;
+        }).filter(Boolean);
+        return details.length ? `${row.store}：${details.join("｜")}` : "";
+      }).filter(Boolean).join("\n") || "无";
+    }
+
+    function renderReportMetricTable(report) {
+      if (!Array.isArray(report.roleMetrics) || !report.roleMetrics.length) return "";
+      const schema = reportSchema(report.role);
+      const columns = schema.columns.filter((column) => report.roleMetrics.some((row) => {
+        const value = row.values?.[column.key];
+        return value !== null && value !== undefined && value !== "";
+      }));
+      if (!columns.length) return "";
+      return `
+        <div class="report-matrix">
+          <table>
+            <thead><tr><th>店铺</th>${columns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")}</tr></thead>
+            <tbody>${report.roleMetrics.map((row) => `<tr><td>${escapeHtml(row.store)}</td>${columns.map((column) => `<td>${escapeHtml(reportMetricValue(column, row.values?.[column.key]) || "-")}</td>`).join("")}</tr>`).join("")}</tbody>
+          </table>
+        </div>
+      `;
     }
 
     function reportTaskParts(line) {
@@ -7728,57 +9428,197 @@
       };
     }
 
+    function normalizedReportAuthor(value) {
+      return String(value || "").trim().toLowerCase();
+    }
+
+    function sameReportSlot(report, data) {
+      if (report.date !== data.date || report.role !== data.role) return false;
+      if (data.role === "售后组" || data.role === "店铺维护") return true;
+      return normalizedReportAuthor(report.author) === normalizedReportAuthor(data.author);
+    }
+
+    function taskPriority(risk) {
+      return risk === "高" ? "紧急" : risk === "中" ? "重要" : "观察";
+    }
+
+    function reportClosureValidation(closure, reportStatus) {
+      if (reportStatus !== "已提交") return "";
+      const incompleteAnomaly = closure.items.anomalies.find((item) => !item.object || !item.issue || !item.reason || !item.risk);
+      if (incompleteAnomaly) return "核心异常需填写对象、问题、原因判断和风险等级";
+      const incompleteTask = closure.items.tasks.find((item) => !item.task || !item.owner || !item.due || !item.acceptance || !item.reviewAt);
+      if (incompleteTask) return "今日任务需填写任务、负责人、截止时间、完成标准和复查时间";
+      const incompleteReview = closure.items.reviews.find((item) => !item.item || !item.result || !item.status);
+      if (incompleteReview) return "昨日复查需填写事项、复查结果和关闭/继续/升级状态";
+      return "";
+    }
+
+    function reportRiskLevel(selectedRisk, anomalyItems) {
+      const order = { "无": 0, "低": 1, "中": 2, "高": 3 };
+      return [selectedRisk, ...anomalyItems.map((item) => item.risk)]
+        .filter((risk) => Object.hasOwn(order, risk))
+        .sort((a, b) => order[b] - order[a])[0] || "无";
+    }
+
+    function applyReportReviews(reviewItems, report) {
+      reviewItems.forEach((review) => {
+        if (!review.taskId) return;
+        const task = (state.tasks || []).find((item) => item.id === review.taskId);
+        if (!task) return;
+        task.reviewResult = review.result;
+        task.reviewedAt = report.date;
+        task.reviewer = report.author;
+        if (review.status === "关闭") {
+          task.status = "已完成";
+          task.completedAt = new Date().toISOString();
+        } else if (review.status === "升级") {
+          task.status = "待处理";
+          task.priority = "紧急";
+          task.completedAt = "";
+        } else if (review.status === "继续") {
+          task.status = "处理中";
+          task.completedAt = "";
+        }
+      });
+    }
+
+    function createTasksFromReport(report, closure) {
+      const anomalyItems = closure.items.anomalies;
+      const taskItems = closure.items.tasks;
+      const total = Math.max(anomalyItems.length, taskItems.length);
+      for (let index = 0; index < total; index += 1) {
+        const anomaly = anomalyItems[index] || null;
+        const entered = taskItems[index] || null;
+        const title = entered?.task || (anomaly ? `处理异常：${anomaly.issue}` : "");
+        if (!title) continue;
+        const owner = entered?.owner || report.author;
+        const due = entered?.due || `${addDays(report.date, 1)}T18:00`;
+        const reviewAt = entered?.reviewAt || `${addDays(report.date, 2)}T10:00`;
+        const acceptance = entered?.acceptance || "提交处理结果和复查证据，确认问题不再持续影响经营。";
+        const actionParts = [
+          anomaly?.object ? `对象：${anomaly.object}` : "",
+          anomaly?.reason ? `原因判断：${anomaly.reason}` : "",
+          anomaly?.impact ? `影响：${anomaly.impact}` : "",
+          `完成标准：${acceptance}`
+        ].filter(Boolean);
+        state.tasks.push({
+          id: entered?.id || crypto.randomUUID(),
+          title,
+          assignee: owner,
+          priority: taskPriority(anomaly?.risk || report.risk),
+          store: anomaly?.object || report.stores,
+          sku: "",
+          due,
+          status: "待处理",
+          source: `${report.role}日报`,
+          sourceReport: report.id,
+          sourceAnomaly: anomaly?.id || "",
+          action: actionParts.join("\n"),
+          acceptance,
+          reviewAt,
+          result: "",
+          evidence: "",
+          reviewResult: "",
+          reviewedAt: "",
+          reviewer: "",
+          completedAt: ""
+        });
+      }
+    }
+
     function saveReport(form) {
       const data = Object.fromEntries(new FormData(form).entries());
+      const roleData = collectRoleData(data.role);
+      const roleMetrics = roleDataMetrics(data.role, roleData);
+      const closure = collectClosureData(data.role);
+      const hasClosureItem = Object.values(closure.items).some((items) => items.length);
+      if (!roleDataHasValue(roleData) && !hasClosureItem) {
+        showToast("请至少填写一项岗位数据或闭环事项");
+        return;
+      }
+      if (data.reportStatus === "已提交" && !roleDataHasValue(roleData)) {
+        showToast("已提交日报必须填写岗位今日结果");
+        return;
+      }
+      const validationMessage = reportClosureValidation(closure, data.reportStatus);
+      if (validationMessage) {
+        showToast(validationMessage);
+        return;
+      }
+      const stores = data.role === "售后组" || data.role === "店铺维护"
+        ? ["六店"]
+        : [...new Set(roleMetrics.map((row) => row.store).filter((store) => REPORT_STORES.some((item) => item.name === store)))];
+      const storesText = data.role === "BD" && roleData.responsibleStores
+        ? roleData.responsibleStores
+        : stores.join("、");
+      state.reports ||= [];
+      const existingIndex = state.reports.findIndex((item) => sameReportSlot(item, data));
+      const existing = existingIndex >= 0 ? state.reports[existingIndex] : null;
+      const existingTasks = existing ? state.tasks.filter((task) => task.sourceReport === existing.id) : [];
+      if (existingTasks.some((task) => task.status !== "待处理")) {
+        showToast("这份日报已经进入执行，请在任务中心更新结果，不能直接覆盖");
+        return;
+      }
       const report = {
-        id: crypto.randomUUID(),
+        id: existing?.id || crypto.randomUUID(),
         date: data.date,
         role: data.role,
         author: data.author,
-        stores: data.stores,
-        risk: data.risk,
+        stores: storesText,
+        risk: reportRiskLevel(data.risk, closure.items.anomalies),
         status: data.reportStatus,
-        results: data.results,
-        anomalies: data.anomalies,
-        reviews: data.reviews,
-        tasksText: data.tasksText,
-        approvals: data.approvals,
-        createdAt: new Date().toISOString()
+        roleMetrics,
+        roleData,
+        results: roleDataResults(data.role, roleData),
+        anomalies: closure.anomalies,
+        reviews: closure.reviews,
+        tasksText: closure.tasksText,
+        approvals: closure.approvals,
+        closureItems: closure.items,
+        createdAt: existing?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
-      state.reports ||= [];
-      state.reports.push(report);
-
-      reportLines(data.tasksText).forEach((line) => {
-        const task = reportTaskParts(line);
-        if (!task.title) return;
-        state.tasks.push({
-          id: crypto.randomUUID(),
-          title: task.title,
-          assignee: task.assignee || data.author,
-          priority: data.risk === "高" ? "紧急" : data.risk === "中" ? "重要" : "观察",
-          store: data.stores,
-          sku: "",
-          due: task.due,
-          status: "待处理",
-          source: `${data.role}日报`,
-          sourceReport: report.id,
-          action: task.acceptance ? `完成标准：${task.acceptance}` : "按日报要求完成并回传结果。",
-          acceptance: task.acceptance,
-          reviewAt: task.reviewAt,
-          result: ""
-        });
-      });
+      if (existing) {
+        state.tasks = state.tasks.filter((task) => task.sourceReport !== existing.id);
+        state.reports[existingIndex] = report;
+      } else {
+        state.reports.push(report);
+      }
+      if (data.reportStatus === "已提交") {
+        applyReportReviews(closure.items.reviews, report);
+        createTasksFromReport(report, closure);
+      }
 
       saveState();
+      document.getElementById("weeklyRole").value = data.role;
+      document.getElementById("weeklyAnchor").value = data.date;
       form.reset();
       form.elements.date.value = today;
       updateReportHelp();
-      showToast("日报已保存，任务已同步到任务中心");
+      const message = data.reportStatus === "已提交"
+        ? (existing ? "日报已更新，关联任务已同步" : "日报已保存，异常与任务已进入闭环")
+        : (existing ? "日报草稿已更新，暂未生成任务" : "日报草稿已保存，暂未生成任务");
+      showToast(message);
       render();
+      setTimeout(() => runAiAnalysis({ silent: true }), 80);
     }
 
     function reportRoleCount(reports, role) {
-      return reports.filter((item) => item.role === role).length;
+      return uniqueReportsBySlot(reports.filter((item) => item.role === role)).length;
+    }
+
+    function reportSlotKey(report) {
+      const author = report.role === "售后组" || report.role === "店铺维护"
+        ? "team"
+        : normalizedReportAuthor(report.author);
+      return `${report.date}|${report.role}|${author}`;
+    }
+
+    function uniqueReportsBySlot(reports) {
+      const sorted = [...reports].sort((a, b) => String(a.updatedAt || a.createdAt || "").localeCompare(String(b.updatedAt || b.createdAt || "")));
+      const latest = new Map();
+      sorted.forEach((report) => latest.set(reportSlotKey(report), report));
+      return [...latest.values()];
     }
 
     function buildDailyDigest(reports) {
@@ -7787,7 +9627,7 @@
       const reviews = reports.flatMap((item) => reportLines(item.reviews).map((line) => `${item.role}/${item.author}：${line}`));
       const tasks = reports.flatMap((item) => reportLines(item.tasksText).map((line) => `${item.role}/${item.author}：${line}`));
       const approvals = reports.flatMap((item) => reportLines(item.approvals).map((line) => `${item.role}/${item.author}：${line}`));
-      const resultBlocks = reports.map((item) => `【${item.role}｜${item.author}】\n${item.results || "无"}`);
+      const resultBlocks = reports.map((item) => `【${item.role}｜${item.author}】\n${reportResultsText(item)}`);
       return [
         `【TikTok团队日报｜${today}】`,
         "",
@@ -7808,22 +9648,537 @@
       ].join("\n");
     }
 
+    function localDate(value) {
+      const [year, month, day] = String(value || today).split("-").map(Number);
+      return new Date(year, (month || 1) - 1, day || 1, 12, 0, 0);
+    }
+
+    function dateKey(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function weekRange(anchor) {
+      const current = localDate(anchor);
+      const day = current.getDay() || 7;
+      const start = new Date(current);
+      start.setDate(current.getDate() - day + 1);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      return { start: dateKey(start), end: dateKey(end) };
+    }
+
+    function weeklyRows(role) {
+      if (role === "售后组") return [...REPORT_STORES, { name: "六店汇总", group: "团队" }];
+      if (role === "店铺维护") return [{ name: "六店汇总", group: "团队" }];
+      if (role === "BD") return [...REPORT_STORES, { name: "个人汇总", group: "人员" }];
+      return REPORT_STORES;
+    }
+
+    function aggregateWeeklyReports(reports, role) {
+      const schema = reportSchema(role);
+      const byStore = Object.fromEntries(weeklyRows(role).map((store) => [store.name, {
+        reportDays: new Set(),
+        values: Object.fromEntries(schema.columns.filter((column) => column.type !== "status").map((column) => [column.key, 0])),
+        latestDates: {},
+        statuses: Object.fromEntries(schema.columns.filter((column) => column.type === "status").map((column) => [column.key, {}]))
+      }]));
+      reports.forEach((report) => {
+        (report.roleMetrics || []).forEach((row) => {
+          if (!byStore[row.store]) return;
+          byStore[row.store].reportDays.add(report.date);
+          schema.columns.forEach((column) => {
+            const value = row.values?.[column.key];
+            if (value === null || value === undefined || value === "") return;
+            if (column.type === "status") {
+              const statusCounts = byStore[row.store].statuses[column.key];
+              statusCounts[value] = (statusCounts[value] || 0) + 1;
+            } else if (column.aggregate === "latest") {
+              const latestDate = byStore[row.store].latestDates[column.key] || "";
+              if (report.date >= latestDate) {
+                byStore[row.store].values[column.key] = Number(value) || 0;
+                byStore[row.store].latestDates[column.key] = report.date;
+              }
+            } else {
+              byStore[row.store].values[column.key] += Number(value) || 0;
+            }
+          });
+        });
+      });
+      return byStore;
+    }
+
+    function weeklyStatusText(column, counts) {
+      const total = Object.values(counts || {}).reduce((sum, value) => sum + value, 0);
+      if (!total) return "-";
+      const warningCount = counts?.[column.warning] || 0;
+      return warningCount ? `${column.warning} ${warningCount}天` : "正常";
+    }
+
+    function buildWeeklyDigest(role, range, reports, aggregates, taskStats) {
+      if (!reports.length) return `【${role}周报｜${range.start}—${range.end}】\n本周暂无结构化日报。`;
+      const schema = reportSchema(role);
+      const storeLines = weeklyRows(role).map((store) => {
+        const aggregate = aggregates[store.name];
+        if (!aggregate?.reportDays.size) return "";
+        const details = schema.columns.map((column) => {
+          if (column.type === "status") {
+            const text = weeklyStatusText(column, aggregate.statuses[column.key]);
+            return text === "-" ? "" : `${column.label} ${text}`;
+          }
+          const value = aggregate.values[column.key];
+          return value ? `${column.label} ${reportMetricValue(column, value)}` : "";
+        }).filter(Boolean);
+        return `${store.name}：${details.join("｜") || "已提交，无数值变化"}`;
+      }).filter(Boolean);
+      const anomalyCount = reports.reduce((sum, report) => sum + reportLines(report.anomalies).length, 0);
+      return [
+        `【${role}周报｜${range.start}—${range.end}】`,
+        `日报：${reports.length}份｜汇总${storeLines.length}项｜异常${anomalyCount}项`,
+        "",
+        "汇总结果：",
+        storeLines.map((line, index) => `${index + 1}. ${line}`).join("\n"),
+        "",
+        `任务闭环：新增${taskStats.total}项｜已完成${taskStats.closed}项｜逾期${taskStats.overdue}项`,
+        "下周重点：优先处理高风险异常、逾期任务和连续出现的同类问题。"
+      ].join("\n");
+    }
+
+    function addDays(value, days) {
+      const date = localDate(value);
+      date.setDate(date.getDate() + days);
+      return dateKey(date);
+    }
+
+    function aggregateTotal(aggregates, key) {
+      return Object.values(aggregates).reduce((sum, aggregate) => sum + Number(aggregate?.values?.[key] || 0), 0);
+    }
+
+    function averageReportMetric(reports, key) {
+      const values = reports.flatMap((report) => (report.roleMetrics || []).map((row) => row.values?.[key]))
+        .filter((value) => value !== null && value !== undefined && value !== "")
+        .map(Number)
+        .filter(Number.isFinite);
+      return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+    }
+
+    function weeklyExpectedReports(role, range) {
+      const people = { "售后组": 1, "BD": 3, "店铺维护": 1, "店群运营": 2 }[role] || 1;
+      const end = range.end > today ? today : range.end;
+      if (end < range.start) return people;
+      const days = Math.max(1, Math.round((localDate(end) - localDate(range.start)) / 86400000) + 1);
+      return people * days;
+    }
+
+    function operationalInsights(role, range, reports, aggregates) {
+      const insights = [];
+      const push = (level, label, title, body) => insights.push({ level, label, title, body });
+      if (!reports.length) {
+        push("info", "数据准备", "本周还不能形成可靠诊断", "先完成当天岗位日报。系统只有在店铺、渠道和异常数据连续记录后，才能判断趋势、结构和问题优先级。");
+        return insights;
+      }
+
+      const previousRange = { start: addDays(range.start, -7), end: addDays(range.end, -7) };
+      const previousReports = (state.reports || []).filter((report) => report.role === role && report.date >= previousRange.start && report.date <= previousRange.end && Array.isArray(report.roleMetrics));
+      const previousAggregates = aggregateWeeklyReports(previousReports, role);
+
+      if (role === "店群运营") {
+        const gmv = aggregateTotal(aggregates, "gmv");
+        const previousGmv = aggregateTotal(previousAggregates, "gmv");
+        const orders = aggregateTotal(aggregates, "orders");
+        const affiliateGmv = aggregateTotal(aggregates, "affiliateGmv");
+        const productCardGmv = aggregateTotal(aggregates, "productCardGmv");
+        const adSpend = aggregateTotal(aggregates, "adSpend");
+        const returns = aggregateTotal(aggregates, "returns");
+        const affiliateShare = gmv ? affiliateGmv / gmv : 0;
+        const productShare = gmv ? productCardGmv / gmv : 0;
+        const returnRate = orders ? returns / orders : 0;
+        const averageRoi = averageReportMetric(reports, "adRoi");
+        const gmvChange = previousGmv ? (gmv - previousGmv) / previousGmv : null;
+
+        push(gmvChange !== null && gmvChange < -0.1 ? "high" : gmvChange !== null && gmvChange > 0.1 ? "good" : "info",
+          "经营结果",
+          previousGmv ? `GMV周环比 ${gmvChange >= 0 ? "+" : ""}${(gmvChange * 100).toFixed(1)}%` : `本周记录GMV ${money(gmv)}`,
+          previousGmv ? `本周 ${money(gmv)}，上周 ${money(previousGmv)}。先确认变化来自流量、转化、客单还是渠道结构，再分派动作。` : "缺少上周同口径数据，当前只做基线记录，不下趋势结论。");
+
+        if (gmv) {
+          const concentration = Math.max(affiliateShare, productShare);
+          const channel = affiliateShare >= productShare ? "联盟" : "商品卡";
+          push(concentration > 0.7 ? "medium" : "good", "渠道韧性", `${channel}占比 ${(concentration * 100).toFixed(1)}%`,
+            concentration > 0.7 ? `成交对${channel}依赖较高。保留优势渠道，同时补足另一条成交路径，降低单一达人视频或单一搜索入口衰减带来的波动。` : "商品卡与联盟均有承接，继续观察广告、卖家内容和达人内容之间是否形成互相放大的结构。");
+        }
+
+        if (adSpend || averageRoi) {
+          push(averageRoi && averageRoi < 3 ? "high" : averageRoi < 5 ? "medium" : "good", "付费效率", `记录期广告ROI均值 ${averageRoi.toFixed(2)}`,
+            `广告成本 ${money(adSpend)}。ROI不能单独判断好坏，应与毛利保本线、自然GMV增量和素材衰减一起复查；低于店铺保本ROI时停止盲目放量。`);
+        }
+
+        if (orders) {
+          push(returnRate > 0.05 ? "high" : returnRate > 0.03 ? "medium" : "good", "增长质量", `退货单量占比 ${(returnRate * 100).toFixed(2)}%`,
+            returnRate > 0.03 ? "增长同时伴随售后压力。应联动VOC、链接表达、产品批次和达人话术，避免用新增订单掩盖利润流失。" : "当前退货压力可控，仍需结合退款金额、差评和产品满意度持续观察。");
+        }
+      }
+
+      if (role === "BD") {
+        const approved = aggregateTotal(aggregates, "samplesApproved");
+        const samples = aggregateTotal(aggregates, "samplesSent");
+        const oldContacts = aggregateTotal(aggregates, "oldCreatorContacts");
+        const confirmed = aggregateTotal(aggregates, "confirmedReinvest");
+        const dispatchRate = approved ? samples / approved : 0;
+        const reinvestRate = oldContacts ? confirmed / oldContacts : 0;
+        const backlogDays = Object.values(aggregates).reduce((sum, aggregate) => sum + Number(aggregate?.statuses?.messageStatus?.有积压 || 0), 0);
+
+        push(backlogDays ? "high" : "good", "机会承接", `联盟消息积压 ${backlogDays} 人次`,
+          backlogDays ? "消息积压意味着达人机会池没有被当天承接，应确认积压店铺、原因和清空时间。" : "联盟消息均记录为已处理完成，继续用重点跟进结果判断承接质量。");
+        push(approved && dispatchRate < 0.8 ? "medium" : "good", "寄样执行", `审样通过 ${approved} 个｜寄出 ${samples} 个`,
+          `当期寄出/通过为 ${(dispatchRate * 100).toFixed(1)}%。该比例只检查执行衔接，不代表样品最终内容产出。`);
+        push(oldContacts && reinvestRate < 0.2 ? "medium" : "good", "复投推进", `老达人确认合作率 ${(reinvestRate * 100).toFixed(1)}%`,
+          `联系 ${oldContacts} 人，确认合作 ${confirmed} 人。应继续按历史GMV、内容稳定性和可复拍性分层，而不是平均跟进。`);
+        push("info", "数据下一层", "发布、出单和达人GMV在周报中需要补充",
+          "当前日报适合控制每日执行，但不能单独评价达人产出。AI结论会把这一缺口标记为数据限制，不会把寄样量当作最终成绩。");
+      }
+
+      if (role === "售后组") {
+        const consultations = aggregateTotal(aggregates, "consultations");
+        const lateReplies = aggregateTotal(aggregates, "lateReplies");
+        const refunds = aggregateTotal(aggregates, "refunds");
+        const returns = aggregateTotal(aggregates, "returns");
+        const badReviews = aggregateTotal(aggregates, "badReviews");
+        const unfinished = aggregateTotal(aggregates, "unfinished");
+        const lateRate = consultations ? lateReplies / consultations : 0;
+        const reportedSps = REPORT_STORES.map((store) => ({
+          store: store.name,
+          value: Number(aggregates[store.name]?.values?.sps || 0)
+        })).filter((item) => item.value > 0);
+        const lowSps = reportedSps.filter((item) => item.value < 3.5);
+
+        push(lowSps.length ? "high" : reportedSps.length ? "good" : "info", "店铺健康",
+          lowSps.length ? `${lowSps.map((item) => `${item.store} ${item.value.toFixed(1)}`).join("｜")} 低于3.5` : reportedSps.length ? "已填店铺 SPS 均不低于3.5" : "本周尚未填写分店 SPS",
+          lowSps.length ? "低于3.5的店铺需要优先拆解商品满意度、履约与客服维度，并关注联盟能力受限带来的流量风险。" : "SPS按店铺持续记录；分数正常时仍需观察单项指标和变化趋势。");
+        push(lateRate > 0.03 ? "high" : lateRate > 0.01 ? "medium" : "good", "响应护栏", `未及时回复占比 ${(lateRate * 100).toFixed(2)}%`,
+          `咨询 ${consultations} 单，未及时回复 ${lateReplies} 单。先按时段和店铺定位积压，再检查排班、标准答复和升级机制。`);
+        push(badReviews || returns ? "medium" : "good", "VOC信号", `退货 ${returns} 单｜新增差评 ${badReviews} 条`,
+          "不要只按订单处理售后。应把原因归并为产品、链接表达、达人话术、物流和客服五类，连续出现的问题必须回流到商品与内容。");
+        push(unfinished ? "high" : "good", "闭环质量", `未完成补发/赔付 ${unfinished} 单`,
+          unfinished ? "未闭环订单会继续累积体验风险。每单必须有负责人、承诺时间和复查节点。" : `本周退款 ${refunds} 单，当前补发与赔付事项已完成闭环。`);
+      }
+
+      if (role === "店铺维护") {
+        const pendingLinks = aggregateTotal(aggregates, "linksPending");
+        const linksUpdated = aggregateTotal(aggregates, "linksUpdated") + aggregateTotal(aggregates, "linksAdded") + aggregateTotal(aggregates, "linksRestored");
+        const violations = aggregateTotal(aggregates, "violations");
+        const appeals = aggregateTotal(aggregates, "appeals");
+        const campaignSuccess = aggregateTotal(aggregates, "campaignSuccess");
+        const pluginWarnings = Object.values(aggregates).reduce((sum, aggregate) => sum + Number(aggregate?.statuses?.pluginStatus?.异常 || 0), 0);
+
+        push(pendingLinks ? "high" : "good", "链接可售性", `完成维护 ${linksUpdated} 项｜待处理 ${pendingLinks} 项`,
+          pendingLinks ? "待处理链接应按GMV影响和挂车范围排序，并以“前台价格、库存、购物车和活动状态均正常”作为完成标准。" : "本周链接维护已闭环，继续保留前台复查证据，避免只记录后台操作完成。");
+        push(pluginWarnings ? "high" : "good", "达人入口", `插件异常 ${pluginWarnings} 店次`,
+          pluginWarnings ? "插件异常会直接影响新增达人机会池，应记录中断时长、影响店铺和恢复结果，并同步给对应BD。" : "插件运行未记录异常，BD侧仍需观察回复与样品申请是否同步变化。");
+        push(violations ? "medium" : "good", "规则护栏", `新增违规 ${violations} 条｜提交申诉 ${appeals} 条`,
+          violations ? "先判断违规属于商品、内容、履约还是账户层级；申诉只是处理中，平台结果返回后才能关闭。" : `活动成功 ${campaignSuccess} 项，当前无新增违规记录。`);
+      }
+
+      return insights.slice(0, 4);
+    }
+
+    function renderOperationalInsights(role, range, reports, aggregates) {
+      const expected = weeklyExpectedReports(role, range);
+      const confidence = Math.min(100, expected ? reports.length / expected * 100 : 0);
+      const confidenceEl = document.getElementById("weeklyConfidence");
+      confidenceEl.textContent = confidence >= 80 ? `数据完整度 ${confidence.toFixed(0)}%` : confidence >= 50 ? `数据参考度 ${confidence.toFixed(0)}%` : `数据不足 ${confidence.toFixed(0)}%`;
+      confidenceEl.className = `badge ${confidence >= 80 ? "green" : confidence >= 50 ? "amber" : "red"}`;
+      const insights = operationalInsights(role, range, reports, aggregates);
+      document.getElementById("weeklyInsights").innerHTML = insights.map((item) => `
+        <article class="insight-card ${item.level}">
+          <span class="insight-label">${escapeHtml(item.label)}</span>
+          <h4>${escapeHtml(item.title)}</h4>
+          <p>${escapeHtml(item.body)}</p>
+        </article>
+      `).join("");
+    }
+
+    function clientFingerprint(value) {
+      const text = JSON.stringify(value);
+      let hash = 2166136261;
+      for (let index = 0; index < text.length; index += 1) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+      }
+      return (hash >>> 0).toString(16);
+    }
+
+    function buildAiAnalysisPayload(role, range) {
+      const currentReports = uniqueReportsBySlot((state.reports || []).filter((report) => report.date >= range.start && report.date <= range.end));
+      const previousRange = { start: addDays(range.start, -7), end: addDays(range.end, -7) };
+      const previousReports = uniqueReportsBySlot((state.reports || []).filter((report) => report.date >= previousRange.start && report.date <= previousRange.end));
+      const currentIds = new Set(currentReports.map((report) => report.id));
+      const compactReport = (report) => ({
+        id: report.id,
+        date: report.date,
+        role: report.role,
+        author: report.author,
+        stores: report.stores,
+        risk: report.risk,
+        status: report.status,
+        metrics: report.roleMetrics || [],
+        roleData: report.roleData || null,
+        results: reportResultsText(report),
+        anomalies: reportLines(report.anomalies),
+        reviews: reportLines(report.reviews),
+        tasks: reportLines(report.tasksText),
+        approvals: reportLines(report.approvals)
+      });
+      return {
+        focusRole: role,
+        range,
+        previousRange,
+        teamContext: {
+          stores: REPORT_STORES,
+          organization: "6家TikTok Shop：5家家纺、1家口腔；售后2人合并1份日报，其余6人分别提交。",
+          workflow: "日报数据 → 经营诊断 → 异常转任务 → 负责人执行 → 复查 → 关闭或升级 → 周报汇总"
+        },
+        metricDefinitions: Object.fromEntries(Object.entries(REPORT_SCHEMAS).map(([name, schema]) => [name, schema.columns.map((column) => ({
+          key: column.key,
+          label: column.label,
+          unit: column.unit || "",
+          type: column.type || "number"
+        }))])),
+        reports: currentReports.map(compactReport),
+        previousReports: previousReports.map(compactReport),
+        tasks: (state.tasks || []).filter((task) => currentIds.has(task.sourceReport)).map((task) => ({
+          title: task.title,
+          assignee: task.assignee,
+          priority: task.priority,
+          store: task.store,
+          due: task.due,
+          status: task.status,
+          acceptance: task.acceptance,
+          reviewAt: task.reviewAt,
+          result: task.result
+        }))
+      };
+    }
+
+    function aiAnalysisKey(role, range, payload) {
+      return `${role}:${range.start}:${range.end}:${clientFingerprint(payload)}`;
+    }
+
+    function renderAiAnalysis(analysis, meta = {}) {
+      const target = document.getElementById("aiAnalysisOutput");
+      if (!analysis) {
+        activeAiAnalysisContext = null;
+        target.innerHTML = `<div class="empty">本周数据变化后，将自动生成新的AI经营诊断。</div>`;
+        return;
+      }
+      activeAiAnalysisContext = { analysis, meta };
+      const severityClass = {
+        "紧急": "red",
+        "重要": "amber",
+        "关注": "blue",
+        "机会": "green"
+      };
+      const existingTasks = new Set((state.tasks || [])
+        .filter((task) => task.sourceAnalysis === meta.key)
+        .map((task) => Number(task.sourceDiagnosis)));
+      target.innerHTML = `
+        <div class="ai-analysis-summary">
+          <small>${escapeHtml(meta.model || "AI分析")} · 数据可信度 ${escapeHtml(analysis.dataConfidence?.level || "-")} · ${escapeHtml(meta.createdAt ? new Date(meta.createdAt).toLocaleString("zh-CN") : "")}</small>
+          <p>${escapeHtml(analysis.executiveSummary || "暂无总评")}</p>
+          <p><strong>数据说明：</strong>${escapeHtml(analysis.dataConfidence?.explanation || "无")}</p>
+        </div>
+        <div class="ai-diagnosis-list">
+          ${(analysis.diagnoses || []).map((item, index) => `
+            <article class="ai-diagnosis">
+              <span class="badge ${severityClass[item.severity] || "blue"}">${escapeHtml(item.severity)} · ${escapeHtml(item.dimension)}</span>
+              <h4>${escapeHtml(item.conclusion)}</h4>
+              <p><strong>证据：</strong>${escapeHtml(item.evidence)}</p>
+              <p><strong>动作：</strong>${escapeHtml(item.action)}</p>
+              <p><strong>责任与复查：</strong>${escapeHtml(item.owner)}｜${escapeHtml(item.reviewMetric)}</p>
+              <button class="small-btn" data-ai-task="${index}" type="button" ${existingTasks.has(index) ? "disabled" : ""}>${existingTasks.has(index) ? "已生成任务" : "采纳并生成任务"}</button>
+            </article>
+          `).join("")}
+        </div>
+        <div class="ai-priority-list">
+          <b>下一周优先级</b>
+          <ol>${(analysis.nextWeekPriorities || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol>
+          ${(analysis.crossRoleSignals || []).length ? `<b style="margin-top:14px">跨岗位信号</b><ol>${analysis.crossRoleSignals.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol>` : ""}
+          ${(analysis.dataCaveats || []).length ? `<b style="margin-top:14px">数据口径提醒</b><ol>${analysis.dataCaveats.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol>` : ""}
+        </div>
+      `;
+    }
+
+    function createTaskFromAiDiagnosis(index) {
+      const diagnosisIndex = Number(index);
+      const diagnosis = activeAiAnalysisContext?.analysis?.diagnoses?.[diagnosisIndex];
+      if (!diagnosis) return;
+      const analysisMeta = activeAiAnalysisContext?.meta || {};
+      const duplicate = (state.tasks || []).find((task) => task.sourceAnalysis === analysisMeta.key && Number(task.sourceDiagnosis) === diagnosisIndex);
+      if (duplicate) {
+        showToast("这条AI建议已经生成任务");
+        setView("tasks");
+        return;
+      }
+      state.tasks.push({
+        id: crypto.randomUUID(),
+        title: diagnosis.conclusion || "AI经营诊断任务",
+        assignee: diagnosis.owner || "待分配",
+        priority: diagnosis.severity === "紧急" ? "紧急" : diagnosis.severity === "重要" ? "重要" : "观察",
+        store: "",
+        sku: "",
+        due: `${addDays(today, 1)}T18:00`,
+        status: "待处理",
+        source: "AI运营诊断",
+        sourceReport: "",
+        sourceAnomaly: "",
+        sourceAnalysis: analysisMeta.key || "",
+        sourceDiagnosis: diagnosisIndex,
+        analysisStart: analysisMeta.start || "",
+        analysisEnd: analysisMeta.end || "",
+        action: diagnosis.action || "",
+        acceptance: diagnosis.reviewMetric || "完成动作并回传复查指标",
+        reviewAt: `${addDays(today, 2)}T10:00`,
+        result: "",
+        evidence: "",
+        reviewResult: "",
+        reviewedAt: "",
+        reviewer: "",
+        completedAt: ""
+      });
+      saveState();
+      render();
+      showToast("AI建议已生成任务");
+    }
+
+    function renderCachedAiAnalysis(role, range) {
+      const payload = buildAiAnalysisPayload(role, range);
+      const key = aiAnalysisKey(role, range, payload);
+      const saved = (state.reportAnalyses || []).find((item) => item.key === key);
+      renderAiAnalysis(saved?.analysis, saved);
+      return { payload, key, saved };
+    }
+
+    async function runAiAnalysis(options = {}) {
+      const button = document.getElementById("runAiAnalysis");
+      const anchor = document.getElementById("weeklyAnchor")?.value || today;
+      const role = document.getElementById("weeklyRole")?.value || "售后组";
+      const range = weekRange(anchor);
+      const { payload, key, saved } = renderCachedAiAnalysis(role, range);
+      if (saved && !options.force) return;
+      if (!payload.reports.length) {
+        if (!options.silent) showToast("本周还没有日报数据");
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "AI分析中…";
+      document.getElementById("aiAnalysisOutput").innerHTML = `<div class="empty">正在读取六店日报、跨岗位异常和任务闭环，请稍候。</div>`;
+      try {
+        const response = await fetch("/.netlify/functions/analyze-reports", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message || result.error || "分析失败");
+        const record = {
+          key,
+          role,
+          start: range.start,
+          end: range.end,
+          analysis: result.analysis,
+          model: result.model,
+          createdAt: result.createdAt,
+          fingerprint: result.fingerprint
+        };
+        state.reportAnalyses ||= [];
+        state.reportAnalyses = state.reportAnalyses.filter((item) => !(item.role === role && item.start === range.start && item.end === range.end));
+        state.reportAnalyses.push(record);
+        saveState();
+        renderAiAnalysis(record.analysis, record);
+        if (!options.silent) showToast("AI经营诊断已生成");
+      } catch (error) {
+        document.getElementById("aiAnalysisOutput").innerHTML = `<div class="empty">${escapeHtml(error.message || "AI分析暂时不可用")}</div>`;
+        if (!options.silent) showToast("AI分析暂时不可用");
+      } finally {
+        button.disabled = false;
+        button.textContent = "重新分析";
+      }
+    }
+
+    function renderWeeklyReport() {
+      const anchor = document.getElementById("weeklyAnchor")?.value || today;
+      const role = document.getElementById("weeklyRole")?.value || "售后组";
+      const range = weekRange(anchor);
+      const reports = uniqueReportsBySlot((state.reports || []).filter((report) => report.role === role && report.date >= range.start && report.date <= range.end && Array.isArray(report.roleMetrics)));
+      const aggregates = aggregateWeeklyReports(reports, role);
+      const reportIds = new Set(reports.map((report) => report.id));
+      const tasks = (state.tasks || []).filter((task) => reportIds.has(task.sourceReport));
+      const analysisTasks = (state.tasks || []).filter((task) => task.source === "AI运营诊断" && task.analysisStart === range.start && task.analysisEnd === range.end);
+      analysisTasks.forEach((task) => {
+        if (!tasks.some((item) => item.id === task.id)) tasks.push(task);
+      });
+      const closed = tasks.filter((task) => task.status === "已完成").length;
+      const overdue = tasks.filter((task) => task.status !== "已完成" && task.due && task.due < today).length;
+      const pendingReview = tasks.filter((task) => task.status === "待复盘").length;
+      const displayRows = weeklyRows(role);
+      const coveredStores = role === "店铺维护"
+        ? (reports.length ? 6 : 0)
+        : REPORT_STORES.filter((store) => aggregates[store.name]?.reportDays.size).length;
+      const highRisks = reports.filter((report) => report.risk === "高").length;
+      const closeRate = tasks.length ? closed / tasks.length * 100 : 0;
+
+      document.getElementById("weeklyMetrics").innerHTML = [
+        [reports.length, "日报提交", `${range.start}—${range.end}`],
+        [coveredStores, "覆盖店铺", `共 ${REPORT_STORES.length} 家店`],
+        [highRisks, "高风险日报", highRisks ? "需要经营负责人关注" : "本周暂无高风险"],
+        [pendingReview, "待复查任务", pendingReview ? "复查后才能计入闭环" : "暂无待复查"],
+        [`${closeRate.toFixed(0)}%`, "任务闭环率", `${closed}/${tasks.length || 0} 已完成`]
+      ].map(([value, label, detail]) => `<div class="weekly-metric"><b>${value}</b><span>${label}<br>${detail}</span></div>`).join("");
+
+      const schema = reportSchema(role);
+      document.getElementById("weeklyTable").innerHTML = `
+        <table>
+          <thead><tr><th>店铺</th><th>填报天数</th>${schema.columns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")}</tr></thead>
+          <tbody>${displayRows.map((store) => {
+            const aggregate = aggregates[store.name];
+            return `<tr><td>${escapeHtml(store.name)}<span class="store-group">${store.group}</span></td><td>${aggregate.reportDays.size || "-"}</td>${schema.columns.map((column) => {
+              const value = column.type === "status"
+                ? weeklyStatusText(column, aggregate.statuses[column.key])
+                : (aggregate.reportDays.size ? reportMetricValue(column, aggregate.values[column.key]) : "-");
+              return `<td>${escapeHtml(value || "-")}</td>`;
+            }).join("")}</tr>`;
+          }).join("")}</tbody>
+        </table>
+      `;
+      document.getElementById("weeklyDigest").textContent = buildWeeklyDigest(role, range, reports, aggregates, {
+        total: tasks.length,
+        closed,
+        overdue
+      });
+      renderOperationalInsights(role, range, reports, aggregates);
+      renderCachedAiAnalysis(role, range);
+    }
+
     function renderReports() {
       const allReports = [...(state.reports || [])].sort((a, b) => {
         const dateCompare = String(b.date || "").localeCompare(String(a.date || ""));
         return dateCompare || String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
       });
-      const todayReports = allReports.filter((item) => item.date === today);
+      const todayReports = uniqueReportsBySlot(allReports.filter((item) => item.date === today));
       const highRisks = todayReports.filter((item) => item.risk === "高").length;
       const reportTasks = state.tasks.filter((item) => item.sourceReport && item.status !== "已完成");
       const overdue = reportTasks.filter((item) => item.due && item.due < today).length;
       const submittedUnits = Math.min(1, reportRoleCount(todayReports, "售后组"))
-        + Math.min(2, reportRoleCount(todayReports, "BD"))
-        + Math.min(1, reportRoleCount(todayReports, "店铺维护"));
+        + Math.min(3, reportRoleCount(todayReports, "BD"))
+        + Math.min(1, reportRoleCount(todayReports, "店铺维护"))
+        + Math.min(2, reportRoleCount(todayReports, "店群运营"));
 
-      document.getElementById("reportProgress").textContent = `${submittedUnits}/4 已提交`;
+      document.getElementById("reportProgress").textContent = `${submittedUnits}/7 已提交`;
       document.getElementById("reportMetrics").innerHTML = [
-        ["今日提交", `${submittedUnits}/4`, "售后1份 · BD 2份 · 维护1份"],
+        ["今日提交", `${submittedUnits}/7`, "售后1份 · 其余成员6份"],
         ["高风险异常", num(highRisks), highRisks ? "需要立即处理" : "暂无高风险"],
         ["日报待办", num(reportTasks.length), "已同步任务中心"],
         ["逾期任务", num(overdue), overdue ? "需要升级处理" : "暂无逾期"]
@@ -7839,13 +10194,15 @@
             <div><b>${escapeHtml(report.role)}｜${escapeHtml(report.author)}</b><br><small>${escapeHtml(report.date)} · ${escapeHtml(report.stores || "未指定店铺")}</small></div>
             <span class="badge ${report.risk === "高" ? "red" : report.risk === "中" ? "amber" : "green"}">${escapeHtml(report.risk || "无")}风险</span>
           </div>
-          <div class="report-section"><strong>今日结果</strong><p>${escapeHtml(report.results || "无")}</p></div>
+          ${renderReportMetricTable(report)}
+          ${report.results || !Array.isArray(report.roleMetrics) || !report.roleMetrics.length ? `<div class="report-section"><strong>今日结果</strong><p>${escapeHtml(reportResultsText(report))}</p></div>` : ""}
           <div class="report-section"><strong>核心异常</strong><p>${escapeHtml(report.anomalies || "无")}</p></div>
           <div class="report-section"><strong>昨日复查</strong><p>${escapeHtml(report.reviews || "无")}</p></div>
           <div class="report-section"><strong>今日任务</strong><p>${escapeHtml(report.tasksText || "无")}</p></div>
           <div class="report-section"><strong>即时审批记录</strong><p>${escapeHtml(report.approvals || "无")}</p></div>
         </article>
       `).join("") : `<div class="empty">暂无日报。提交后系统会自动生成团队摘要并同步任务。</div>`;
+      renderWeeklyReport();
     }
 
     function escapeHtml(value) {
@@ -8432,7 +10789,9 @@
           rows: state.tasks,
           columns: [
             ["title", "任务"], ["assignee", "责任人"], ["priority", "优先级"], ["store", "店铺"], ["sku", "SKU"],
-            ["due", "截止"], ["status", "状态"], ["source", "来源"], ["action", "动作"], ["result", "结果"]
+            ["due", "截止"], ["status", "状态"], ["source", "来源"], ["action", "动作"], ["acceptance", "完成标准"],
+            ["reviewAt", "复查时间"], ["result", "执行结果"], ["evidence", "完成证据"], ["reviewResult", "复查结论"],
+            ["reviewer", "复查人"], ["reviewedAt", "复查日期"]
           ]
         },
         {
@@ -8537,6 +10896,8 @@
     });
 
     document.getElementById("reportRole").addEventListener("change", updateReportHelp);
+    document.querySelector("#reportForm [name='date']").addEventListener("change", renderPendingReviewQueue);
+    document.querySelector("#reportForm [name='author']").addEventListener("input", renderPendingReviewQueue);
 
     document.getElementById("resetReportForm").addEventListener("click", () => {
       const form = document.getElementById("reportForm");
@@ -8555,6 +10916,20 @@
       }
     });
 
+    document.getElementById("weeklyAnchor").addEventListener("change", renderWeeklyReport);
+    document.getElementById("weeklyRole").addEventListener("change", renderWeeklyReport);
+    document.getElementById("runAiAnalysis").addEventListener("click", () => runAiAnalysis({ force: true }));
+
+    document.getElementById("copyWeeklyDigest").addEventListener("click", async () => {
+      const text = document.getElementById("weeklyDigest").textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("岗位周报已复制");
+      } catch {
+        showToast("复制失败，请手动选择周报");
+      }
+    });
+
     document.getElementById("creatorForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       await saveCreator(event.currentTarget);
@@ -8566,11 +10941,15 @@
     });
 
     document.getElementById("seedSevenDays").addEventListener("click", () => {
+      if (cloudAvailable() && !window.confirm("载入7天演示数据会覆盖当前共享经营数据，确定继续吗？")) return;
       state = normalizeState(buildSevenDayData());
+      const latestSimulationDate = [...state.reports].map((report) => report.date).sort().at(-1) || today;
+      document.getElementById("weeklyAnchor").value = latestSimulationDate;
+      document.getElementById("weeklyRole").value = "售后组";
       saveState();
-      showToast("7天模拟数据已载入");
+      showToast("前7天完整闭环模拟数据已载入");
       render();
-      setView("overview");
+      setView("reports");
     });
 
     document.getElementById("exportJson").addEventListener("click", exportJsonData);
@@ -8632,6 +11011,15 @@
       await saveCreatorEdit(event.currentTarget);
     });
 
+    document.getElementById("closeTaskResultModal").addEventListener("click", closeTaskResultEditor);
+    document.getElementById("taskResultModal").addEventListener("click", (event) => {
+      if (event.target.id === "taskResultModal") closeTaskResultEditor();
+    });
+    document.getElementById("taskResultForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      saveTaskResult(event.currentTarget);
+    });
+
     document.getElementById("deleteCustomCreator").addEventListener("click", deleteCustomCreator);
 
     document.addEventListener("keydown", (event) => {
@@ -8640,14 +11028,39 @@
         closeCreatorHistory();
         return;
       }
-      if (!document.getElementById("creatorModal").hidden) closeCreatorEditor();
+      if (!document.getElementById("creatorModal").hidden) {
+        closeCreatorEditor();
+        return;
+      }
+      if (!document.getElementById("taskResultModal").hidden) closeTaskResultEditor();
     });
 
     document.addEventListener("click", (event) => {
-      const nextBtn = event.target.closest("[data-task-next]");
+      const addRowBtn = event.target.closest("[data-add-row]");
+      const removeRowBtn = event.target.closest("[data-remove-row]");
+      const bringReviewBtn = event.target.closest("[data-bring-review]");
+      const aiTaskBtn = event.target.closest("[data-ai-task]");
+      const startTaskBtn = event.target.closest("[data-task-start]");
+      const resultTaskBtn = event.target.closest("[data-task-result]");
       const deleteBtn = event.target.closest("[data-task-delete]");
       const historyBtn = event.target.closest("[data-creator-history]");
       const editCreatorBtn = event.target.closest("[data-edit-creator]");
+      if (addRowBtn) {
+        addRepeatedRow(addRowBtn.dataset.addRow, addRowBtn.closest("[data-repeat-section]"));
+        return;
+      }
+      if (removeRowBtn) {
+        removeRepeatedRow(removeRowBtn.dataset.removeRow, removeRowBtn.closest("[data-repeat-section]"));
+        return;
+      }
+      if (bringReviewBtn) {
+        bringTaskIntoReview(bringReviewBtn.dataset.bringReview);
+        return;
+      }
+      if (aiTaskBtn) {
+        createTaskFromAiDiagnosis(aiTaskBtn.dataset.aiTask);
+        return;
+      }
       if (historyBtn) {
         openCreatorHistory(historyBtn.dataset.creatorHistory);
         return;
@@ -8656,16 +11069,23 @@
         openCreatorEditor(editCreatorBtn.dataset.editCreator);
         return;
       }
-      if (nextBtn) {
-        const task = state.tasks.find((item) => item.id === nextBtn.dataset.taskNext);
-        if (task) task.status = nextBtn.dataset.next;
+      if (startTaskBtn) {
+        const task = state.tasks.find((item) => item.id === startTaskBtn.dataset.taskStart);
+        if (task) task.status = "处理中";
         saveState();
         render();
+        showToast("任务已开始处理");
+        return;
+      }
+      if (resultTaskBtn) {
+        openTaskResultEditor(resultTaskBtn.dataset.taskResult);
+        return;
       }
       if (deleteBtn) {
         state.tasks = state.tasks.filter((item) => item.id !== deleteBtn.dataset.taskDelete);
         saveState();
         render();
+        return;
       }
     });
 
@@ -8679,6 +11099,7 @@
     document.querySelector("#dailyForm [name='date']").value = today;
     document.querySelector("#productForm [name='date']").value = today;
     document.querySelector("#reportForm [name='date']").value = today;
+    document.getElementById("weeklyAnchor").value = today;
     updateReportHelp();
     initializeWorkbench();
   </script>
