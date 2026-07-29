@@ -125,6 +125,121 @@
       gap: 10px;
     }
 
+    .report-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .report-summary {
+      border-radius: 28px;
+      padding: 26px;
+      background: #0b0d10;
+      color: #fff;
+      min-height: 300px;
+    }
+
+    .report-summary .sub { color: rgba(255, 255, 255, 0.58); }
+
+    .report-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .report-summary-card {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .report-summary-card b {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .report-summary-card span {
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .report-help {
+      margin: 0 0 18px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(44, 110, 232, 0.08);
+      color: #305b9f;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .report-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .report-card {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .report-card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .report-card-head b { font-size: 15px; }
+
+    .report-card-head small,
+    .report-section small {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .report-section {
+      padding-top: 11px;
+      margin-top: 11px;
+      border-top: 1px solid var(--soft);
+    }
+
+    .report-section strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 12px;
+      color: #343a45;
+    }
+
+    .report-section p {
+      margin: 0;
+      white-space: pre-wrap;
+      color: #555d69;
+      font-size: 13px;
+      line-height: 1.62;
+    }
+
+    .digest-box {
+      white-space: pre-wrap;
+      border-radius: 22px;
+      background: #f5f6f8;
+      border: 1px solid var(--soft);
+      padding: 18px;
+      color: #3f4652;
+      font-size: 13px;
+      line-height: 1.72;
+      min-height: 180px;
+    }
+
     .ghost, .primary {
       height: 40px;
       border-radius: 999px;
@@ -4730,6 +4845,8 @@
       .next-lesson { flex-direction: column; align-items: flex-start; }
       .next-lesson button { width: 100%; }
       .lesson-pill-grid, .entry-grid { grid-template-columns: 1fr; }
+      .report-layout, .report-cards { grid-template-columns: 1fr; }
+      .report-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .platform-photo, .platform-photo img { min-height: 260px; }
       .question-head { align-items: flex-start; flex-direction: column; }
       .question-flow { grid-template-columns: 1fr; }
@@ -4759,7 +4876,7 @@
       <nav class="tabs" aria-label="页面导航">
         <button class="tab active" data-view="overview" type="button">总览</button>
         <button class="tab" data-view="entry" type="button">数据录入</button>
-        <button class="tab" data-view="anomalies" type="button">异常看板</button>
+        <button class="tab" data-view="reports" type="button">日报中心</button>
         <button class="tab" data-view="tasks" type="button">任务中心</button>
         <button class="tab" data-view="creators" type="button">达人中心</button>
         <button class="tab" data-view="sop" type="button">运营学院</button>
@@ -5131,17 +5248,116 @@
         </div>
       </section>
 
-      <section id="anomalies" class="view">
-        <div class="panel">
+      <section id="reports" class="view">
+        <div class="report-layout">
+          <div>
+            <div class="report-summary">
+              <div class="panel-head">
+                <div>
+                  <h2>今日团队日报</h2>
+                  <p class="sub">系统自动汇总售后、BD和店铺维护日报，并把任务送入任务中心。</p>
+                </div>
+                <span class="badge blue" id="reportProgress">0/4 已提交</span>
+              </div>
+              <div class="report-summary-grid" id="reportMetrics"></div>
+            </div>
+
+            <div class="panel section-gap">
+              <div class="panel-head">
+                <div>
+                  <h2>自动汇总</h2>
+                  <p class="sub">群内只需要发送这一份摘要，个人明细留在系统中。</p>
+                </div>
+                <button class="ghost" id="copyDailyDigest" type="button">复制团队摘要</button>
+              </div>
+              <div class="digest-box" id="dailyDigest"></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>提交岗位日报</h2>
+                <p class="sub">统一记录结果、异常、复查、任务和审批事项。</p>
+              </div>
+            </div>
+            <form class="form-grid" id="reportForm">
+              <div class="field">
+                <label>日期</label>
+                <input name="date" type="date" required />
+              </div>
+              <div class="field">
+                <label>日报类型</label>
+                <select name="role" id="reportRole">
+                  <option>售后组</option>
+                  <option>BD</option>
+                  <option>店铺维护</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>姓名 / 汇总人</label>
+                <input name="author" placeholder="填写姓名" required />
+              </div>
+              <div class="field">
+                <label>负责店铺</label>
+                <input name="stores" placeholder="六店 / 具体店铺" />
+              </div>
+              <div class="field">
+                <label>最高风险</label>
+                <select name="risk">
+                  <option>无</option>
+                  <option>低</option>
+                  <option>中</option>
+                  <option>高</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>日报状态</label>
+                <select name="reportStatus">
+                  <option>已提交</option>
+                  <option>待补充</option>
+                </select>
+              </div>
+              <div class="field full">
+                <div class="report-help" id="reportHelp"></div>
+              </div>
+              <div class="field full">
+                <label>今日结果</label>
+                <textarea name="results" rows="5" required></textarea>
+              </div>
+              <div class="field full">
+                <label>核心异常</label>
+                <textarea name="anomalies" rows="4" placeholder="每行一项；无异常填写“无”"></textarea>
+              </div>
+              <div class="field full">
+                <label>昨日复查</label>
+                <textarea name="reviews" rows="3" placeholder="事项｜复查结果｜关闭/继续/升级"></textarea>
+              </div>
+              <div class="field full">
+                <label>今日任务</label>
+                <textarea name="tasksText" rows="4" placeholder="每行一项：任务｜负责人｜截止日期｜完成标准｜复查时间"></textarea>
+              </div>
+              <div class="field full">
+                <label>即时审批记录</label>
+                <textarea name="approvals" rows="3" placeholder="事项｜建议方案｜审批结果｜后续负责人；无则填写“无”"></textarea>
+              </div>
+              <div class="form-actions">
+                <button class="ghost" id="resetReportForm" type="button">清空</button>
+                <button class="primary" type="submit">保存并同步任务</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div class="panel section-gap">
           <div class="panel-head">
             <div>
-              <h2>异常看板</h2>
-              <p class="sub">系统按阈值自动识别异常，第一版先作为提醒，具体阈值后续可配置。</p>
+              <h2>日报记录</h2>
+              <p class="sub">按日期倒序保留岗位日报，系统自动识别当日提交进度。</p>
             </div>
-            <button class="primary" id="createTasksFromAnomalies" type="button">异常转任务</button>
+            <span class="badge blue" id="reportRecordCount">0 份日报</span>
           </div>
-          <div class="metrics" id="anomalyMetrics"></div>
-          <div class="list" id="anomalyList"></div>
+          <div class="report-cards" id="reportCards"></div>
         </div>
       </section>
 
@@ -6500,6 +6716,7 @@
       entries: [],
       products: [],
       tasks: [],
+      reports: [],
       customCreators: [],
       creatorEdits: {},
       creatorHistory: []
@@ -6849,6 +7066,7 @@
         entries: Array.isArray(data?.entries) ? data.entries : [],
         products: Array.isArray(data?.products) ? data.products : [],
         tasks: Array.isArray(data?.tasks) ? data.tasks : [],
+        reports: Array.isArray(data?.reports) ? data.reports : [],
         customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
         creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
         creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
@@ -7117,7 +7335,7 @@
       renderOverview();
       renderEntries();
       renderProducts();
-      renderAnomalies();
+      renderReports();
       renderTasks();
       renderCreatorCenter();
     }
@@ -7473,6 +7691,7 @@
             <span class="badge ${task.priority === "紧急" ? "red" : task.priority === "重要" ? "amber" : "green"}">${task.priority}</span>
             <span class="badge">${task.assignee || "-"}</span>
             <span class="badge">${task.due || "无截止"}</span>
+            ${task.reviewAt ? `<span class="badge">复查 ${task.reviewAt}</span>` : ""}
           </div>
           <div class="task-actions">
             ${task.status !== "已完成" ? `<button class="small-btn" data-task-next="${task.id}" data-next="${next}" type="button">推进到${next}</button>` : ""}
@@ -7480,6 +7699,153 @@
           </div>
         </div>
       `;
+    }
+
+    const reportHelpText = {
+      "售后组": "今日结果建议填写：咨询、退款、退货、差评、申诉、补发/赔付和高风险订单。售后组每天只提交一份，由两人轮流汇总。",
+      "BD": "今日结果建议填写：联盟消息状态、审样寄样、重点达人跟进、老达人复投和其他重要结果。三名BD按实际负责人分别提交，系统按两份核心汇总进度展示。",
+      "店铺维护": "今日结果建议填写：链接维护、库存与价格、活动执行、六店巡检、违规申诉和必要表格更新。"
+    };
+
+    function updateReportHelp() {
+      const role = document.getElementById("reportRole")?.value || "售后组";
+      const help = document.getElementById("reportHelp");
+      if (help) help.textContent = reportHelpText[role];
+    }
+
+    function reportLines(value) {
+      return String(value || "").split(/\n+/).map((line) => line.trim()).filter((line) => line && line !== "无");
+    }
+
+    function reportTaskParts(line) {
+      const parts = String(line).split(/[｜|]/).map((item) => item.trim());
+      return {
+        title: parts[0] || "",
+        assignee: parts[1] || "",
+        due: parts[2] || "",
+        acceptance: parts[3] || "",
+        reviewAt: parts[4] || ""
+      };
+    }
+
+    function saveReport(form) {
+      const data = Object.fromEntries(new FormData(form).entries());
+      const report = {
+        id: crypto.randomUUID(),
+        date: data.date,
+        role: data.role,
+        author: data.author,
+        stores: data.stores,
+        risk: data.risk,
+        status: data.reportStatus,
+        results: data.results,
+        anomalies: data.anomalies,
+        reviews: data.reviews,
+        tasksText: data.tasksText,
+        approvals: data.approvals,
+        createdAt: new Date().toISOString()
+      };
+      state.reports ||= [];
+      state.reports.push(report);
+
+      reportLines(data.tasksText).forEach((line) => {
+        const task = reportTaskParts(line);
+        if (!task.title) return;
+        state.tasks.push({
+          id: crypto.randomUUID(),
+          title: task.title,
+          assignee: task.assignee || data.author,
+          priority: data.risk === "高" ? "紧急" : data.risk === "中" ? "重要" : "观察",
+          store: data.stores,
+          sku: "",
+          due: task.due,
+          status: "待处理",
+          source: `${data.role}日报`,
+          sourceReport: report.id,
+          action: task.acceptance ? `完成标准：${task.acceptance}` : "按日报要求完成并回传结果。",
+          acceptance: task.acceptance,
+          reviewAt: task.reviewAt,
+          result: ""
+        });
+      });
+
+      saveState();
+      form.reset();
+      form.elements.date.value = today;
+      updateReportHelp();
+      showToast("日报已保存，任务已同步到任务中心");
+      render();
+    }
+
+    function reportRoleCount(reports, role) {
+      return reports.filter((item) => item.role === role).length;
+    }
+
+    function buildDailyDigest(reports) {
+      if (!reports.length) return "今日尚未提交岗位日报。";
+      const anomalies = reports.flatMap((item) => reportLines(item.anomalies).map((line) => `${item.role}/${item.author}：${line}`));
+      const reviews = reports.flatMap((item) => reportLines(item.reviews).map((line) => `${item.role}/${item.author}：${line}`));
+      const tasks = reports.flatMap((item) => reportLines(item.tasksText).map((line) => `${item.role}/${item.author}：${line}`));
+      const approvals = reports.flatMap((item) => reportLines(item.approvals).map((line) => `${item.role}/${item.author}：${line}`));
+      const resultBlocks = reports.map((item) => `【${item.role}｜${item.author}】\n${item.results || "无"}`);
+      return [
+        `【TikTok团队日报｜${today}】`,
+        "",
+        "今日结果：",
+        resultBlocks.join("\n\n"),
+        "",
+        "核心异常：",
+        anomalies.length ? anomalies.map((line, index) => `${index + 1}. ${line}`).join("\n") : "无",
+        "",
+        "昨日复查：",
+        reviews.length ? reviews.map((line, index) => `${index + 1}. ${line}`).join("\n") : "无",
+        "",
+        "今日任务：",
+        tasks.length ? tasks.map((line, index) => `${index + 1}. ${line}`).join("\n") : "无",
+        "",
+        "即时审批记录：",
+        approvals.length ? approvals.map((line, index) => `${index + 1}. ${line}`).join("\n") : "无"
+      ].join("\n");
+    }
+
+    function renderReports() {
+      const allReports = [...(state.reports || [])].sort((a, b) => {
+        const dateCompare = String(b.date || "").localeCompare(String(a.date || ""));
+        return dateCompare || String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+      });
+      const todayReports = allReports.filter((item) => item.date === today);
+      const highRisks = todayReports.filter((item) => item.risk === "高").length;
+      const reportTasks = state.tasks.filter((item) => item.sourceReport && item.status !== "已完成");
+      const overdue = reportTasks.filter((item) => item.due && item.due < today).length;
+      const submittedUnits = Math.min(1, reportRoleCount(todayReports, "售后组"))
+        + Math.min(2, reportRoleCount(todayReports, "BD"))
+        + Math.min(1, reportRoleCount(todayReports, "店铺维护"));
+
+      document.getElementById("reportProgress").textContent = `${submittedUnits}/4 已提交`;
+      document.getElementById("reportMetrics").innerHTML = [
+        ["今日提交", `${submittedUnits}/4`, "售后1份 · BD 2份 · 维护1份"],
+        ["高风险异常", num(highRisks), highRisks ? "需要立即处理" : "暂无高风险"],
+        ["日报待办", num(reportTasks.length), "已同步任务中心"],
+        ["逾期任务", num(overdue), overdue ? "需要升级处理" : "暂无逾期"]
+      ].map(([value, number, detail]) => `
+        <div class="report-summary-card"><b>${number}</b><span>${value}<br>${detail}</span></div>
+      `).join("");
+
+      document.getElementById("dailyDigest").textContent = buildDailyDigest(todayReports);
+      document.getElementById("reportRecordCount").textContent = `${allReports.length} 份日报`;
+      document.getElementById("reportCards").innerHTML = allReports.length ? allReports.map((report) => `
+        <article class="report-card">
+          <div class="report-card-head">
+            <div><b>${escapeHtml(report.role)}｜${escapeHtml(report.author)}</b><br><small>${escapeHtml(report.date)} · ${escapeHtml(report.stores || "未指定店铺")}</small></div>
+            <span class="badge ${report.risk === "高" ? "red" : report.risk === "中" ? "amber" : "green"}">${escapeHtml(report.risk || "无")}风险</span>
+          </div>
+          <div class="report-section"><strong>今日结果</strong><p>${escapeHtml(report.results || "无")}</p></div>
+          <div class="report-section"><strong>核心异常</strong><p>${escapeHtml(report.anomalies || "无")}</p></div>
+          <div class="report-section"><strong>昨日复查</strong><p>${escapeHtml(report.reviews || "无")}</p></div>
+          <div class="report-section"><strong>今日任务</strong><p>${escapeHtml(report.tasksText || "无")}</p></div>
+          <div class="report-section"><strong>即时审批记录</strong><p>${escapeHtml(report.approvals || "无")}</p></div>
+        </article>
+      `).join("") : `<div class="empty">暂无日报。提交后系统会自动生成团队摘要并同步任务。</div>`;
     }
 
     function escapeHtml(value) {
@@ -8070,6 +8436,15 @@
           ]
         },
         {
+          title: "岗位日报",
+          rows: state.reports || [],
+          columns: [
+            ["date", "日期"], ["role", "日报类型"], ["author", "姓名/汇总人"], ["stores", "负责店铺"], ["risk", "最高风险"],
+            ["status", "日报状态"], ["results", "今日结果"], ["anomalies", "核心异常"], ["reviews", "昨日复查"],
+            ["tasksText", "今日任务"], ["approvals", "即时审批记录"], ["createdAt", "提交时间"]
+          ]
+        },
+        {
           title: "达人维护",
           rows: creatorRecords().map((item) => ({ ...item, ...creatorEditFor(item.id) })),
           columns: [
@@ -8156,6 +8531,30 @@
       saveTask(event.currentTarget);
     });
 
+    document.getElementById("reportForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      saveReport(event.currentTarget);
+    });
+
+    document.getElementById("reportRole").addEventListener("change", updateReportHelp);
+
+    document.getElementById("resetReportForm").addEventListener("click", () => {
+      const form = document.getElementById("reportForm");
+      form.reset();
+      form.elements.date.value = today;
+      updateReportHelp();
+    });
+
+    document.getElementById("copyDailyDigest").addEventListener("click", async () => {
+      const text = document.getElementById("dailyDigest").textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("团队日报摘要已复制");
+      } catch {
+        showToast("复制失败，请手动选择摘要");
+      }
+    });
+
     document.getElementById("creatorForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       await saveCreator(event.currentTarget);
@@ -8185,7 +8584,7 @@
       event.target.value = "";
     });
 
-    document.getElementById("createTasksFromAnomalies").addEventListener("click", createTasksFromAnomalies);
+    document.getElementById("createTasksFromAnomalies")?.addEventListener("click", createTasksFromAnomalies);
 
     document.getElementById("creatorSearch").addEventListener("input", () => {
       creatorPage = 1;
@@ -8279,6 +8678,8 @@
 
     document.querySelector("#dailyForm [name='date']").value = today;
     document.querySelector("#productForm [name='date']").value = today;
+    document.querySelector("#reportForm [name='date']").value = today;
+    updateReportHelp();
     initializeWorkbench();
   </script>
 </body>
