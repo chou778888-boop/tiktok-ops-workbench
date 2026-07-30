@@ -1,0 +1,158 @@
+const headers = {
+  "content-type": "application/json; charset=utf-8",
+  "cache-control": "no-store"
+};
+
+const arrayKeys = {
+  entries: "id",
+  products: "id",
+  tasks: "id",
+  reports: "id",
+  reportAnalyses: "key",
+  customCreators: "id",
+  creatorHistory: "id"
+};
+
+function json(status, body) {
+  return new Response(JSON.stringify(body), { status, headers });
+}
+
+function normalizeData(data) {
+  return {
+    entries: Array.isArray(data?.entries) ? data.entries : [],
+    products: Array.isArray(data?.products) ? data.products : [],
+    tasks: Array.isArray(data?.tasks) ? data.tasks : [],
+    reports: Array.isArray(data?.reports) ? data.reports : [],
+    reportAnalyses: Array.isArray(data?.reportAnalyses) ? data.reportAnalyses : [],
+    customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
+    creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
+    creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
+  };
+}
+
+function normalizePatch(payload) {
+  const source = payload?.patch || {};
+  const collections = {};
+  Object.keys(arrayKeys).forEach((name) => {
+    const operations = source?.collections?.[name] || {};
+    collections[name] = {
+      upserts: Array.isArray(operations.upserts) ? operations.upserts : [],
+      deletes: Array.isArray(operations.deletes) ? operations.deletes.map(String) : []
+    };
+  });
+  return {
+    collections,
+    creatorEdits: {
+      upserts: source?.creatorEdits?.upserts && typeof source.creatorEdits.upserts === "object"
+        ? source.creatorEdits.upserts
+        : {},
+      deletes: Array.isArray(source?.creatorEdits?.deletes)
+        ? source.creatorEdits.deletes.map(String)
+        : []
+    }
+  };
+}
+
+function mergeCollection(current, operations, keyField) {
+  const deleted = new Set(operations.deletes);
+  const records = new Map();
+
+  current.forEach((record, index) => {
+    const key = String(record?.[keyField] || `legacy:${index}:${JSON.stringify(record)}`);
+    if (!deleted.has(key)) records.set(key, record);
+  });
+
+  operations.upserts.forEach((record, index) => {
+    const key = String(record?.[keyField] || `incoming:${index}:${JSON.stringify(record)}`);
+    if (!deleted.has(key)) records.set(key, record);
+  });
+
+  return [...records.values()];
+}
+
+function applyPatch(currentData, patch) {
+  const current = normalizeData(currentData);
+  const next = { ...current };
+
+  Object.entries(arrayKeys).forEach(([name, keyField]) => {
+    next[name] = mergeCollection(current[name], patch.collections[name], keyField);
+  });
+
+  next.creatorEdits = { ...current.creatorEdits, ...patch.creatorEdits.upserts };
+  patch.creatorEdits.deletes.forEach((key) => delete next.creatorEdits[key]);
+  return next;
+}
+
+async function readState(db) {
+  const row = await db.prepare(
+    "SELECT version, updated_at, revision, data FROM workbench_state WHERE id = ?"
+  ).bind("main").first();
+  if (!row) return null;
+  return {
+    version: row.version,
+    updatedAt: row.updated_at,
+    revision: Number(row.revision || 0),
+    data: normalizeData(JSON.parse(row.data))
+  };
+}
+
+async function handleGet(env) {
+  const state = await readState(env.DB);
+  if (!state) return json(200, { version: "v2", updatedAt: null, revision: 0, data: null });
+  return json(200, state);
+}
+
+async function handlePost(request, env) {
+  let payload;
+  try {
+    payload = await request.json();
+  } catch {
+    return json(400, { error: "Invalid JSON payload" });
+  }
+
+  const patch = normalizePatch(payload);
+  const maxAttempts = 24;
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const current = await readState(env.DB);
+    const nextData = applyPatch(current?.data || null, patch);
+    const updatedAt = new Date().toISOString();
+
+    if (!current) {
+      const inserted = await env.DB.prepare(
+        "INSERT OR IGNORE INTO workbench_state (id, version, updated_at, revision, data) VALUES (?, ?, ?, ?, ?)"
+      ).bind("main", "v2", updatedAt, 1, JSON.stringify(nextData)).run();
+      if (inserted.meta?.changes === 1) {
+        return json(200, { version: "v2", updatedAt, revision: 1, data: nextData });
+      }
+      await new Promise((resolve) => setTimeout(resolve, Math.min(5 + attempt * 2, 35)));
+      continue;
+    }
+
+    const nextRevision = current.revision + 1;
+    const updated = await env.DB.prepare(
+      "UPDATE workbench_state SET version = ?, updated_at = ?, revision = ?, data = ? WHERE id = ? AND revision = ?"
+    ).bind("v2", updatedAt, nextRevision, JSON.stringify(nextData), "main", current.revision).run();
+
+    if (updated.meta?.changes === 1) {
+      return json(200, {
+        version: "v2",
+        updatedAt,
+        revision: nextRevision,
+        data: nextData
+      });
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, Math.min(5 + attempt * 2, 35)));
+  }
+
+  return json(409, {
+    error: "Concurrent update conflict. Please retry.",
+    retryable: true
+  });
+}
+
+export async function onRequest({ request, env }) {
+  if (request.method === "GET") return handleGet(env);
+  if (request.method === "POST") return handlePost(request, env);
+  return json(405, { error: "Method not allowed" });
+}

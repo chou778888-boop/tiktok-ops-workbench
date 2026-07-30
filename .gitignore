@@ -1,6 +1,10 @@
 .DS_Store
 node_modules/
 .netlify/
+.wrangler/
+.dev.vars
+.migration-backups/
+dist/
 dist/
 .env
 .env.*

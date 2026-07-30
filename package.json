@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "echo \"Static workbench ready\""
+    "build": "node scripts/build-cloudflare.mjs",
+    "dev:cloudflare": "pnpm build && wrangler pages dev dist",
+    "db:local:init": "wrangler d1 execute tiktok-ops-workbench --local --file=migrations/0001_init.sql",
+    "deploy:cloudflare": "pnpm build && wrangler pages deploy dist"
   },
-  "dependencies": {
-    "@netlify/blobs": "latest"
+  "devDependencies": {
+    "wrangler": "^4.26.1"
   }
 }

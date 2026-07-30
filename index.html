@@ -7487,7 +7487,7 @@
   <script src="assets/creator-data.js"></script>
   <script>
     const storeKey = "tiktok_ops_workbench_v1";
-    const cloudEndpoint = "/.netlify/functions/state";
+    const cloudEndpoint = "/api/state";
     const today = new Date().toISOString().slice(0, 10);
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
 
@@ -8097,6 +8097,7 @@
     let cloudSaveTimer = null;
     let cloudSaveInFlight = false;
     let cloudSaveQueued = false;
+    let cloudSaveRetryCount = 0;
     let cloudBaseline = normalizeState({});
     let activeAiAnalysisContext = null;
 
@@ -8268,13 +8269,22 @@
       let saved = false;
       setSyncStatus("保存中", "saving");
       try {
-        const response = await fetch(cloudEndpoint, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ version: "v2", patch })
-        });
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error || `HTTP ${response.status}`);
+        let response;
+        let payload;
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          response = await fetch(cloudEndpoint, {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ version: "v2", patch })
+          });
+          payload = await response.json();
+          if (response.ok) break;
+          if (response.status !== 409 || payload?.retryable === false || attempt === 3) {
+            throw new Error(payload.error || `HTTP ${response.status}`);
+          }
+          setSyncStatus(`同步冲突，重试 ${attempt + 1}/3`, "saving");
+          await new Promise((resolve) => setTimeout(resolve, 120 * (attempt + 1)));
+        }
 
         const remoteState = normalizeState(payload.data);
         const pendingPatch = buildCloudPatch(snapshot, normalizeState(state));
@@ -8282,11 +8292,17 @@
         cloudBaseline = remoteState;
         localStorage.setItem(storeKey, JSON.stringify(state));
         saved = true;
+        cloudSaveRetryCount = 0;
         setSyncStatus("已同步", "");
         render();
       } catch (error) {
         console.warn("Cloud save failed", error);
-        setSyncStatus("同步失败", "error");
+        cloudSaveRetryCount += 1;
+        cloudSaveQueued = cloudSaveRetryCount <= 3;
+        setSyncStatus(
+          cloudSaveQueued ? `同步重试中 ${cloudSaveRetryCount}/3` : "同步失败，请再次保存",
+          cloudSaveQueued ? "saving" : "error"
+        );
       } finally {
         cloudSaveInFlight = false;
         const needsAnotherSave = cloudSaveQueued
@@ -8294,7 +8310,7 @@
         cloudSaveQueued = false;
         if (needsAnotherSave) {
           clearTimeout(cloudSaveTimer);
-          cloudSaveTimer = setTimeout(saveCloudState, 80);
+          cloudSaveTimer = setTimeout(saveCloudState, saved ? 80 : 500 * cloudSaveRetryCount);
         }
       }
     }
@@ -10529,7 +10545,7 @@
       button.textContent = "AI分析中…";
       document.getElementById("aiAnalysisOutput").innerHTML = `<div class="empty">正在读取六店日报、跨岗位异常和任务闭环，请稍候。</div>`;
       try {
-        const response = await fetch("/.netlify/functions/analyze-reports", {
+        const response = await fetch("/api/analyze-reports", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify(payload)
