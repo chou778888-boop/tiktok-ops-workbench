@@ -204,6 +204,18 @@
       align-items: stretch;
     }
 
+    .report-overview-grid > .report-summary,
+    .report-overview-grid > .panel {
+      height: 340px;
+      min-height: 0;
+    }
+
+    .report-overview-grid > .panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
     .report-overview-grid .section-gap {
       margin-top: 0;
     }
@@ -256,26 +268,29 @@
 
     .report-cards {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
     }
 
     .report-card {
       border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 18px;
-      background: rgba(255, 255, 255, 0.82);
+      border-radius: 24px;
+      padding: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 251, 0.92));
+      box-shadow: 0 14px 36px rgba(18, 22, 30, 0.045);
     }
 
     .report-card-head {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--soft);
     }
 
-    .report-card-head b { font-size: 15px; }
+    .report-card-head b { font-size: 17px; }
 
     .report-card-actions {
       display: flex;
@@ -291,10 +306,31 @@
       line-height: 1.55;
     }
 
+    .report-detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
     .report-section {
-      padding-top: 11px;
-      margin-top: 11px;
-      border-top: 1px solid var(--soft);
+      min-width: 0;
+      min-height: 96px;
+      margin: 0;
+      padding: 14px 15px;
+      border: 1px solid rgba(12, 15, 20, 0.055);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .report-section.report-result {
+      grid-column: 1 / -1;
+    }
+
+    .report-section-scroll {
+      max-height: 150px;
+      overflow: auto;
+      scrollbar-gutter: stable;
     }
 
     .report-section strong {
@@ -963,7 +999,11 @@
       color: #3f4652;
       font-size: 13px;
       line-height: 1.72;
-      min-height: 180px;
+      min-height: 0;
+      margin: 0 22px 22px;
+      overflow: auto;
+      scrollbar-gutter: stable;
+      flex: 1;
     }
 
     .ghost, .primary {
@@ -6219,6 +6259,12 @@
       .metrics { grid-template-columns: repeat(2, 1fr); }
       .form-grid { grid-template-columns: repeat(2, 1fr); }
       .report-overview-grid { grid-template-columns: 1fr; }
+      .report-overview-grid > .report-summary,
+      .report-overview-grid > .panel {
+        height: auto;
+        min-height: 300px;
+      }
+      .digest-box { max-height: 300px; }
       #reportForm { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .weekly-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .task-board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -6278,6 +6324,8 @@
       h1 { white-space: normal; }
       .metrics, .form-grid, .task-board { grid-template-columns: 1fr; }
       #reportForm { grid-template-columns: 1fr; }
+      .report-detail-grid { grid-template-columns: 1fr; }
+      .report-section.report-result { grid-column: auto; }
       .academy-shell { padding: 0 18px 18px; }
       .academy-hero { padding: 24px; }
       .academy-hero h3 { white-space: normal; }
@@ -11028,18 +11076,107 @@
       return [...latest.values()];
     }
 
+    function digestNumber(value, digits = 0) {
+      return Number(value || 0).toLocaleString("zh-CN", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      });
+    }
+
+    function digestMoney(value) {
+      return `$${Number(value || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      })}`;
+    }
+
+    function sumValues(rows, key) {
+      return rows.reduce((sum, row) => sum + Number(row?.values?.[key] || 0), 0);
+    }
+
+    function buildRoleDigestLines(reports) {
+      const lines = [];
+      const operationReports = reports.filter((report) => report.role === "店群运营");
+      const operationRows = operationReports.flatMap((report) =>
+        (report.roleMetrics || []).filter((row) => REPORT_STORES.some((store) => store.name === row.store))
+      );
+      if (operationRows.length) {
+        const roiValues = operationRows.map((row) => Number(row.values?.adRoi || 0)).filter((value) => value > 0);
+        const averageRoi = roiValues.length ? roiValues.reduce((sum, value) => sum + value, 0) / roiValues.length : 0;
+        lines.push(`店群运营：GMV ${digestMoney(sumValues(operationRows, "gmv"))}｜订单 ${digestNumber(sumValues(operationRows, "orders"))} 单｜销量 ${digestNumber(sumValues(operationRows, "units"))} 件｜商品卡 ${digestMoney(sumValues(operationRows, "productCardGmv"))}｜联盟 ${digestMoney(sumValues(operationRows, "affiliateGmv"))}｜广告成本 ${digestMoney(sumValues(operationRows, "adSpend"))}｜平均 ROI ${averageRoi ? digestNumber(averageRoi, 1) : "-"}`);
+      }
+
+      const afterSalesReports = reports.filter((report) => report.role === "售后组");
+      if (afterSalesReports.length) {
+        const storeRows = afterSalesReports.flatMap((report) =>
+          (report.roleMetrics || []).filter((row) => REPORT_STORES.some((store) => store.name === row.store))
+        );
+        const summaryRows = afterSalesReports.flatMap((report) =>
+          (report.roleMetrics || []).filter((row) => row.store === "六店汇总")
+        );
+        const spsRows = storeRows
+          .map((row) => ({ store: row.store, value: Number(row.values?.sps || 0) }))
+          .filter((item) => item.value > 0);
+        const averageSps = spsRows.length ? spsRows.reduce((sum, item) => sum + item.value, 0) / spsRows.length : 0;
+        const lowestSps = [...spsRows].sort((a, b) => a.value - b.value)[0];
+        lines.push(`售后组：退货 / 退款 ${digestNumber(sumValues(storeRows, "returns"))} 单 / ${digestMoney(sumValues(storeRows, "returnAmount"))}｜SPS 均值 ${averageSps ? digestNumber(averageSps, 2) : "-"}${lowestSps ? `（最低 ${lowestSps.store} ${digestNumber(lowestSps.value, 1)}）` : ""}｜新增差评 ${digestNumber(sumValues(summaryRows, "badReviews"))} 条｜已处理 ${digestNumber(sumValues(summaryRows, "reviewsResolved"))} 条｜索赔 ${digestNumber(sumValues(summaryRows, "claims"))} 单｜未完成 ${digestNumber(sumValues(summaryRows, "unfinished"))} 单`);
+      }
+
+      const bdReports = reports.filter((report) => report.role === "BD");
+      if (bdReports.length) {
+        const samples = bdReports.flatMap((report) => report.roleData?.samples || []);
+        const sentSamples = samples.filter((item) => Number(item.sent || 0) > 0);
+        const sampleTotal = sentSamples.reduce((sum, item) => sum + Number(item.sent || 0), 0);
+        const productTotals = new Map();
+        sentSamples.forEach((item) => {
+          const product = String(item.product || "未填写").trim() || "未填写";
+          productTotals.set(product, (productTotals.get(product) || 0) + Number(item.sent || 0));
+        });
+        const productSummary = [...productTotals.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([product, quantity]) => `${product} ${digestNumber(quantity)}件`)
+          .join("、");
+        const stores = new Set(sentSamples.map((item) => item.store).filter(Boolean));
+        const followups = bdReports.reduce((sum, report) => sum + (report.roleData?.followups || []).length, 0);
+        lines.push(`BD：${bdReports.length} 人提交｜覆盖 ${stores.size} 店｜寄样 ${digestNumber(sampleTotal)} 件${productSummary ? `（${productSummary}）` : ""}｜重点达人跟进 ${digestNumber(followups)} 项`);
+      }
+
+      const maintenanceReports = reports.filter((report) => report.role === "店铺维护");
+      if (maintenanceReports.length) {
+        const plugins = maintenanceReports.flatMap((report) => report.roleData?.plugins || []);
+        const outreach = plugins.reduce((sum, item) => sum + Number(item.outreach || 0), 0);
+        const issues = maintenanceReports.reduce((sum, report) => sum + (report.roleData?.inspectionIssues || []).length, 0);
+        lines.push(`店铺维护：插件建联 ${digestNumber(outreach)} 次｜检查 ${digestNumber(plugins.length)} 个店铺 / 产品项｜违规与异常 ${digestNumber(issues)} 项`);
+      }
+
+      const otherReports = reports.filter((report) => report.role === "其他");
+      if (otherReports.length) {
+        const totals = otherReports.reduce((result, report) => {
+          result.completed += Number(report.roleData?.completedItems || 0);
+          result.training += Number(report.roleData?.trainingItems || 0);
+          result.documents += Number(report.roleData?.documentsUpdated || 0);
+          return result;
+        }, { completed: 0, training: 0, documents: 0 });
+        lines.push(`其他：完成 ${digestNumber(totals.completed)} 项｜学习 / 培训 ${digestNumber(totals.training)} 项｜SOP / 文档更新 ${digestNumber(totals.documents)} 项`);
+      }
+
+      return lines;
+    }
+
     function buildDailyDigest(reports) {
       if (!reports.length) return "今日尚未提交岗位日报。";
       const anomalies = reports.flatMap((item) => reportLines(item.anomalies).map((line) => `${item.role}/${item.author}：${line}`));
       const reviews = reports.flatMap((item) => reportLines(item.reviews).map((line) => `${item.role}/${item.author}：${line}`));
       const tasks = reports.flatMap((item) => reportLines(item.tasksText).map((line) => `${item.role}/${item.author}：${line}`));
       const approvals = reports.flatMap((item) => reportLines(item.approvals).map((line) => `${item.role}/${item.author}：${line}`));
-      const resultBlocks = reports.map((item) => `【${item.role}｜${item.author}】\n${reportResultsText(item)}`);
+      const roleLines = buildRoleDigestLines(reports);
       return [
         `【TikTok团队日报｜${today}】`,
         "",
-        "今日结果：",
-        resultBlocks.join("\n\n"),
+        `提交概况：${reports.length} 人次｜${new Set(reports.map((item) => item.role)).size} 个岗位`,
+        "",
+        "今日经营汇总：",
+        roleLines.length ? roleLines.map((line) => `• ${line}`).join("\n") : "暂无可汇总的岗位数据",
         "",
         "核心异常：",
         anomalies.length ? anomalies.map((line, index) => `${index + 1}. ${line}`).join("\n") : "无",
@@ -11049,9 +11186,7 @@
         "",
         "今日任务：",
         tasks.length ? tasks.map((line, index) => `${index + 1}. ${line}`).join("\n") : "无",
-        "",
-        "即时审批记录：",
-        approvals.length ? approvals.map((line, index) => `${index + 1}. ${line}`).join("\n") : "无"
+        ...(approvals.length ? ["", "即时审批记录：", approvals.map((line, index) => `${index + 1}. ${line}`).join("\n")] : [])
       ].join("\n");
     }
 
@@ -11876,7 +12011,8 @@
       });
       const todayReports = uniqueReportsBySlot(allReports.filter((item) => item.date === today && item.status === "已提交"));
       const highRisks = todayReports.filter((item) => item.risk === "高").length;
-      const reportTasks = state.tasks.filter((item) => item.sourceReport && item.status !== "已完成");
+      const todayReportIds = new Set(todayReports.map((report) => report.id));
+      const reportTasks = state.tasks.filter((item) => todayReportIds.has(item.sourceReport) && item.status !== "已完成");
       const overdue = reportTasks.filter((item) => isPastDue(item.due)).length;
       const submittedUnits = todayReports.length;
 
@@ -11909,11 +12045,13 @@
             </div>
           </div>
           ${renderReportMetricTable(report)}
-          ${report.results || !Array.isArray(report.roleMetrics) || !report.roleMetrics.length ? `<div class="report-section"><strong>今日结果</strong><p>${escapeHtml(reportResultsText(report))}</p></div>` : ""}
-          <div class="report-section"><strong>核心异常</strong><p>${escapeHtml(report.anomalies || "无")}</p></div>
-          <div class="report-section"><strong>昨日复查</strong><p>${escapeHtml(report.reviews || "无")}</p></div>
-          <div class="report-section"><strong>今日任务</strong><p>${escapeHtml(report.tasksText || "无")}</p>${renderReportTaskLinks(report)}</div>
-          <div class="report-section"><strong>即时审批记录</strong><p>${escapeHtml(report.approvals || "无")}</p></div>
+          <div class="report-detail-grid">
+            <div class="report-section report-result"><strong>今日结果</strong><p class="report-section-scroll">${escapeHtml(reportResultsText(report))}</p></div>
+            <div class="report-section"><strong>核心异常</strong><p>${escapeHtml(report.anomalies || "无")}</p></div>
+            <div class="report-section"><strong>昨日复查</strong><p>${escapeHtml(report.reviews || "无")}</p></div>
+            <div class="report-section"><strong>今日任务</strong><p>${escapeHtml(report.tasksText || "无")}</p>${renderReportTaskLinks(report)}</div>
+            <div class="report-section"><strong>即时审批记录</strong><p>${escapeHtml(report.approvals || "无")}</p></div>
+          </div>
         </article>
       `;
       }).join("") : `<div class="empty">暂无日报。提交后系统会自动生成团队摘要并同步任务。</div>`;
