@@ -43,6 +43,7 @@
     .app {
       min-height: 100vh;
       padding: 18px 26px 46px;
+      overflow-x: hidden;
     }
 
     .topbar {
@@ -1078,6 +1079,127 @@
 
     .view { display: none; }
     .view.active { display: block; }
+
+    .cost-shell { display: grid; gap: 18px; min-width: 0; overflow-x: clip; }
+    .cost-hero {
+      padding: 26px;
+      border-radius: 26px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 80% 15%, rgba(117, 255, 194, .18), transparent 30%),
+        linear-gradient(135deg, #15191f 0%, #26322f 100%);
+      box-shadow: 0 24px 70px rgba(18, 25, 24, .16);
+    }
+    .cost-hero-top, .cost-section-head, .cost-actions, .cost-result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .cost-hero h1 { margin: 8px 0 7px; max-width: 760px; font-size: clamp(27px, 3vw, 43px); letter-spacing: -.035em; }
+    .cost-hero p { margin: 0; max-width: 780px; color: rgba(255,255,255,.65); line-height: 1.7; }
+    .cost-kicker { color: #7effc4; font-size: 12px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .cost-local-badge { padding: 8px 11px; border: 1px solid rgba(126,255,196,.28); border-radius: 999px; color: #baffdc; background: rgba(126,255,196,.08); font-size: 12px; font-weight: 750; }
+    .cost-tabs { display: flex; flex-wrap: wrap; gap: 7px; padding: 6px; width: 100%; max-width: 100%; overflow: visible; border: 1px solid var(--soft); border-radius: 22px; background: rgba(255,255,255,.76); box-sizing: border-box; }
+    .cost-subtab { border: 0; border-radius: 999px; padding: 10px 17px; color: var(--muted); background: transparent; white-space: nowrap; font-weight: 750; }
+    .cost-subtab.active { color: #fff; background: var(--ink); }
+    .cost-pane { display: none; }
+    .cost-pane.active { display: block; }
+    .cost-workspace { display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(380px, .82fr); gap: 18px; align-items: start; }
+    .cost-card { min-width: 0; padding: 22px; border: 1px solid var(--soft); border-radius: 24px; background: rgba(255,255,255,.86); box-shadow: 0 16px 45px rgba(18,22,30,.055); }
+    .cost-card h2, .cost-card h3 { margin: 0; }
+    .cost-card .sub { margin-top: 6px; }
+    .cost-section { padding: 18px 0; border-top: 1px solid #e9ebed; }
+    .cost-section:first-of-type { margin-top: 16px; border-top: 0; padding-top: 0; }
+    .cost-section-head { margin-bottom: 13px; }
+    .cost-section-head b { font-size: 14px; }
+    .cost-section-head span { color: var(--muted); font-size: 12px; }
+    .cost-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .cost-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cost-field { min-width: 0; }
+    .cost-field label { display: block; margin-bottom: 7px; color: #555c68; font-size: 12px; font-weight: 720; }
+    .cost-field input, .cost-field select, .cost-field textarea {
+      width: 100%;
+      height: 43px;
+      min-height: 43px;
+      padding: 10px 12px;
+      border: 1px solid #dfe2e5;
+      border-radius: 12px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .cost-field select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #737983 50%), linear-gradient(135deg, #737983 50%, transparent 50%); background-position: calc(100% - 16px) 18px, calc(100% - 11px) 18px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
+    .cost-field input:focus, .cost-field select:focus { border-color: #111820; box-shadow: 0 0 0 3px rgba(17,24,32,.07); }
+    .cost-input-note { margin-top: 6px; color: #8a9098; font-size: 11px; line-height: 1.45; }
+    .cost-result { overflow: hidden; padding: 20px; color: #fff; background: linear-gradient(145deg, #151a1f 0%, #20272a 100%); box-shadow: 0 24px 60px rgba(16, 22, 24, .18); }
+    .cost-result-column { display: grid; gap: 18px; min-width: 0; }
+    .cost-result-column > .cost-card { width: 100%; max-width: 100%; box-sizing: border-box; }
+    .cost-result-column .cost-scenario-grid { grid-template-columns: 1fr; }
+    .cost-result-column .table-wrap { width: 100%; max-width: 100%; overflow: visible; }
+    .cost-result-head small { color: rgba(255,255,255,.48); }
+    .cost-profit { margin: 16px 0 3px; font-size: 40px; font-weight: 880; letter-spacing: -.04em; }
+    .cost-profit.negative { color: #ff8f8f; }
+    .cost-profit.positive { color: #86ffc8; }
+    .cost-result-sub { color: rgba(255,255,255,.52); font-size: 13px; }
+    .cost-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin: 14px 0 16px; }
+    .cost-kpi { padding: 11px 12px; border: 1px solid rgba(255,255,255,.075); border-radius: 13px; background: rgba(255,255,255,.04); }
+    .cost-kpi span { display: block; color: rgba(255,255,255,.48); font-size: 11px; }
+    .cost-kpi b { display: block; margin-top: 4px; font-size: 17px; }
+    .cost-waterfall { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 4px 12px; margin-top: 10px; }
+    .cost-bar-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.07); font-size: 11px; }
+    .cost-bar-row span:first-child { color: rgba(255,255,255,.58); }
+    .cost-bar-track { display: none; }
+    .cost-bar { height: 100%; border-radius: inherit; background: #7effc4; }
+    .cost-bar.cost { background: #ffbc70; }
+    .cost-bar-row strong { text-align: right; }
+    .cost-alert { margin-top: 14px; padding: 11px 12px; border-radius: 12px; color: #ffe0b8; background: rgba(255,178,88,.095); font-size: 11px; line-height: 1.55; }
+    .cost-actions { margin-top: 18px; justify-content: flex-end; }
+    .cost-actions .primary, .cost-actions .ghost { min-height: 42px; }
+    .cost-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    .cost-card .table-wrap { max-width: 100%; overflow-x: auto; }
+    .cost-table th, .cost-table td { padding: 13px 12px; border-bottom: 1px solid #eceef0; text-align: left; font-size: 13px; }
+    .cost-table th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    .cost-empty { padding: 44px 20px; border: 1px dashed #d8dcdf; border-radius: 18px; color: var(--muted); text-align: center; }
+    .cost-scenario-grid { margin-top: 14px; }
+    .cost-scenario { padding: 18px; border: 1px solid var(--soft); border-radius: 18px; background: #fff; }
+    .cost-scenario.best { border-color: #6adcad; box-shadow: inset 0 3px 0 #6adcad; }
+    .cost-scenario h3 { margin: 0 0 12px; font-size: 15px; }
+    .cost-scenario-line { display:flex; justify-content:space-between; padding:7px 0; color:var(--muted); font-size:12px; }
+    .cost-scenario-line b { color:var(--ink); }
+    .cost-compare-table { width: 100%; min-width: 0; table-layout: fixed; border-collapse: separate; border-spacing: 0; overflow: hidden; border: 1px solid #e8ebed; border-radius: 16px; background: #fff; }
+    .cost-compare-table th { padding: 9px 7px; color: #8a9098; background: #f7f8f8; font-size: 10px; font-weight: 750; text-align: right; white-space: normal; }
+    .cost-compare-table th:first-child { text-align: left; }
+    .cost-compare-table td { padding: 12px 7px; border-top: 1px solid #eceef0; color: #4f5660; font-size: 12px; line-height: 1.35; text-align: right; white-space: normal; overflow-wrap: anywhere; }
+    .cost-compare-table td:first-child { color: var(--ink); font-weight: 780; text-align: left; }
+    .cost-compare-table tr.best td { background: #f0fff7; }
+    .cost-compare-table tr.best td:first-child::after { content: "最优"; display: inline-block; margin-left: 6px; padding: 2px 5px; border-radius: 999px; color: #247452; background: #d8f8e8; font-size: 9px; vertical-align: 1px; }
+    .cost-compare-profit { color: #16825a !important; font-weight: 820; }
+    .cost-history-actions button { border:0; padding:6px 9px; border-radius:8px; background:#f0f2f3; font-size:12px; }
+    .cost-image-field { display: grid; grid-template-columns: 112px 1fr; gap: 16px; align-items: center; margin-top: 14px; }
+    .cost-image-preview { width: 112px; height: 112px; overflow: hidden; display: grid; place-items: center; border: 1px dashed #cfd4d8; border-radius: 18px; color: #9298a0; background: #f7f8f8; font-size: 12px; text-align: center; }
+    .cost-image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .cost-image-control input[type="file"] { height: auto; padding: 9px; }
+    .cost-image-control p { margin: 8px 0 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .cost-sku-cell { display: grid; grid-template-columns: 48px minmax(150px,1fr); gap: 10px; align-items: center; }
+    .cost-sku-thumb { width: 48px; height: 48px; overflow: hidden; display: grid; place-items: center; border-radius: 12px; color: #959ba2; background: #f0f2f3; font-size: 10px; }
+    .cost-sku-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    @media (max-width: 1050px) {
+      .cost-workspace { grid-template-columns: 1fr; }
+      .cost-result { position: static; }
+      .cost-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+    @media (max-width: 680px) {
+      .cost-hero, .cost-card { padding: 18px; border-radius: 20px; }
+      .cost-hero-top { align-items: flex-start; }
+      .cost-grid, .cost-grid.two, .cost-scenario-grid { grid-template-columns: 1fr; }
+      .cost-profit { font-size: 36px; }
+      .cost-kpis { grid-template-columns: repeat(2, 1fr); }
+      .cost-waterfall { grid-template-columns: repeat(2, 1fr); }
+      .cost-image-field { grid-template-columns: 88px 1fr; }
+      .cost-image-preview { width: 88px; height: 88px; }
+    }
 
     .hero {
       display: grid;
@@ -6429,6 +6551,7 @@
         <button class="tab active" data-view="overview" type="button">总览</button>
         <button class="tab" data-view="reports" type="button">日报中心</button>
         <button class="tab" data-view="tasks" type="button">任务中心</button>
+        <button class="tab" data-view="costing" type="button">成本测算</button>
         <div class="tab-menu" id="creatorNavMenu">
           <button class="tab" id="creatorNavTrigger" data-view="creators" type="button" aria-expanded="false">达人中心</button>
           <div class="tab-dropdown" aria-label="达人中心板块">
@@ -6825,6 +6948,186 @@
               </thead>
               <tbody id="entryRows"></tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="costing" class="view">
+        <div class="cost-shell">
+          <div class="cost-hero">
+            <div class="cost-hero-top">
+              <div>
+                <div class="cost-kicker">Profit decision lab</div>
+                <h1>先算清楚，再决定卖多少钱、投多少、佣金开多少。</h1>
+                <p>面向 TikTok 多店铺运营的单 SKU 利润决策工具。把采购、物流、平台、达人、广告和退货成本放进同一套口径。</p>
+              </div>
+              <span class="cost-local-badge">仅保存在本地</span>
+            </div>
+          </div>
+
+          <div class="cost-tabs" aria-label="成本测算功能">
+            <button class="cost-subtab active" data-cost-pane="calculator" type="button">快速测算</button>
+            <button class="cost-subtab" data-cost-pane="history" type="button">测算历史</button>
+            <button class="cost-subtab" data-cost-pane="profiles" type="button">基础成本录入</button>
+          </div>
+
+          <div class="cost-pane" data-cost-pane-content="profiles">
+            <div class="cost-workspace">
+              <form class="cost-card" id="costProfileForm">
+                <div class="cost-section-head">
+                  <div><h2>SKU 基础成本录入</h2><p class="sub">每个 SKU 只需维护一次；快速测算会自动带出这些默认值。</p></div>
+                  <span class="badge blue" id="costProfileMode">新建档案</span>
+                </div>
+                <input name="profileId" type="hidden" />
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>01 · SKU 信息</b><span>用于选择和识别测算对象</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>产品名称</label><input name="product" placeholder="例如：酒店枕" required /></div>
+                    <div class="cost-field"><label>SKU / 规格</label><input name="sku" placeholder="例如：white / 2pcs" required /></div>
+                    <div class="cost-field"><label>当前售价 ($)</label><input name="price" type="number" step="0.01" required /></div>
+                    <div class="cost-field"><label>目标利润率 (%)</label><input name="targetMargin" type="number" step="0.1" value="20" /></div>
+                    <div class="cost-field"><label>生效日期</label><input name="effectiveDate" type="date" /></div>
+                  </div>
+                  <div class="cost-image-field">
+                    <div class="cost-image-preview" id="costProfileImagePreview">暂无<br>SKU 图片</div>
+                    <div class="cost-image-control cost-field">
+                      <label>SKU 图片</label>
+                      <input id="costProfileImageFile" type="file" accept="image/png,image/jpeg,image/webp" />
+                      <input name="image" type="hidden" />
+                      <p>支持 JPG、PNG、WebP。图片仅随本地 SKU 档案保存，不上传到团队云端。</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>02 · 商品与履约基础成本</b><span>默认按单件金额录入</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>采购成本 ($)</label><input name="purchase" type="number" step="0.01" required /></div>
+                    <div class="cost-field"><label>包材 / 质检 ($)</label><input name="packaging" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>头程分摊 ($)</label><input name="firstMile" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>入库及仓储操作 ($)</label><input name="warehouse" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>尾程配送 ($)</label><input name="lastMile" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>其他履约成本 ($)</label><input name="fulfillmentOther" type="number" step="0.01" value="0" /></div>
+                  </div>
+                </div>
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>03 · 默认费率与风险</b><span>场景测算时仍可单独修改</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>平台佣金 (%)</label><input name="platformRate" type="number" step="0.1" value="6" /></div>
+                    <div class="cost-field"><label>交易及其他费率 (%)</label><input name="transactionRate" type="number" step="0.1" value="2.5" /></div>
+                    <div class="cost-field"><label>默认退款率 (%)</label><input name="refundRate" type="number" step="0.1" value="5" /></div>
+                    <div class="cost-field"><label>退货处理损失 / 单 ($)</label><input name="returnLoss" type="number" step="0.01" value="4" /></div>
+                    <div class="cost-field" style="grid-column:span 2"><label>备注</label><input name="note" placeholder="供应商、物流方案或成本口径说明" /></div>
+                  </div>
+                </div>
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>04 · 默认测算参数</b><span>选择该 SKU 后自动带入快速测算</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>默认销售场景</label><select name="channel"><option value="affiliate">达人自然出单</option><option value="organic">自然 / 商品卡</option><option value="ads">达人投流出单</option></select></div>
+                    <div class="cost-field"><label>卖家承担优惠 / 单 ($)</label><input name="discount" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>达人自然佣金 (%)</label><input name="creatorRate" type="number" step="0.1" value="15" /></div>
+                    <div class="cost-field"><label>广告佣金 (%)</label><input name="adCommissionRate" type="number" step="0.1" value="5" /></div>
+                    <div class="cost-field"><label>TikTok 投流费用 / 单 ($)</label><input name="adCost" type="number" step="0.01" value="0" /></div>
+                  </div>
+                </div>
+                <div class="cost-actions">
+                  <button class="ghost" id="resetCostProfile" type="button">新建空白档案</button>
+                  <button class="primary" type="submit">保存基础成本</button>
+                </div>
+              </form>
+              <div class="cost-card">
+                <div class="cost-section-head"><div><h2>已录入 SKU</h2><p class="sub">点击编辑可更新基础数据；历史测算仍保留原快照。</p></div><span class="badge blue" id="costProfileCount">0 个 SKU</span></div>
+                <div id="costProfileList"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cost-pane active" data-cost-pane-content="calculator">
+            <div class="cost-workspace">
+              <form class="cost-card" id="costCalculatorForm">
+                <div class="cost-section-head">
+                  <div><h2>单品利润测算</h2><p class="sub">金额统一按美元；修改任意数字后实时重算。</p></div>
+                  <span class="badge blue">V1 · 单店单 SKU</span>
+                </div>
+                <div class="cost-section" style="padding-bottom:18px">
+                  <div class="cost-section-head"><b>先选择 SKU 基础档案</b><span id="costOverrideHint">未选择时可使用示例数据</span></div>
+                  <div class="cost-grid two">
+                    <div class="cost-field"><label>选择已录入 SKU</label><select id="costProfileSelect"><option value="">不使用基础档案 / 手动填写</option></select></div>
+                    <div class="cost-field"><label>基础数据状态</label><div style="display:flex;align-items:center;gap:10px"><div class="cost-sku-thumb" id="costSelectedSkuImage">暂无图</div><div class="cost-local-badge" id="costProfileStatus" style="display:inline-flex;color:#35634f;background:#edfff6;border-color:#ccebdd">当前使用示例数据</div></div></div>
+                  </div>
+                </div>
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>01 · 经营场景</b><span>确定测算对象、售价与销售方式</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>店铺</label><select name="store"><option>DreamWeave</option><option>sweet dream</option><option>Dreamland</option><option>Dreamdaily</option><option>MoonDream</option><option>Himood Smile</option></select></div>
+                    <div class="cost-field"><label>产品 / SKU</label><input name="sku" value="酒店枕 2pcs / white" /></div>
+                    <div class="cost-field"><label>销售场景</label><select name="channel"><option value="affiliate">达人自然出单</option><option value="organic">自然 / 商品卡</option><option value="ads">达人投流出单</option></select></div>
+                    <div class="cost-field"><label>商品售价 ($)</label><input name="price" type="number" step="0.01" value="32.99" /></div>
+                    <div class="cost-field"><label>卖家承担优惠 / 单 ($)</label><input name="discount" type="number" step="0.01" value="2" /></div>
+                  </div>
+                </div>
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>02 · 商品与履约</b><span>均为单件成本</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>采购成本 ($)</label><input name="purchase" type="number" step="0.01" value="7.8" /></div>
+                    <div class="cost-field"><label>包材 / 质检 ($)</label><input name="packaging" type="number" step="0.01" value="0.55" /></div>
+                    <div class="cost-field"><label>头程分摊 ($)</label><input name="firstMile" type="number" step="0.01" value="2.1" /></div>
+                    <div class="cost-field"><label>入库及仓储操作 ($)</label><input name="warehouse" type="number" step="0.01" value="1.15" /></div>
+                    <div class="cost-field"><label>尾程配送 ($)</label><input name="lastMile" type="number" step="0.01" value="5.65" /></div>
+                    <div class="cost-field"><label>其他履约成本 ($)</label><input name="fulfillmentOther" type="number" step="0.01" value="0.3" /></div>
+                  </div>
+                </div>
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>03 · 平台与渠道</b><span>平台佣金所有场景必扣，渠道佣金在此基础上额外计算</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>平台佣金 (%) · 全场景</label><input name="platformRate" type="number" step="0.1" value="6" /><div class="cost-input-note">自然、达人自然、达人投流均扣除</div></div>
+                    <div class="cost-field"><label>交易及其他费率 (%)</label><input name="transactionRate" type="number" step="0.1" value="2.5" /></div>
+                    <div class="cost-field"><label>达人自然佣金 (%)</label><input name="creatorRate" type="number" step="0.1" value="15" /><div class="cost-input-note">仅“达人自然出单”场景计入</div></div>
+                    <div class="cost-field"><label>广告佣金 (%)</label><input name="adCommissionRate" type="number" step="0.1" value="5" /><div class="cost-input-note">仅“达人投流出单”场景计入，替代达人自然佣金</div></div>
+                    <div class="cost-field"><label>TikTok 投流费用 / 单 ($)</label><input name="adCost" type="number" step="0.01" value="3.5" /><div class="cost-input-note">额外充值的广告费用，仅投流场景计入</div></div>
+                  </div>
+                </div>
+                <div class="cost-section">
+                  <div class="cost-section-head"><b>04 · 退货与目标</b><span>用风险假设看真实贡献利润</span></div>
+                  <div class="cost-grid">
+                    <div class="cost-field"><label>预计退款率 (%)</label><input name="refundRate" type="number" step="0.1" value="5" /></div>
+                    <div class="cost-field"><label>退货处理损失 / 单 ($)</label><input name="returnLoss" type="number" step="0.01" value="4" /><div class="cost-input-note">按预计退款订单数量计提</div></div>
+                    <div class="cost-field"><label>目标贡献利润率 (%)</label><input name="targetMargin" type="number" step="0.1" value="20" /></div>
+                  </div>
+                </div>
+                <div class="cost-actions">
+                  <button class="ghost" id="resetCostCalculator" type="button">恢复示例</button>
+                  <button class="primary" type="submit">保存为测算方案</button>
+                </div>
+              </form>
+
+              <div class="cost-result-column">
+                <aside class="cost-card cost-result">
+                  <div class="cost-result-head"><div><small>单件贡献利润</small><div class="cost-profit positive" id="costTotalProfit">$0.00</div><div class="cost-result-sub" id="costProfitSummary">—</div></div><span class="badge green" id="costRiskBadge">利润健康</span></div>
+                  <div class="cost-kpis">
+                    <div class="cost-kpi"><span>单件净销售收入</span><b id="costUnitProfit">$0.00</b></div>
+                    <div class="cost-kpi"><span>贡献利润率</span><b id="costMargin">0.0%</b></div>
+                    <div class="cost-kpi"><span>保本售价</span><b id="costBreakEvenPrice">$0.00</b></div>
+                    <div class="cost-kpi"><span>目标利润售价</span><b id="costTargetPrice">$0.00</b></div>
+                    <div class="cost-kpi"><span>保本 ROAS</span><b id="costBreakEvenRoas">—</b></div>
+                    <div class="cost-kpi"><span id="costCommissionCeilingLabel">渠道佣金上限</span><b id="costCreatorCeiling">0.0%</b></div>
+                  </div>
+                  <div class="cost-result-head"><b>每单利润去向</b><small id="costNetRevenueLabel">净收入 $0.00</small></div>
+                  <div class="cost-waterfall" id="costWaterfall"></div>
+                  <div class="cost-alert" id="costAdvice">调整输入后，这里会给出经营建议。</div>
+                </aside>
+                <div class="cost-card" style="padding:18px">
+                  <div class="cost-section-head"><div><h3>方案对比</h3><p class="sub">同一 SKU，不同获客方式。</p></div><span class="badge blue">实时</span></div>
+                  <div class="cost-scenario-grid" id="costScenarioGrid"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="cost-pane" data-cost-pane-content="history">
+            <div class="cost-card">
+              <div class="cost-section-head"><div><h2>测算历史</h2><p class="sub">保存产生新快照，不覆盖旧方案。可以复制旧方案继续测算。</p></div><span class="badge blue" id="costHistoryCount">0 个版本</span></div>
+              <div id="costHistoryContent"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -13068,6 +13371,327 @@
       };
       reader.readAsText(file);
     }
+
+    const costingStoreKey = "tiktok_ops_costing_v1_local";
+    const costDefaultValues = {
+      store: "DreamWeave", sku: "酒店枕 2pcs / white", channel: "affiliate",
+      price: 32.99, discount: 2, purchase: 7.8, packaging: .55,
+      firstMile: 2.1, warehouse: 1.15, lastMile: 5.65, fulfillmentOther: .3,
+      platformRate: 6, transactionRate: 2.5, creatorRate: 15, adCommissionRate: 5,
+      adCost: 3.5, refundRate: 5, returnLoss: 4, targetMargin: 20
+    };
+    let costingState = (() => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(costingStoreKey));
+        return {
+          history: Array.isArray(parsed?.history) ? parsed.history : [],
+          profiles: Array.isArray(parsed?.profiles) ? parsed.profiles.map((item) => ({ ...item, id: item.id || crypto.randomUUID(), product: item.product || "" })) : []
+        };
+      } catch { return { history: [], profiles: [] }; }
+    })();
+
+    function costNumber(value) {
+      const number = Number(value);
+      return Number.isFinite(number) ? number : 0;
+    }
+
+    function costFormValues() {
+      const form = document.getElementById("costCalculatorForm");
+      return Object.fromEntries([...new FormData(form).entries()].map(([key, value]) => [key, ["store", "sku", "channel"].includes(key) ? value : costNumber(value)]));
+    }
+
+    function calculateCost(values) {
+      const grossUnitRevenue = Math.max(0, values.price - values.discount);
+      const refundRate = Math.min(1, Math.max(0, values.refundRate / 100));
+      const netUnitRevenue = grossUnitRevenue * (1 - refundRate);
+      const productCost = values.purchase + values.packaging + values.firstMile;
+      const fulfillment = values.warehouse + values.lastMile + values.fulfillmentOther + refundRate * values.returnLoss;
+      const platform = netUnitRevenue * (values.platformRate + values.transactionRate) / 100;
+      const appliedCommissionRate = values.channel === "affiliate"
+        ? values.creatorRate
+        : values.channel === "ads" ? values.adCommissionRate : 0;
+      const channelCommission = netUnitRevenue * appliedCommissionRate / 100;
+      const ads = values.channel === "ads" ? values.adCost : 0;
+      const totalCost = productCost + fulfillment + platform + channelCommission + ads;
+      const unitProfit = netUnitRevenue - totalCost;
+      const margin = netUnitRevenue ? unitProfit / netUnitRevenue : 0;
+      const percentageRate = (values.platformRate + values.transactionRate + appliedCommissionRate) / 100;
+      const fixedUnitCost = productCost + fulfillment + ads;
+      const netFactor = (1 - refundRate) * (1 - percentageRate);
+      const breakEvenPrice = netFactor > 0 ? values.discount + fixedUnitCost / netFactor : 0;
+      const targetRate = values.targetMargin / 100;
+      const targetFactor = (1 - refundRate) * (1 - percentageRate - targetRate);
+      const targetPrice = targetFactor > 0 ? values.discount + fixedUnitCost / targetFactor : 0;
+      const preAdProfit = unitProfit + ads;
+      const breakEvenRoas = preAdProfit > 0 && grossUnitRevenue > 0 ? grossUnitRevenue / preAdProfit : 0;
+      const nonCreatorCost = productCost + fulfillment + platform + ads;
+      const creatorCeiling = netUnitRevenue > 0 ? Math.max(0, (netUnitRevenue - nonCreatorCost) / netUnitRevenue * 100) : 0;
+      return { grossUnitRevenue, netUnitRevenue, productCost, fulfillment, platform, channelCommission, appliedCommissionRate, ads, totalCost, unitProfit, margin, breakEvenPrice, targetPrice, breakEvenRoas, creatorCeiling };
+    }
+
+    function money(value) {
+      return `${value < 0 ? "-" : ""}$${Math.abs(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    function renderCostCalculator() {
+      const values = costFormValues();
+      const result = calculateCost(values);
+      const profitEl = document.getElementById("costTotalProfit");
+      profitEl.textContent = money(result.unitProfit);
+      profitEl.className = `cost-profit ${result.unitProfit >= 0 ? "positive" : "negative"}`;
+      document.getElementById("costProfitSummary").textContent = `${values.store} · ${values.sku}`;
+      document.getElementById("costUnitProfit").textContent = money(result.netUnitRevenue);
+      document.getElementById("costMargin").textContent = `${(result.margin * 100).toFixed(1)}%`;
+      document.getElementById("costBreakEvenPrice").textContent = money(result.breakEvenPrice);
+      document.getElementById("costTargetPrice").textContent = money(result.targetPrice);
+      document.getElementById("costBreakEvenRoas").textContent = result.breakEvenRoas ? `${result.breakEvenRoas.toFixed(2)}x` : "无法保本";
+      document.getElementById("costCreatorCeiling").textContent = `${result.creatorCeiling.toFixed(1)}%`;
+      document.getElementById("costCommissionCeilingLabel").textContent = values.channel === "ads" ? "广告佣金上限" : values.channel === "affiliate" ? "达人佣金上限" : "可用渠道费率";
+      document.getElementById("costNetRevenueLabel").textContent = `净收入 ${money(result.netUnitRevenue)}`;
+      const risk = document.getElementById("costRiskBadge");
+      const target = values.targetMargin / 100;
+      risk.textContent = result.margin < 0 ? "当前亏损" : result.margin < target ? "低于目标" : "利润健康";
+      risk.className = `badge ${result.margin < 0 ? "red" : result.margin < target ? "amber" : "green"}`;
+      const bars = [
+        ["净销售收入", result.netUnitRevenue, "income"], ["商品成本", result.productCost, "cost"],
+        ["履约成本", result.fulfillment, "cost"], ["平台费用", result.platform, "cost"],
+        [values.channel === "ads" ? "广告佣金" : values.channel === "affiliate" ? "达人佣金" : "渠道佣金", result.channelCommission, "cost"],
+        ["投流费用", result.ads, "cost"], ["贡献利润", Math.max(0, result.unitProfit), "income"]
+      ];
+      const max = Math.max(1, ...bars.map((item) => Math.abs(item[1])));
+      document.getElementById("costWaterfall").innerHTML = bars.map(([label, value, type]) => `<div class="cost-bar-row"><span>${label}</span><div class="cost-bar-track"><div class="cost-bar ${type}" style="width:${Math.max(2, Math.abs(value) / max * 100)}%"></div></div><strong>${money(value)}</strong></div>`).join("");
+      const advice = result.margin < 0
+        ? `当前单件亏损 ${money(Math.abs(result.unitProfit))}。售价至少需达到 ${money(result.breakEvenPrice)}，或优先降低广告、佣金及尾程成本。`
+        : result.margin < target
+          ? `当前已盈利但低于 ${(target * 100).toFixed(0)}% 目标。建议售价约 ${money(result.targetPrice)}；${values.channel === "ads" ? "广告佣金" : "达人佣金"}最好控制在 ${result.creatorCeiling.toFixed(1)}% 以内。`
+          : values.channel === "ads"
+            ? `投流场景达到目标。扣除广告佣金和每单 ${money(result.ads)} 投流费用后，仍有 ${money(result.unitProfit)} 单件贡献利润。`
+            : `方案达到目标，当前单件贡献利润为 ${money(result.unitProfit)}。`;
+      document.getElementById("costAdvice").textContent = advice;
+      renderCostScenarios(values);
+    }
+
+    function renderCostScenarios(base) {
+      const scenarios = [
+        { name: "自然 / 商品卡", channel: "organic", creatorRate: 0, adCommissionRate: 0, adCost: 0 },
+        { name: "达人自然出单", channel: "affiliate", creatorRate: base.creatorRate || 15, adCommissionRate: 0, adCost: 0 },
+        { name: "达人投流出单", channel: "ads", creatorRate: 0, adCommissionRate: base.adCommissionRate || 5, adCost: base.adCost || 5 }
+      ].map((scenario) => ({ ...scenario, result: calculateCost({ ...base, ...scenario }) }));
+      const best = Math.max(...scenarios.map((item) => item.result.margin));
+      document.getElementById("costScenarioGrid").innerHTML = `<div class="table-wrap"><table class="cost-compare-table"><thead><tr><th>场景</th><th>单件利润</th><th>利润率</th><th>保本价</th></tr></thead><tbody>${scenarios.map((item) => `<tr class="${item.result.margin === best ? "best" : ""}"><td>${item.name}</td><td class="${item.result.unitProfit >= 0 ? "cost-compare-profit" : ""}">${money(item.result.unitProfit)}</td><td>${(item.result.margin * 100).toFixed(1)}%</td><td>${money(item.result.breakEvenPrice)}</td></tr>`).join("")}</tbody></table></div>`;
+    }
+
+    function saveCostingState() {
+      localStorage.setItem(costingStoreKey, JSON.stringify(costingState));
+    }
+
+    function renderCostHistory() {
+      document.getElementById("costHistoryCount").textContent = `${costingState.history.length} 个版本`;
+      const target = document.getElementById("costHistoryContent");
+      if (!costingState.history.length) {
+        target.innerHTML = '<div class="cost-empty">还没有保存的测算方案。<br>在「快速测算」确认参数后保存，第一条版本会出现在这里。</div>';
+      } else {
+        target.innerHTML = `<div class="table-wrap"><table class="cost-table"><thead><tr><th>版本</th><th>店铺 / SKU</th><th>场景</th><th>售价</th><th>单件利润</th><th>利润率</th><th>保存时间</th><th>操作</th></tr></thead><tbody>${costingState.history.map((item, index) => `<tr><td>V${costingState.history.length - index}</td><td>${escapeHtml(item.values.store)}<br><small>${escapeHtml(item.values.sku)}</small></td><td>${item.values.channel === "affiliate" ? "达人自然出单" : item.values.channel === "ads" ? "达人投流出单" : "自然 / 商品卡"}</td><td>${money(item.values.price)}</td><td>${money(item.result.unitProfit)}</td><td>${(item.result.margin * 100).toFixed(1)}%</td><td>${new Date(item.savedAt).toLocaleString("zh-CN")}</td><td class="cost-history-actions"><button data-cost-copy="${item.id}" type="button">复制测算</button></td></tr>`).join("")}</tbody></table></div>`;
+      }
+      renderCostProfiles();
+    }
+
+    function profileDisplayName(profile) {
+      return `${profile.product ? `${profile.product} / ` : ""}${profile.sku}`;
+    }
+
+    function renderCostProfiles() {
+      const profiles = costingState.profiles || [];
+      document.getElementById("costProfileCount").textContent = `${profiles.length} 个 SKU`;
+      document.getElementById("costProfileList").innerHTML = profiles.length
+        ? `<div class="table-wrap"><table class="cost-table"><thead><tr><th>SKU</th><th>售价</th><th>基础成本</th><th>默认费率</th><th>操作</th></tr></thead><tbody>${profiles.map((item) => {
+            const baseCost = costNumber(item.purchase) + costNumber(item.packaging) + costNumber(item.firstMile) + costNumber(item.warehouse) + costNumber(item.lastMile) + costNumber(item.fulfillmentOther);
+            const image = item.image ? `<img src="${escapeHtml(item.image)}" alt="" />` : "暂无图";
+            return `<tr><td><div class="cost-sku-cell"><div class="cost-sku-thumb">${image}</div><div><b>${escapeHtml(item.product || "未命名产品")}</b><br><small>${escapeHtml(item.sku)}</small></div></div></td><td>${money(costNumber(item.price))}</td><td>${money(baseCost)}</td><td>${(costNumber(item.platformRate) + costNumber(item.transactionRate)).toFixed(1)}%</td><td class="cost-history-actions"><button data-cost-profile-edit="${escapeHtml(item.id || "")}" type="button">编辑</button> <button data-cost-profile-use="${escapeHtml(item.id || "")}" type="button">去测算</button></td></tr>`;
+          }).join("")}</tbody></table></div>`
+        : '<div class="cost-empty">还没有 SKU 基础档案。<br>先在左侧录入一个 SKU，之后快速测算即可自动带出成本。</div>';
+      const select = document.getElementById("costProfileSelect");
+      const selected = select.value;
+      select.innerHTML = `<option value="">不使用基础档案 / 手动填写</option>${profiles.map((item) => `<option value="${escapeHtml(item.id || "")}">${escapeHtml(profileDisplayName(item))}</option>`).join("")}`;
+      if (profiles.some((item) => item.id === selected)) select.value = selected;
+    }
+
+    function profileFormValues() {
+      const form = document.getElementById("costProfileForm");
+      const raw = Object.fromEntries(new FormData(form).entries());
+      const textKeys = new Set(["profileId", "product", "sku", "effectiveDate", "note", "image", "channel"]);
+      return Object.fromEntries(Object.entries(raw).map(([key, value]) => [key, textKeys.has(key) ? String(value).trim() : costNumber(value)]));
+    }
+
+    function resetCostProfileForm() {
+      const form = document.getElementById("costProfileForm");
+      form.reset();
+      form.elements.profileId.value = "";
+      form.elements.targetMargin.value = 20;
+      form.elements.platformRate.value = 6;
+      form.elements.transactionRate.value = 2.5;
+      form.elements.refundRate.value = 5;
+      form.elements.returnLoss.value = 4;
+      form.elements.channel.value = "affiliate";
+      form.elements.discount.value = 0;
+      form.elements.creatorRate.value = 15;
+      form.elements.adCommissionRate.value = 5;
+      form.elements.adCost.value = 0;
+      form.elements.effectiveDate.value = today;
+      document.getElementById("costProfileMode").textContent = "新建档案";
+      renderCostProfileImage("");
+    }
+
+    function renderCostProfileImage(source) {
+      const preview = document.getElementById("costProfileImagePreview");
+      preview.innerHTML = source ? `<img src="${escapeHtml(source)}" alt="SKU 图片预览" />` : "暂无<br>SKU 图片";
+    }
+
+    function editCostProfile(id) {
+      const profile = costingState.profiles.find((item) => item.id === id);
+      if (!profile) return;
+      resetCostProfileForm();
+      const form = document.getElementById("costProfileForm");
+      Object.entries(profile).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value ?? ""; });
+      form.elements.profileId.value = profile.id;
+      document.getElementById("costProfileMode").textContent = "编辑基础档案";
+      renderCostProfileImage(profile.image || "");
+      setCostPane("profiles");
+    }
+
+    function applyCostProfile(id) {
+      const profile = costingState.profiles.find((item) => item.id === id);
+      if (!profile) return;
+      const currentStore = document.querySelector("#costCalculatorForm [name='store']")?.value || costDefaultValues.store;
+      const values = {
+        ...costDefaultValues,
+        store: currentStore,
+        sku: `${profile.product ? `${profile.product} / ` : ""}${profile.sku}`,
+        price: profile.price,
+        purchase: profile.purchase,
+        packaging: profile.packaging,
+        firstMile: profile.firstMile,
+        warehouse: profile.warehouse,
+        lastMile: profile.lastMile,
+        fulfillmentOther: profile.fulfillmentOther,
+        platformRate: profile.platformRate,
+        transactionRate: profile.transactionRate,
+        refundRate: profile.refundRate,
+        returnLoss: profile.returnLoss,
+        targetMargin: profile.targetMargin,
+        channel: profile.channel || costDefaultValues.channel,
+        discount: profile.discount ?? costDefaultValues.discount,
+        creatorRate: profile.creatorRate ?? costDefaultValues.creatorRate,
+        adCommissionRate: profile.adCommissionRate ?? costDefaultValues.adCommissionRate,
+        adCost: profile.adCost ?? 0
+      };
+      loadCostValues(values);
+      document.getElementById("costProfileSelect").value = id;
+      document.getElementById("costSelectedSkuImage").innerHTML = profile.image ? `<img src="${escapeHtml(profile.image)}" alt="" />` : "暂无图";
+      document.getElementById("costProfileStatus").textContent = `已带出：${profileDisplayName(profile)}`;
+      document.getElementById("costOverrideHint").textContent = "修改字段仅用于当前测算场景";
+      setCostPane("calculator");
+    }
+
+    function loadCostValues(values) {
+      const form = document.getElementById("costCalculatorForm");
+      Object.entries(values).forEach(([key, value]) => { if (form.elements[key]) form.elements[key].value = value; });
+      renderCostCalculator();
+    }
+
+    function setCostPane(name) {
+      document.querySelectorAll(".cost-subtab").forEach((button) => button.classList.toggle("active", button.dataset.costPane === name));
+      document.querySelectorAll("[data-cost-pane-content]").forEach((pane) => pane.classList.toggle("active", pane.dataset.costPaneContent === name));
+      renderCostHistory();
+    }
+
+    document.getElementById("costCalculatorForm").addEventListener("input", renderCostCalculator);
+    document.getElementById("costCalculatorForm").addEventListener("change", renderCostCalculator);
+    document.getElementById("costCalculatorForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const values = costFormValues();
+      const result = calculateCost(values);
+      const savedAt = new Date().toISOString();
+      costingState.history.unshift({ id: crypto.randomUUID(), savedAt, values, result });
+      saveCostingState();
+      renderCostHistory();
+      showToast("测算方案已保存到本地");
+    });
+    document.getElementById("resetCostCalculator").addEventListener("click", () => loadCostValues(costDefaultValues));
+    document.getElementById("costProfileForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const values = profileFormValues();
+      const existingId = values.profileId;
+      const previous = costingState.profiles.find((item) => item.id === existingId) || {};
+      const profile = { ...previous, ...values, id: existingId || crypto.randomUUID(), updatedAt: new Date().toISOString() };
+      delete profile.profileId;
+      const index = costingState.profiles.findIndex((item) => item.id === profile.id);
+      if (index >= 0) costingState.profiles[index] = profile;
+      else costingState.profiles.unshift(profile);
+      saveCostingState();
+      renderCostProfiles();
+      resetCostProfileForm();
+      showToast(existingId ? "SKU 基础成本已更新" : "SKU 基础成本已保存");
+    });
+    document.getElementById("resetCostProfile").addEventListener("click", resetCostProfileForm);
+    document.getElementById("costProfileImageFile").addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (file.size > 1500000) {
+        event.target.value = "";
+        showToast("图片请控制在 1.5MB 以内");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const source = String(reader.result || "");
+        document.querySelector("#costProfileForm [name='image']").value = source;
+        renderCostProfileImage(source);
+      };
+      reader.readAsDataURL(file);
+    });
+    document.querySelectorAll("#costProfileForm input[type='number'], #costCalculatorForm input[type='number']").forEach((input) => {
+      input.addEventListener("focus", () => {
+        if (input.value === "0") window.setTimeout(() => input.select(), 0);
+      });
+      input.addEventListener("input", () => {
+        const raw = String(input.value);
+        if (/^0\d+/.test(raw)) {
+          input.value = raw.replace(/^0+(?=\d)/, "");
+          input.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+      });
+    });
+    document.getElementById("costProfileSelect").addEventListener("change", (event) => {
+      if (event.target.value) applyCostProfile(event.target.value);
+      else {
+        document.getElementById("costSelectedSkuImage").textContent = "暂无图";
+        document.getElementById("costProfileStatus").textContent = "当前手动填写，不关联基础档案";
+        document.getElementById("costOverrideHint").textContent = "未选择时可使用示例数据";
+      }
+    });
+    document.querySelectorAll(".cost-subtab").forEach((button) => button.addEventListener("click", () => setCostPane(button.dataset.costPane)));
+    document.addEventListener("click", (event) => {
+      const copy = event.target.closest("[data-cost-copy]");
+      const editProfile = event.target.closest("[data-cost-profile-edit]");
+      const useProfile = event.target.closest("[data-cost-profile-use]");
+      if (copy) {
+        const record = costingState.history.find((item) => item.id === copy.dataset.costCopy);
+        if (!record) return;
+        loadCostValues(record.values);
+        setCostPane("calculator");
+        showToast("已复制历史方案，可继续调整");
+        return;
+      }
+      if (editProfile) {
+        editCostProfile(editProfile.dataset.costProfileEdit);
+        return;
+      }
+      if (useProfile) applyCostProfile(useProfile.dataset.costProfileUse);
+    });
+    resetCostProfileForm();
+    renderCostCalculator();
+    renderCostHistory();
 
     document.querySelectorAll(".tab").forEach((tab) => {
       tab.addEventListener("click", () => setView(tab.dataset.view));
