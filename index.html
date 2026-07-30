@@ -23,9 +23,14 @@
 
     * { box-sizing: border-box; }
 
+    html {
+      scrollbar-gutter: stable;
+    }
+
     body {
       margin: 0;
       min-height: 100vh;
+      overflow-x: hidden;
       background: linear-gradient(180deg, #fff 0%, var(--bg) 38%, #ececf0 100%);
       color: var(--ink);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
@@ -96,7 +101,7 @@
       display: flex;
       justify-content: center;
       gap: 6px;
-      overflow-x: auto;
+      overflow: visible;
       scrollbar-width: none;
     }
 
@@ -117,6 +122,66 @@
     .tab.active {
       background: var(--ink);
       color: #fff;
+    }
+
+    .tab-menu {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .tab-menu > .tab::after {
+      content: "⌄";
+      display: inline-block;
+      margin-left: 6px;
+      font-size: 11px;
+      transition: transform 0.18s ease;
+    }
+
+    .tab-menu.open > .tab::after {
+      transform: rotate(180deg);
+    }
+
+    .tab-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      z-index: 80;
+      display: none;
+      width: 168px;
+      transform: translateX(-50%);
+      padding: 8px;
+      border: 1px solid rgba(12, 15, 20, 0.1);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 18px 46px rgba(20, 28, 40, 0.16);
+    }
+
+    .tab-menu.open .tab-dropdown {
+      display: grid;
+      gap: 5px;
+    }
+
+    .tab-dropdown button {
+      min-height: 36px;
+      border: 0;
+      border-radius: 999px;
+      padding: 0 13px;
+      background: transparent;
+      color: #4d5561;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .tab-dropdown button:hover,
+    .tab-dropdown button.active {
+      background: #111827;
+      color: #fff;
+    }
+
+    .creator-main-panel > .panel-head::after {
+      display: none;
     }
 
     .top-actions {
@@ -211,6 +276,14 @@
     }
 
     .report-card-head b { font-size: 15px; }
+
+    .report-card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
 
     .report-card-head small,
     .report-section small {
@@ -4942,6 +5015,617 @@
       gap: 14px;
     }
 
+    .blanket-creator-shell {
+      padding: 0 26px 26px;
+      display: grid;
+      gap: 16px;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+
+    #creators > .panel > .panel-head {
+      padding-left: 26px;
+      padding-right: 26px;
+    }
+
+    #creators,
+    #creators > .panel {
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: clip;
+    }
+
+    .blanket-overview-grid,
+    .blanket-list-card {
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+
+    .blanket-list-card {
+      overflow: hidden;
+    }
+
+    .blanket-filter {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #4b5563;
+      min-height: 34px;
+      padding: 0 14px;
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .blanket-filter.active {
+      color: #fff;
+      border-color: #111827;
+      background: #111827;
+    }
+
+    .blanket-project-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 18px 20px;
+      border: 1px solid #dfe4ea;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #f8fafc, #fff);
+    }
+
+    .blanket-project-head h3,
+    .blanket-overview-card h3,
+    .blanket-list-card h3 {
+      margin: 0;
+      color: #111827;
+    }
+
+    .blanket-project-head p {
+      margin: 7px 0 0;
+      color: #667085;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .blanket-preview-note {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 7px 11px;
+      color: #8a5200;
+      background: #fff3d6;
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .blanket-metrics {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .blanket-metric {
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      background: #fff;
+      padding: 15px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .blanket-metric:hover,
+    .blanket-metric.active {
+      border-color: #9fb7dc;
+      background: #f4f8ff;
+      transform: translateY(-1px);
+    }
+
+    .blanket-metric span {
+      color: #76808f;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .blanket-metric strong {
+      display: block;
+      margin-top: 7px;
+      color: #111827;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .blanket-overview-grid {
+      display: grid;
+      grid-template-columns: 1.45fr 0.75fr;
+      gap: 12px;
+    }
+
+    .blanket-overview-card,
+    .blanket-list-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      padding: 18px;
+    }
+
+    .blanket-funnel {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .blanket-step {
+      padding: 11px 8px;
+      border-radius: 13px;
+      background: #f5f7f9;
+      text-align: center;
+    }
+
+    .blanket-step b,
+    .blanket-step span {
+      display: block;
+    }
+
+    .blanket-step b { font-size: 18px; color: #111827; }
+    .blanket-step span { margin-top: 4px; font-size: 10px; color: #6b7280; }
+
+    .blanket-alerts {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .blanket-alert {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fff6e7;
+      color: #7a4b00;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    button.blanket-alert {
+      width: 100%;
+      border: 0;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    button.blanket-alert.risk {
+      background: #fff0f0;
+      color: #a52b2b;
+    }
+
+    .blanket-overview-title {
+      margin-bottom: 14px;
+    }
+
+    .blanket-overview-title h3 {
+      margin: 0;
+    }
+
+    .blanket-overview-title p {
+      margin: 5px 0 0;
+    }
+
+    .blanket-list-head,
+    .blanket-toolbar,
+    .blanket-record-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .blanket-toolbar {
+      margin-top: 14px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid rgba(12, 15, 20, 0.06);
+    }
+
+    .blanket-quick-filters {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .blanket-toolbar input {
+      width: min(100%, 320px);
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0 12px;
+      background: #f8fafc;
+    }
+
+    .blanket-list-card .table-wrap {
+      margin-top: 16px;
+      padding: 0;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      contain: inline-size;
+      overscroll-behavior-x: contain;
+    }
+
+    .blanket-preview-table {
+      border-color: rgba(12, 15, 20, 0.08);
+      box-shadow: 0 12px 30px rgba(18, 22, 30, 0.04);
+    }
+
+    .blanket-preview-table th {
+      height: 48px;
+      background: #f6f7f9;
+      color: #4e5765;
+      font-size: 12px;
+      letter-spacing: 0.01em;
+    }
+
+    .blanket-preview-table td {
+      height: 82px;
+      vertical-align: middle;
+    }
+
+    .blanket-preview-table th:first-child,
+    .blanket-preview-table td:first-child {
+      min-width: 230px;
+      width: 230px;
+      text-align: center;
+    }
+
+    .blanket-preview-table th:nth-child(3),
+    .blanket-preview-table td:nth-child(3) {
+      min-width: 220px;
+      width: 220px;
+    }
+
+    .blanket-preview-table th:nth-child(7),
+    .blanket-preview-table td:nth-child(7) {
+      min-width: 190px;
+      width: 190px;
+    }
+
+    .blanket-preview-table th:nth-child(8),
+    .blanket-preview-table td:nth-child(8) {
+      min-width: 104px;
+      width: 104px;
+      padding-left: 5px;
+      padding-right: 5px;
+      text-align: center;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    .blanket-preview-table th:nth-child(10),
+    .blanket-preview-table td:nth-child(10) {
+      min-width: 94px;
+      white-space: nowrap;
+    }
+
+    .blanket-preview-table .creator-profile {
+      grid-template-columns: 48px minmax(125px, 1fr);
+      width: 202px;
+      min-width: 202px;
+      margin: 0 auto;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .blanket-preview-table .creator-avatar {
+      width: 48px;
+      height: 48px;
+    }
+
+    .blanket-preview-table .creator-profile span,
+    .blanket-preview-table .creator-profile b,
+    .blanket-preview-table .creator-profile small {
+      min-width: 0;
+      text-align: center;
+    }
+
+    .blanket-preview-table .creator-contact {
+      margin-top: 4px;
+      color: #57606e;
+      font-weight: 700;
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    .blanket-status-select {
+      width: 94px;
+      min-width: 94px;
+      height: 32px;
+      border: 1px solid rgba(12, 15, 20, 0.1);
+      border-radius: 999px;
+      padding: 0 18px 0 8px;
+      background: #eefaf8;
+      color: #087b75;
+      font-size: 12px;
+      font-weight: 850;
+      outline: none;
+      cursor: pointer;
+      display: block;
+      margin: 0 auto;
+      text-align: center;
+      text-align-last: center;
+      white-space: nowrap;
+    }
+
+    .sample-summary-btn {
+      width: 100%;
+      border: 0;
+      padding: 7px 8px;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .sample-summary-btn:hover {
+      background: #f3f6fa;
+    }
+
+    .sample-summary-main {
+      display: block;
+      line-height: 1.55;
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .sample-summary-meta {
+      display: block;
+      margin-top: 4px;
+      color: #647087;
+      font-size: 11px;
+      font-weight: 750;
+    }
+
+    .sample-detail-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #f5f7fa;
+    }
+
+    .sample-detail-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .sample-detail-table th,
+    .sample-detail-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(12, 15, 20, 0.08);
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .blanket-status-select.status-pending {
+      border-color: rgba(245, 158, 11, 0.28);
+      background: #fff7e8;
+      color: #925b05;
+    }
+
+    .blanket-status-select.status-active {
+      border-color: rgba(44, 110, 232, 0.25);
+      background: #edf4ff;
+      color: #245dbb;
+    }
+
+    .blanket-status-select.status-sampled {
+      border-color: rgba(139, 92, 246, 0.24);
+      background: #f4efff;
+      color: #6d3fd1;
+    }
+
+    .blanket-status-select.status-content {
+      border-color: rgba(14, 165, 164, 0.24);
+      background: #eafaf8;
+      color: #087b75;
+    }
+
+    .blanket-status-select.status-success {
+      border-color: rgba(34, 197, 94, 0.25);
+      background: #edfbf1;
+      color: #177a38;
+    }
+
+    .blanket-status-select.status-paused {
+      border-color: rgba(107, 114, 128, 0.22);
+      background: #f1f3f5;
+      color: #626b78;
+    }
+
+    .blanket-status-select.status-abandoned {
+      border-color: rgba(239, 68, 68, 0.24);
+      background: #fff0f0;
+      color: #bd3030;
+    }
+
+    .blanket-preview-table .blanket-record {
+      border: 0;
+      border-radius: 0;
+      padding: 0;
+      background: #fff;
+    }
+
+    .blanket-preview-table tbody tr:hover {
+      background: #fbfcfd;
+    }
+
+    .blanket-records {
+      display: grid;
+      gap: 10px;
+      margin-top: 13px;
+    }
+
+    .blanket-record {
+      border: 1px solid #e1e6eb;
+      border-radius: 17px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .blanket-record-head {
+      align-items: flex-start;
+    }
+
+    .blanket-identity {
+      display: flex;
+      min-width: 0;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .blanket-avatar {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      color: #fff;
+      background: #111827;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .blanket-identity strong,
+    .blanket-identity small {
+      display: block;
+    }
+
+    .blanket-identity small {
+      margin-top: 3px;
+      color: #788291;
+      font-size: 11px;
+    }
+
+    .blanket-stage {
+      border-radius: 999px;
+      padding: 6px 9px;
+      color: #075d58;
+      background: #dff8f5;
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .blanket-record-grid {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .blanket-record-grid div {
+      min-width: 0;
+      border-radius: 11px;
+      padding: 9px;
+      background: #f7f8fa;
+    }
+
+    .blanket-record-grid span,
+    .blanket-record-grid b {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .blanket-record-grid span { color: #7a8491; font-size: 9px; }
+    .blanket-record-grid b { margin-top: 4px; color: #262d37; font-size: 11px; }
+
+    .creator-page-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .creator-row-actions {
+      display: inline-flex;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .row-action.danger {
+      background: #fff0f0;
+      color: #b62c2c;
+    }
+
+    .creator-entry-dialog {
+      position: fixed;
+      inset: 5vh max(18px, calc((100vw - 980px) / 2));
+      z-index: 120;
+      display: none;
+      overflow-y: auto;
+      border: 1px solid rgba(12, 15, 20, 0.12);
+      border-radius: 26px;
+      background: #fff;
+      box-shadow: 0 30px 90px rgba(15, 23, 42, 0.28);
+    }
+
+    .creator-entry-dialog.open {
+      display: block;
+    }
+
+    .creator-entry-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 110;
+      display: none;
+      background: rgba(15, 23, 42, 0.34);
+      backdrop-filter: blur(3px);
+    }
+
+    .creator-entry-backdrop.open {
+      display: block;
+    }
+
+    [data-creator-section][hidden] {
+      display: none !important;
+    }
+
+    .head-followup-board {
+      display: grid;
+      gap: 14px;
+      padding: 0 26px 18px;
+    }
+
+    .head-followup-board .creator-insight {
+      min-height: 0;
+    }
+
+    @media (max-width: 1100px) {
+      .blanket-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .blanket-record-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .blanket-creator-shell { padding: 0 14px 18px; }
+      #creators > .panel > .panel-head { padding-left: 14px; padding-right: 14px; }
+      .blanket-project-head, .blanket-list-head { align-items: stretch; flex-direction: column; }
+      .blanket-overview-grid { grid-template-columns: 1fr; }
+      .blanket-funnel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .blanket-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .blanket-record-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
     .report-box {
       border: 1px solid var(--line);
       border-radius: 22px;
@@ -5035,6 +5719,55 @@
       font-weight: 800;
     }
 
+    .creator-tag-filter {
+      min-width: 150px;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 30px 0 13px;
+      background: #fff;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .creator-tags {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .creator-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 21px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: #4b596d;
+      font-size: 10px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .creator-tag.more {
+      background: #151b25;
+      color: #fff;
+    }
+
+    .creator-tag.level {
+      background: #eaf2ff;
+      color: #245fbd;
+      border: 1px solid #cfdef7;
+    }
+
+    .creator-tag.category {
+      background: #f3eaff;
+      color: #7540bd;
+      border: 1px solid #e1d0f7;
+    }
+
     .creator-note {
       color: var(--muted);
       font-size: 12px;
@@ -5068,6 +5801,69 @@
       white-space: nowrap;
     }
 
+    #creatorHeadResources .table-wrap {
+      padding-bottom: 26px;
+    }
+
+    #creatorHeadResources .creator-head-table thead th {
+      height: 52px;
+      padding-top: 15px;
+      padding-bottom: 15px;
+    }
+
+    #headCreatorRows td {
+      min-height: 82px;
+      padding-top: 15px;
+      padding-bottom: 15px;
+      vertical-align: middle;
+    }
+
+    #headCreatorRows tr:not(:last-child) td {
+      border-bottom: 5px solid #f3f5f7;
+    }
+
+    #creatorHeadResources .creator-head-table th:nth-child(8),
+    #creatorHeadResources .creator-head-table td:nth-child(8) {
+      width: 280px !important;
+      min-width: 280px !important;
+      max-width: 280px;
+    }
+
+    #creatorHeadResources .creator-head-table td:nth-child(8) .creator-row-note {
+      width: 100%;
+      max-width: 250px;
+      line-height: 1.5;
+      word-break: normal;
+      overflow-wrap: normal;
+    }
+
+    #creatorHeadResources .creator-head-table th:nth-child(11),
+    #creatorHeadResources .creator-head-table td:nth-child(11) {
+      width: 112px;
+      min-width: 112px;
+      white-space: nowrap;
+    }
+
+    #headCreatorRows .creator-profile {
+      gap: 12px;
+      margin: 0 auto;
+    }
+
+    #headCreatorRows td:first-child > small {
+      display: block;
+      margin-top: 9px;
+      color: #687386;
+      line-height: 1.45;
+    }
+
+    #headCreatorRows .creator-tags {
+      margin-top: 7px;
+    }
+
+    #headCreatorRows .creator-row-actions {
+      align-items: center;
+    }
+
     .creator-status {
       display: inline-flex;
       align-items: center;
@@ -5091,6 +5887,29 @@
     .creator-status.good {
       background: rgba(23, 210, 202, 0.14);
       color: #087b75;
+    }
+
+    .creator-status.video {
+      background: #eaf2ff;
+      color: #245fbd;
+    }
+
+    .creator-status.live {
+      background: #f3eaff;
+      color: #7540bd;
+    }
+
+    .creator-status.video-live {
+      background: linear-gradient(90deg, #eaf2ff 0 50%, #f3eaff 50%);
+      color: #4e4d9f;
+    }
+
+    [data-row-edit] {
+      cursor: pointer;
+    }
+
+    [data-row-edit]:hover td {
+      background: #f8fafc;
     }
 
     .creator-status.warn {
@@ -5315,6 +6134,11 @@
       border-radius: 18px;
       background: #fff;
       padding: 14px 16px;
+    }
+
+    .history-item.latest {
+      border-color: rgba(23, 210, 202, 0.38);
+      background: #f1fcfb;
     }
 
     .history-item b,
@@ -5557,7 +6381,14 @@
         <button class="tab active" data-view="overview" type="button">总览</button>
         <button class="tab" data-view="reports" type="button">日报中心</button>
         <button class="tab" data-view="tasks" type="button">任务中心</button>
-        <button class="tab" data-view="creators" type="button">达人中心</button>
+        <div class="tab-menu" id="creatorNavMenu">
+          <button class="tab" id="creatorNavTrigger" data-view="creators" type="button" aria-expanded="false">达人中心</button>
+          <div class="tab-dropdown" aria-label="达人中心板块">
+            <button class="active" type="button" data-creator-page="blanket">毛毯项目跟进</button>
+            <button type="button" data-creator-page="head">头部达人跟进</button>
+            <button type="button" data-creator-page="all">达人库</button>
+          </div>
+        </div>
         <button class="tab" data-view="sop" type="button">运营学院</button>
       </nav>
       <div class="top-actions">
@@ -5613,7 +6444,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel creator-main-panel">
           <div class="panel-head">
             <div>
               <h2>多店铺总览</h2>
@@ -5830,7 +6661,7 @@
               </div>
               <div class="field">
                 <label>截止时间</label>
-                <input name="due" type="date" />
+                <input name="due" type="datetime-local" />
               </div>
               <div class="field">
                 <label>状态</label>
@@ -6117,15 +6948,78 @@
         <div class="panel">
           <div class="panel-head">
             <div>
-              <h2>达人中心</h2>
-              <p class="sub">Excel 作为初始迁移数据，后续在平台内维护达人状态、负责人、下次跟进和备注。</p>
+              <h2 id="creatorPageTitle">毛毯项目跟进</h2>
             </div>
-            <span class="badge blue" id="creatorImportMeta">已导入</span>
+            <div class="creator-page-actions">
+              <span class="badge blue" id="creatorImportMeta">已导入</span>
+              <button class="primary" type="button" data-open-creator-form>＋ 录入达人</button>
+            </div>
           </div>
-          <div class="creator-hub">
+          <div class="blanket-creator-shell">
+            <div class="blanket-overview-grid" data-creator-section="blanket">
+              <div class="blanket-overview-card">
+                <div class="blanket-overview-title">
+                  <h3>项目数据一览</h3>
+                  <p class="sub">由下方达人记录自动统计，点击指标可直接筛选。</p>
+                </div>
+                <div class="blanket-metrics" id="blanketOverviewMetrics"></div>
+              </div>
+              <div class="blanket-overview-card">
+                <div class="blanket-overview-title">
+                  <h3>跟进事项</h3>
+                  <p class="sub">优先显示风险和待推进达人。</p>
+                </div>
+                <div class="blanket-alerts" id="blanketFollowupList"></div>
+              </div>
+            </div>
+            <div class="blanket-list-card" data-creator-section="blanket">
+              <div class="blanket-list-head">
+                <div>
+                  <h3>毛毯项目达人</h3>
+                  <p class="sub">统一维护达人合作、寄样进度、负责人和跟进结果。</p>
+                </div>
+                <span class="blanket-preview-note">本地预览 · 示例数据</span>
+              </div>
+              <div class="blanket-toolbar">
+                <div class="blanket-quick-filters">
+                  <button class="blanket-filter active" type="button" data-blanket-filter="all">全部</button>
+                  <button class="blanket-filter" type="button" data-blanket-filter="pending">待推进</button>
+                  <button class="blanket-filter" type="button" data-blanket-filter="sampled">已寄样</button>
+                  <button class="blanket-filter" type="button" data-blanket-filter="content">已出内容</button>
+                  <button class="blanket-filter" type="button" data-blanket-filter="success">已出单</button>
+                  <button class="blanket-filter" type="button" data-blanket-filter="risk">风险</button>
+                </div>
+                <select class="creator-tag-filter" id="blanketLevelFilter" aria-label="按达人层级筛选"><option value="">全部层级</option><option>头达</option><option>腰部</option><option>长尾</option><option>新达人</option></select>
+                <select class="creator-tag-filter" id="blanketCategoryFilter" aria-label="按达人类目筛选"><option value="">全部类目</option><option>家居</option><option>个护</option><option>母婴</option><option>宠物</option><option>户外</option><option>其他</option></select>
+                <input id="blanketCreatorSearch" type="search" placeholder="搜索达人、负责人、产品或状态" />
+              </div>
+              <div class="table-wrap" id="blanketCreatorCards">
+                <table class="creator-head-table blanket-preview-table">
+                  <thead>
+                    <tr>
+                      <th>达人</th>
+                      <th>视频/直播</th>
+                      <th>寄样产品</th>
+                      <th>店铺</th>
+                      <th>合作佣金</th>
+                      <th>广告佣金</th>
+                      <th>合作情况</th>
+                      <th>跟进状态</th>
+                      <th>负责人</th>
+                      <th>更新日期</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="blanketCreatorRows"></tbody>
+                </table>
+              </div>
+            </div>
+          <div class="creator-hub" data-creator-section="all" hidden>
             <div class="metrics" id="creatorMetrics"></div>
             <div class="creator-top-search">
               <input class="creator-search" id="creatorSearch" type="search" placeholder="搜索达人、产品、状态、负责人" />
+              <select class="creator-tag-filter" id="creatorLevelFilter" aria-label="按达人层级筛选"><option value="">全部层级</option><option>头达</option><option>腰部</option><option>长尾</option><option>新达人</option></select>
+              <select class="creator-tag-filter" id="creatorCategoryFilter" aria-label="按达人类目筛选"><option value="">全部类目</option><option>家居</option><option>个护</option><option>母婴</option><option>宠物</option><option>户外</option><option>其他</option></select>
               <div class="creator-note">头像可用于区分达人；头达头像可点击查看历史维护记录。</div>
             </div>
             <div class="creator-grid">
@@ -6141,13 +7035,34 @@
           </div>
         </div>
 
-        <div class="panel section-gap">
+        <div class="panel section-gap" id="creatorHeadResources" data-creator-section="head" hidden>
           <div class="panel-head">
             <div>
               <h2>头达跟进</h2>
               <p class="sub">优先看近7日GMV、合作佣金、广告佣金，并直接维护跟进状态。</p>
             </div>
-            <span class="badge amber" id="headCreatorCount">0 位头达</span>
+            <div>
+              <select class="creator-tag-filter" id="headLevelFilter" aria-label="按头达层级筛选"><option value="">全部层级</option><option>头达</option><option>腰部</option><option>长尾</option><option>新达人</option></select>
+              <select class="creator-tag-filter" id="headCategoryFilter" aria-label="按头达类目筛选"><option value="">全部类目</option><option>家居</option><option>个护</option><option>母婴</option><option>宠物</option><option>户外</option><option>其他</option></select>
+              <span class="badge amber" id="headCreatorCount">0 位头达</span>
+            </div>
+          </div>
+          <div class="head-followup-board">
+            <div class="metrics" id="headFollowupMetrics"></div>
+            <div class="creator-grid">
+              <div class="creator-insight">
+                <h3>头达跟进看板</h3>
+                <div class="list" id="headFollowupQueue"></div>
+              </div>
+              <div class="creator-insight">
+                <h3>执行规则</h3>
+                <div class="list">
+                  <div class="item"><span class="dot red"></span><div><b>先处理待跟进</b><small>优先处理尚未确认合作或寄样的头达。</small></div></div>
+                  <div class="item"><span class="dot amber"></span><div><b>再维护高产达人</b><small>结合近7日GMV、合作状态和新品匹配度安排沟通。</small></div></div>
+                  <div class="item"><span class="dot green"></span><div><b>每次留下结果</b><small>更新负责人、合作情况和跟进备注，避免重复联系。</small></div></div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="creator-head-table">
@@ -6155,7 +7070,8 @@
                 <tr>
                   <th>达人</th>
                   <th>视频/直播</th>
-                  <th>带货产品</th>
+                  <th>寄样产品</th>
+                  <th>店铺</th>
                   <th>近7日GMV(k)</th>
                   <th>合作佣金</th>
                   <th>广告佣金</th>
@@ -6163,7 +7079,6 @@
                   <th>跟进状态</th>
                   <th>负责人</th>
                   <th>更新日期</th>
-                  <th>下次跟进</th>
                   <th>操作</th>
                 </tr>
               </thead>
@@ -6172,7 +7087,7 @@
           </div>
         </div>
 
-        <div class="panel section-gap">
+        <div class="panel section-gap" id="creatorLegacyResources" data-creator-section="all" hidden>
           <div class="panel-head">
             <div>
               <h2>达人登记明细</h2>
@@ -6190,10 +7105,10 @@
                   <th>日期/更新</th>
                   <th>是否发视频</th>
                   <th>直播状态</th>
-                  <th>带货产品</th>
+                  <th>寄样产品</th>
+                  <th>店铺</th>
                   <th>跟进状态</th>
                   <th>负责人</th>
-                  <th>下次跟进</th>
                   <th>操作</th>
                 </tr>
               </thead>
@@ -6210,13 +7125,14 @@
           </div>
         </div>
 
-        <div class="panel section-gap">
+        <div class="creator-entry-backdrop" id="creatorEntryBackdrop"></div>
+        <div class="panel creator-entry-dialog" id="creatorEntryDialog" hidden>
           <div class="panel-head">
             <div>
               <h2>达人信息录入</h2>
               <p class="sub">新增普通达人或头达，支持头像录入，便于后续按人跟进和复盘。</p>
             </div>
-            <span class="badge green">新增通道</span>
+            <button class="small-btn" id="closeCreatorEntry" type="button">关闭</button>
           </div>
           <div class="creator-hub">
             <form class="form-grid" id="creatorForm">
@@ -6245,9 +7161,12 @@
                 <input name="contact" placeholder="可填脱敏信息或后台联系" />
               </div>
               <div class="field">
-                <label>带货产品</label>
+                <label>寄样产品</label>
                 <input name="product" placeholder="JZZ / JDZ / 酒店枕2pcs" />
               </div>
+              <div class="field"><label>店铺</label><select name="shop"><option value="">请选择</option><option>DreamWeave</option><option>sweet dream</option><option>Dreamland</option><option>Dreamdaily</option><option>MoonDream</option><option>Himood Smile</option></select></div>
+              <div class="field"><label>层级标签</label><select name="levelTag"><option value="">请选择</option><option>头达</option><option>腰部</option><option>长尾</option><option>新达人</option></select></div>
+              <div class="field"><label>类目标签</label><select name="categoryTag"><option value="">请选择</option><option>家居</option><option>个护</option><option>母婴</option><option>宠物</option><option>户外</option><option>其他</option></select></div>
               <div class="field">
                 <label>内容类型</label>
                 <select name="videoStatus">
@@ -6272,10 +7191,6 @@
               <div class="field">
                 <label>负责人</label>
                 <input name="owner" placeholder="运营A" />
-              </div>
-              <div class="field">
-                <label>下次跟进</label>
-                <input name="nextDate" type="date" />
               </div>
               <div class="field">
                 <label>近7日GMV(k)</label>
@@ -7376,9 +8291,16 @@
           <input name="period" />
         </div>
         <div class="field">
-          <label>带货产品</label>
+          <label>寄样产品</label>
           <input name="product" />
         </div>
+        <div class="field"><label>店铺</label><select name="shop"><option value="">请选择</option><option>DreamWeave</option><option>sweet dream</option><option>Dreamland</option><option>Dreamdaily</option><option>MoonDream</option><option>Himood Smile</option></select></div>
+        <div class="field half">
+          <label>寄样规格明细</label>
+          <textarea name="sampleDetails" placeholder="每行一个规格：SKU | 颜色 | 尺寸 | 数量 | 状态"></textarea>
+        </div>
+        <div class="field"><label>层级标签</label><select name="levelTag"><option value="">请选择</option><option>头达</option><option>腰部</option><option>长尾</option><option>新达人</option></select></div>
+        <div class="field"><label>类目标签</label><select name="categoryTag"><option value="">请选择</option><option>家居</option><option>个护</option><option>母婴</option><option>宠物</option><option>户外</option><option>其他</option></select></div>
         <div class="field">
           <label>视频/直播</label>
           <input name="videoStatus" />
@@ -7399,6 +8321,7 @@
           <label>跟进状态</label>
           <select name="followStatus">
             <option>待跟进</option>
+            <option>待确认寄样</option>
             <option>维护中</option>
             <option>已寄样</option>
             <option>已出内容</option>
@@ -7411,10 +8334,6 @@
           <label>负责人</label>
           <input name="owner" />
         </div>
-        <div class="field">
-          <label>下次跟进</label>
-          <input name="nextDate" type="date" />
-        </div>
         <div class="field half">
           <label>合作情况</label>
           <textarea name="relationship"></textarea>
@@ -7424,7 +8343,7 @@
           <textarea name="followNote"></textarea>
         </div>
         <div class="form-actions">
-          <button class="ghost" id="deleteCustomCreator" type="button">删除平台新增达人</button>
+          <button class="ghost" id="deleteCustomCreator" type="button">从当前栏目移出</button>
           <button class="primary" type="submit">保存整行</button>
         </div>
       </form>
@@ -7440,6 +8359,18 @@
         <button class="small-btn" id="closeCreatorHistoryModal" type="button">关闭</button>
       </div>
       <div id="creatorHistoryContent"></div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="creatorSampleModal" hidden>
+    <div class="creator-modal" role="dialog" aria-modal="true" aria-labelledby="creatorSampleTitle">
+      <div class="creator-modal-head">
+        <div>
+          <span>毛毯项目寄样</span>
+          <h3 id="creatorSampleTitle">完整寄样明细</h3>
+        </div>
+        <button class="small-btn" id="closeCreatorSampleModal" type="button">关闭</button>
+      </div>
+      <div id="creatorSampleContent"></div>
     </div>
   </div>
   <div class="modal-backdrop" id="taskResultModal" hidden>
@@ -7487,9 +8418,21 @@
   <script src="assets/creator-data.js"></script>
   <script>
     const storeKey = "tiktok_ops_workbench_v1";
+    const currentAuthorKey = "tiktok_ops_current_author";
     const cloudEndpoint = "/api/state";
-    const today = new Date().toISOString().slice(0, 10);
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+    function localDateValue(date = new Date()) {
+      const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+      return localTime.toISOString().slice(0, 10);
+    }
+    const today = localDateValue();
+    const yesterday = localDateValue(new Date(Date.now() - 86400000));
+    function isPastDue(value) {
+      if (!value) return false;
+      const text = String(value);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text < today;
+      const timestamp = new Date(text).getTime();
+      return Number.isFinite(timestamp) && timestamp < Date.now();
+    }
 
     const defaultData = {
       entries: [],
@@ -7498,6 +8441,9 @@
       reports: [],
       reportAnalyses: [],
       customCreators: [],
+      deletedCreators: [],
+      blanketRemovedCreators: [],
+      headRemovedCreators: [],
       creatorEdits: {},
       creatorHistory: []
     };
@@ -8083,6 +9029,9 @@
         reports,
         reportAnalyses: [],
         customCreators: structuredClone(state?.customCreators || []),
+        deletedCreators: structuredClone(state?.deletedCreators || []),
+        blanketRemovedCreators: structuredClone(state?.blanketRemovedCreators || []),
+        headRemovedCreators: structuredClone(state?.headRemovedCreators || []),
         creatorEdits: structuredClone(state?.creatorEdits || {}),
         creatorHistory: structuredClone(state?.creatorHistory || [])
       };
@@ -8118,6 +9067,9 @@
         reports: Array.isArray(data?.reports) ? data.reports : [],
         reportAnalyses: Array.isArray(data?.reportAnalyses) ? data.reportAnalyses : [],
         customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
+        deletedCreators: Array.isArray(data?.deletedCreators) ? data.deletedCreators : [],
+        blanketRemovedCreators: Array.isArray(data?.blanketRemovedCreators) ? data.blanketRemovedCreators : [],
+        headRemovedCreators: Array.isArray(data?.headRemovedCreators) ? data.headRemovedCreators : [],
         creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
         creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
       };
@@ -8146,6 +9098,9 @@
       reports: "id",
       reportAnalyses: "key",
       customCreators: "id",
+      deletedCreators: "id",
+      blanketRemovedCreators: "id",
+      headRemovedCreators: "id",
       creatorHistory: "id"
     };
 
@@ -8358,7 +9313,7 @@
         { ...entry, source: "历史录入" }
       ]));
       const reports = uniqueReportsBySlot((state.reports || [])
-        .filter((report) => report.status !== "草稿" && Array.isArray(report.roleMetrics))
+        .filter((report) => report.status === "已提交" && Array.isArray(report.roleMetrics))
         .sort((a, b) => String(a.updatedAt || a.createdAt || "").localeCompare(String(b.updatedAt || b.createdAt || ""))));
 
       reports.forEach((report) => {
@@ -8554,7 +9509,7 @@
         }
       });
       const currentDate = latestDate();
-      uniqueReportsBySlot((state.reports || []).filter((report) => report.status !== "草稿" && report.date === currentDate)).forEach((report) => {
+      uniqueReportsBySlot((state.reports || []).filter((report) => report.status === "已提交" && report.date === currentDate)).forEach((report) => {
         (report.closureItems?.anomalies || []).forEach((item, index) => {
           if (!item.issue) return;
           anomalies.push({
@@ -8963,8 +9918,8 @@
           <div class="task-meta">
             <span class="badge ${task.priority === "紧急" ? "red" : task.priority === "重要" ? "amber" : "green"}">${task.priority}</span>
             <span class="badge">${task.assignee || "-"}</span>
-            <span class="badge">${task.due || "无截止"}</span>
-            ${task.reviewAt ? `<span class="badge">复查 ${task.reviewAt}</span>` : ""}
+            <span class="badge">${task.due ? escapeHtml(formatDateTime(task.due)) : "无截止"}</span>
+            ${task.reviewAt ? `<span class="badge">复查 ${escapeHtml(formatDateTime(task.reviewAt))}</span>` : ""}
           </div>
           ${task.result ? `<div class="task-result"><b>执行结果</b><br>${escapeHtml(task.result)}${task.evidence ? `<br><b>证据</b><br>${escapeHtml(task.evidence)}` : ""}${task.reviewResult ? `<br><b>复查结论</b><br>${escapeHtml(task.reviewResult)}` : ""}</div>` : ""}
           <div class="task-actions">
@@ -9114,6 +10069,84 @@
       renderReportRoleFields(role);
       renderReportClosureFields(role);
       renderPendingReviewQueue();
+    }
+
+    function currentReportAuthor() {
+      const formAuthor = String(document.querySelector("#reportForm [name='author']")?.value || "").trim();
+      return formAuthor || String(localStorage.getItem(currentAuthorKey) || "").trim();
+    }
+
+    function setInputValue(input, value) {
+      if (!input) return;
+      input.value = value ?? "";
+    }
+
+    function fillRepeatedSection(scopeSelector, name, rows) {
+      const section = document.querySelector(`${scopeSelector} [data-repeat-section="${name}"]`);
+      if (!section) return;
+      const values = Array.isArray(rows) ? rows : [];
+      while (repeatSectionRows(section, name).length < Math.max(Number(section.dataset.minRows || 1), values.length)) {
+        addRepeatedRow(name, section);
+      }
+      repeatSectionRows(section, name).forEach((row, index) => {
+        clearRepeatedRow(row);
+        const data = values[index] || {};
+        row.querySelectorAll("[data-part]").forEach((input) => setInputValue(input, data[input.dataset.part]));
+      });
+      renumberRepeatSection(section, name);
+    }
+
+    function fillReportRoleData(report) {
+      const data = report.roleData || {};
+      if (Array.isArray(data.matrix)) {
+        data.matrix.forEach((item) => {
+          const row = [...document.querySelectorAll("#reportRoleFields .report-store-row")]
+            .find((candidate) => candidate.dataset.store === item.store);
+          if (!row) return;
+          row.querySelectorAll("[data-report-key]").forEach((input) => setInputValue(input, item.values?.[input.dataset.reportKey]));
+        });
+      }
+      Object.entries(data.summary || {}).forEach(([key, value]) => setInputValue(document.querySelector(`#reportRoleFields [data-role-field="${key}"]`), value));
+      Object.entries(data).forEach(([key, value]) => {
+        if (typeof value !== "object") setInputValue(document.querySelector(`#reportRoleFields [data-role-field="${key}"]`), value);
+      });
+      if (report.role === "BD") {
+        fillRepeatedSection("#reportRoleFields", "responsibleStores", data.responsibleStoreRows || []);
+        fillRepeatedSection("#reportRoleFields", "samples", data.samples || []);
+        fillRepeatedSection("#reportRoleFields", "followups", data.followups || []);
+      } else if (report.role === "店铺维护") {
+        fillRepeatedSection("#reportRoleFields", "plugin", data.plugins || (data.plugin ? [data.plugin] : []));
+        fillRepeatedSection("#reportRoleFields", "inspectionIssues", data.inspectionIssues || []);
+      }
+    }
+
+    function fillReportClosureData(report) {
+      const items = report.closureItems || {};
+      fillRepeatedSection("#reportClosureFields", "anomaly", items.anomalies || []);
+      fillRepeatedSection("#reportClosureFields", "review", items.reviews || []);
+      fillRepeatedSection("#reportClosureFields", "task", items.tasks || []);
+      fillRepeatedSection("#reportClosureFields", "approval", items.approvals || []);
+    }
+
+    function editTodayReport(reportId) {
+      const report = (state.reports || []).find((item) => item.id === reportId);
+      if (!report || report.date !== today || normalizedReportAuthor(report.author) !== normalizedReportAuthor(currentReportAuthor())) {
+        showToast("只能编辑本人今天提交的日报");
+        return;
+      }
+      const form = document.getElementById("reportForm");
+      form.dataset.editingReportId = report.id;
+      form.elements.date.value = report.date;
+      form.elements.role.value = report.role;
+      form.elements.author.value = report.author;
+      form.elements.risk.value = report.risk || "无";
+      form.elements.reportStatus.value = report.status || "已提交";
+      updateReportHelp();
+      fillReportRoleData(report);
+      fillReportClosureData(report);
+      renderPendingReviewQueue();
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+      showToast("已载入本人今日日报，可修改后重新保存");
     }
 
     function templateField(label, key, options = {}) {
@@ -9425,7 +10458,7 @@
           <div class="review-queue-item">
             <div>
               <b>${escapeHtml(task.title)}</b>
-              <small>${escapeHtml(task.assignee || "未分配")}｜${escapeHtml(task.result || "尚未提交执行结果")}｜复查 ${escapeHtml(task.reviewAt || "未设置")}</small>
+              <small>${escapeHtml(task.assignee || "未分配")}｜${escapeHtml(task.result || "尚未提交执行结果")}｜复查 ${task.reviewAt ? escapeHtml(formatDateTime(task.reviewAt)) : "未设置"}</small>
             </div>
             <button class="row-control" data-bring-review="${task.id}" type="button">带入复查</button>
           </div>
@@ -9803,7 +10836,6 @@
 
     function sameReportSlot(report, data) {
       if (report.date !== data.date || report.role !== data.role) return false;
-      if (data.role === "售后组" || data.role === "店铺维护") return true;
       return normalizedReportAuthor(report.author) === normalizedReportAuthor(data.author);
     }
 
@@ -9921,7 +10953,10 @@
         ? roleData.responsibleStores
         : data.role === "其他" ? "个人" : stores.join("、");
       state.reports ||= [];
-      const existingIndex = state.reports.findIndex((item) => sameReportSlot(item, data));
+      const editingReportId = form.dataset.editingReportId || "";
+      const existingIndex = editingReportId
+        ? state.reports.findIndex((item) => item.id === editingReportId)
+        : state.reports.findIndex((item) => sameReportSlot(item, data));
       const existing = existingIndex >= 0 ? state.reports[existingIndex] : null;
       const existingTasks = existing ? state.tasks.filter((task) => task.sourceReport === existing.id) : [];
       if (existingTasks.some((task) => task.status !== "待处理")) {
@@ -9959,9 +10994,11 @@
       }
 
       saveState();
+      localStorage.setItem(currentAuthorKey, data.author.trim());
       document.getElementById("weeklyRole").value = data.role;
       document.getElementById("weeklyAnchor").value = data.date;
       form.reset();
+      delete form.dataset.editingReportId;
       form.elements.date.value = today;
       updateReportHelp();
       const message = data.reportStatus === "已提交"
@@ -9977,9 +11014,7 @@
     }
 
     function reportSlotKey(report) {
-      const author = report.role === "售后组" || report.role === "店铺维护"
-        ? "team"
-        : normalizedReportAuthor(report.author);
+      const author = normalizedReportAuthor(report.author);
       return `${report.date}|${report.role}|${author}`;
     }
 
@@ -10247,7 +11282,7 @@
       }
 
       const previousRange = { start: addDays(range.start, -7), end: addDays(range.end, -7) };
-      const previousReports = (state.reports || []).filter((report) => report.role === role && report.date >= previousRange.start && report.date <= previousRange.end && Array.isArray(report.roleMetrics));
+      const previousReports = (state.reports || []).filter((report) => report.status === "已提交" && report.role === role && report.date >= previousRange.start && report.date <= previousRange.end && Array.isArray(report.roleMetrics));
       const previousAggregates = aggregateWeeklyReports(previousReports, role);
 
       if (role === "店群运营") {
@@ -10258,7 +11293,8 @@
         const productCardGmv = aggregateTotal(aggregates, "productCardGmv");
         const adSpend = aggregateTotal(aggregates, "adSpend");
         const afterSalesReports = (state.reports || []).filter((report) =>
-          report.role === "售后组"
+          report.status === "已提交"
+          && report.role === "售后组"
           && report.date >= range.start
           && report.date <= range.end
           && Array.isArray(report.roleMetrics)
@@ -10380,9 +11416,9 @@
     }
 
     function buildAiAnalysisPayload(role, range) {
-      const currentReports = uniqueReportsBySlot((state.reports || []).filter((report) => report.date >= range.start && report.date <= range.end));
+      const currentReports = uniqueReportsBySlot((state.reports || []).filter((report) => report.status === "已提交" && report.date >= range.start && report.date <= range.end));
       const previousRange = { start: addDays(range.start, -7), end: addDays(range.end, -7) };
-      const previousReports = uniqueReportsBySlot((state.reports || []).filter((report) => report.date >= previousRange.start && report.date <= previousRange.end));
+      const previousReports = uniqueReportsBySlot((state.reports || []).filter((report) => report.status === "已提交" && report.date >= previousRange.start && report.date <= previousRange.end));
       const currentIds = new Set(currentReports.map((report) => report.id));
       const compactReport = (report) => ({
         id: report.id,
@@ -10585,13 +11621,15 @@
 
     function renderOverallWeeklyReport(range) {
       const reports = uniqueReportsBySlot((state.reports || []).filter((report) =>
-        report.date >= range.start
+        report.status === "已提交"
+        && report.date >= range.start
         && report.date <= range.end
         && Array.isArray(report.roleMetrics)
       ));
       const previousRange = { start: addDays(range.start, -7), end: addDays(range.end, -7) };
       const previousReports = uniqueReportsBySlot((state.reports || []).filter((report) =>
-        report.date >= previousRange.start
+        report.status === "已提交"
+        && report.date >= previousRange.start
         && report.date <= previousRange.end
         && Array.isArray(report.roleMetrics)
       ));
@@ -10619,7 +11657,7 @@
       const previousTasks = (state.tasks || []).filter((task) => previousReportIds.has(task.sourceReport));
       const closed = tasks.filter((task) => task.status === "已完成").length;
       const pendingReview = tasks.filter((task) => task.status === "待复盘").length;
-      const overdue = tasks.filter((task) => task.status !== "已完成" && task.due && task.due < today).length;
+      const overdue = tasks.filter((task) => task.status !== "已完成" && isPastDue(task.due)).length;
       const highRisks = reports.filter((report) => report.risk === "高").length;
       const expected = ["售后组", "BD", "店铺维护", "店群运营"].reduce((sum, role) => sum + weeklyExpectedReports(role, range), 0);
       const coveredStores = REPORT_STORES.filter((store) =>
@@ -10748,7 +11786,7 @@
         renderOverallWeeklyReport(range);
         return;
       }
-      const reports = uniqueReportsBySlot((state.reports || []).filter((report) => report.role === role && report.date >= range.start && report.date <= range.end && Array.isArray(report.roleMetrics)));
+      const reports = uniqueReportsBySlot((state.reports || []).filter((report) => report.status === "已提交" && report.role === role && report.date >= range.start && report.date <= range.end && Array.isArray(report.roleMetrics)));
       const aggregates = aggregateWeeklyReports(reports, role);
       const reportIds = new Set(reports.map((report) => report.id));
       const tasks = (state.tasks || []).filter((task) => reportIds.has(task.sourceReport));
@@ -10757,7 +11795,7 @@
         if (!tasks.some((item) => item.id === task.id)) tasks.push(task);
       });
       const closed = tasks.filter((task) => task.status === "已完成").length;
-      const overdue = tasks.filter((task) => task.status !== "已完成" && task.due && task.due < today).length;
+      const overdue = tasks.filter((task) => task.status !== "已完成" && isPastDue(task.due)).length;
       const pendingReview = tasks.filter((task) => task.status === "待复盘").length;
       const displayRows = weeklyRows(role);
       const coveredStores = role === "店铺维护"
@@ -10833,10 +11871,10 @@
         const dateCompare = String(b.date || "").localeCompare(String(a.date || ""));
         return dateCompare || String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
       });
-      const todayReports = uniqueReportsBySlot(allReports.filter((item) => item.date === today));
+      const todayReports = uniqueReportsBySlot(allReports.filter((item) => item.date === today && item.status === "已提交"));
       const highRisks = todayReports.filter((item) => item.risk === "高").length;
       const reportTasks = state.tasks.filter((item) => item.sourceReport && item.status !== "已完成");
-      const overdue = reportTasks.filter((item) => item.due && item.due < today).length;
+      const overdue = reportTasks.filter((item) => isPastDue(item.due)).length;
       const submittedUnits = todayReports.length;
 
       document.getElementById("reportProgress").textContent = `${submittedUnits}/7 已提交`;
@@ -10855,11 +11893,17 @@
       reportPage = Math.min(Math.max(1, reportPage), totalReportPages);
       const reportPageStart = (reportPage - 1) * reportPageSize;
       const pageReports = allReports.slice(reportPageStart, reportPageStart + reportPageSize);
-      document.getElementById("reportCards").innerHTML = pageReports.length ? pageReports.map((report) => `
+      document.getElementById("reportCards").innerHTML = pageReports.length ? pageReports.map((report) => {
+        const canEditToday = report.date === today
+          && normalizedReportAuthor(report.author) === normalizedReportAuthor(currentReportAuthor());
+        return `
         <article class="report-card">
           <div class="report-card-head">
             <div><b>${escapeHtml(report.role)}｜${escapeHtml(report.author)}</b><br><small>${escapeHtml(report.date)} · ${escapeHtml(report.stores || "未指定店铺")}</small></div>
-            <span class="badge ${report.risk === "高" ? "red" : report.risk === "中" ? "amber" : "green"}">${escapeHtml(report.risk || "无")}风险</span>
+            <div class="report-card-actions">
+              ${canEditToday ? `<button class="small-btn" data-edit-report="${escapeHtml(report.id)}" type="button">编辑今日日报</button>` : ""}
+              <span class="badge ${report.risk === "高" ? "red" : report.risk === "中" ? "amber" : "green"}">${escapeHtml(report.risk || "无")}风险</span>
+            </div>
           </div>
           ${renderReportMetricTable(report)}
           ${report.results || !Array.isArray(report.roleMetrics) || !report.roleMetrics.length ? `<div class="report-section"><strong>今日结果</strong><p>${escapeHtml(reportResultsText(report))}</p></div>` : ""}
@@ -10868,7 +11912,8 @@
           <div class="report-section"><strong>今日任务</strong><p>${escapeHtml(report.tasksText || "无")}</p>${renderReportTaskLinks(report)}</div>
           <div class="report-section"><strong>即时审批记录</strong><p>${escapeHtml(report.approvals || "无")}</p></div>
         </article>
-      `).join("") : `<div class="empty">暂无日报。提交后系统会自动生成团队摘要并同步任务。</div>`;
+      `;
+      }).join("") : `<div class="empty">暂无日报。提交后系统会自动生成团队摘要并同步任务。</div>`;
       const reportPager = document.getElementById("reportPager");
       reportPager.hidden = allReports.length <= reportPageSize;
       document.getElementById("reportPageInfo").textContent = `第 ${reportPage} / ${totalReportPages} 页 · 每页10条`;
@@ -10954,10 +11999,10 @@
         action,
         name: data.name || record.name || "",
         product: data.product || record.product || "",
+        shop: data.shop || record.shop || "",
         gmvK: Number(data.gmvK || record.gmvK || 0),
         followStatus: data.followStatus || "待跟进",
         owner: data.owner || "",
-        nextDate: data.nextDate || "",
         relationship: data.relationship || "",
         followNote: data.followNote || ""
       });
@@ -10966,11 +12011,98 @@
       }
     }
 
-    function creatorRecords() {
+    const BLANKET_PROJECT_CREATORS = [
+      {
+        id: "blanket-luna-home",
+        source: "毛毯项目",
+        tier: "头达",
+        avatar: "",
+        name: "Luna Home",
+        contact: "@lunahome · WhatsApp",
+        levelTag: "头达",
+        categoryTag: "家居",
+        period: "2026-07-30",
+        videoStatus: "直播",
+        liveStatus: "直播",
+        product: "灰色毛毯 × 2",
+        shop: "DreamWeave",
+        samples: [
+          { sku: "BL-GY-L", color: "灰色", size: "L", qty: 1, status: "已寄出" },
+          { sku: "BL-GY-XL", color: "灰色", size: "XL", qty: 1, status: "已寄出" },
+          { sku: "BL-WH-XL", color: "白色", size: "XL", qty: 2, status: "已寄出" },
+          { sku: "BL-BR-L", color: "棕色", size: "L", qty: 1, status: "待寄出" },
+          { sku: "BL-BR-XL", color: "棕色", size: "XL", qty: 2, status: "待寄出" }
+        ],
+        commission: 0.15,
+        adCommission: 0.05,
+        relationship: "已确认合作并寄样",
+        followStatus: "已寄样",
+        owner: "Amy",
+      },
+      {
+        id: "blanket-mika-living",
+        source: "毛毯项目",
+        tier: "优先达人",
+        avatar: "",
+        name: "Mika Living",
+        contact: "@mikaliving · Email",
+        levelTag: "腰部",
+        categoryTag: "家居",
+        period: "2026-07-27",
+        videoStatus: "视频",
+        liveStatus: "",
+        product: "白色毛毯 × 1",
+        shop: "sweet dream",
+        samples: [
+          { sku: "BL-WH-M", color: "白色", size: "M", qty: 1, status: "已寄出" },
+          { sku: "BL-WH-L", color: "白色", size: "L", qty: 1, status: "已寄出" }
+        ],
+        commission: 0.12,
+        adCommission: 0.03,
+        relationship: "寄样后暂未回复",
+        followStatus: "待跟进",
+        owner: "Leo",
+      },
+      {
+        id: "blanket-sunday-nest",
+        source: "毛毯项目",
+        tier: "普通达人",
+        avatar: "",
+        name: "Sunday Nest",
+        contact: "@sundaynest · TikTok DM",
+        levelTag: "长尾",
+        categoryTag: "个护",
+        period: "2026-07-30",
+        videoStatus: "视频",
+        liveStatus: "",
+        product: "棕色毛毯 × 1",
+        shop: "Dreamland",
+        samples: [
+          { sku: "BL-BR-XL", color: "棕色", size: "XL", qty: 1, status: "待寄出" }
+        ],
+        commission: 0.10,
+        adCommission: 0.02,
+        relationship: "等待确认收件地址",
+        followStatus: "待确认寄样",
+        owner: "Mia",
+      }
+    ];
+
+    function blanketProjectCreators() {
+      const removedIds = new Set((state.blanketRemovedCreators || []).map((item) => item.id));
       return [
+        ...BLANKET_PROJECT_CREATORS,
+        ...(state.customCreators || []).filter((item) => item.source === "毛毯项目")
+      ].filter((item) => !removedIds.has(item.id)).map(creatorDisplayRecord);
+    }
+
+    function creatorRecords() {
+      const records = [
+        ...BLANKET_PROJECT_CREATORS,
         ...(window.IMPORTED_CREATOR_DATA?.records || []),
         ...(state.customCreators || [])
       ];
+      return [...new Map(records.map((item) => [item.id, item])).values()];
     }
 
     function creatorEditFor(id) {
@@ -10983,6 +12115,9 @@
         tier: existing.tier || "",
         period: existing.period || "",
         product: existing.product || "",
+        shop: existing.shop || "",
+        levelTag: existing.levelTag || "",
+        categoryTag: existing.categoryTag || "",
         videoStatus: existing.videoStatus || "",
         liveStatus: existing.liveStatus || "",
         gmvK: existing.gmvK ?? "",
@@ -10991,7 +12126,6 @@
         relationship: existing.relationship || "",
         followStatus: existing.followStatus || "待跟进",
         owner: existing.owner || "",
-        nextDate: existing.nextDate || "",
         followNote: existing.followNote || ""
       };
     }
@@ -10999,9 +12133,12 @@
     function creatorDisplayRecord(record) {
       const edit = creatorEditFor(record.id);
       const merged = { ...record };
-      ["name", "avatar", "contact", "source", "tier", "period", "product", "videoStatus", "liveStatus", "relationship"].forEach((key) => {
+      ["name", "avatar", "contact", "source", "tier", "period", "product", "shop", "videoStatus", "liveStatus", "relationship"].forEach((key) => {
         if (edit[key] !== "") merged[key] = edit[key];
       });
+      if (edit.levelTag !== "") merged.levelTag = edit.levelTag;
+      if (edit.categoryTag !== "") merged.categoryTag = edit.categoryTag;
+      if (Array.isArray(edit.samples)) merged.samples = edit.samples;
       ["gmvK", "commission", "adCommission"].forEach((key) => {
         if (edit[key] !== "" && edit[key] !== undefined) merged[key] = Number(edit[key] || 0);
       });
@@ -11015,7 +12152,7 @@
     }
 
     function creatorAvatar(record, clickable = false) {
-      const attrs = clickable ? ` data-creator-history="${escapeHtml(record.id)}" title="查看头达历史记录"` : "";
+      const attrs = clickable ? ` data-creator-history="${escapeHtml(record.id)}" title="查看达人最新记录和历史记录"` : "";
       const cls = clickable ? "creator-avatar clickable" : "creator-avatar";
       if (record.avatar) {
         return `<span class="${cls}"${attrs}><img src="${escapeHtml(record.avatar)}" alt="${escapeHtml(record.name || "达人头像")}" loading="lazy"></span>`;
@@ -11027,13 +12164,23 @@
       return `
         <div class="creator-profile">
           ${creatorAvatar(record, clickableAvatar)}
-          <span><b>${escapeHtml(record.name || "-")}</b><small>${escapeHtml(record.source || "-")} · ${escapeHtml(record.tier || "-")}</small></span>
+          <span><b>${escapeHtml(record.name || "-")}</b><small>${escapeHtml(record.source || "-")} · ${escapeHtml(record.tier || "-")}</small>${creatorTagSummary(record)}</span>
         </div>
       `;
     }
 
-    function creatorActionButton(record) {
-      return `<button class="row-action" type="button" data-edit-creator="${escapeHtml(record.id)}">编辑</button>`;
+    function creatorTagsFor(record) {
+      return [record.levelTag, record.categoryTag].map((tag) => String(tag || "").trim()).filter(Boolean);
+    }
+
+    function creatorTagSummary(record) {
+      if (!record.levelTag && !record.categoryTag) return "";
+      return `<span class="creator-tags">${record.levelTag ? `<em class="creator-tag level">${escapeHtml(record.levelTag)}</em>` : ""}${record.categoryTag ? `<em class="creator-tag category">${escapeHtml(record.categoryTag)}</em>` : ""}</span>`;
+    }
+
+    function creatorActionButton(record, context = "all") {
+      const removeButton = context === "all" ? "" : `<button class="row-action danger" type="button" data-remove-creator="${escapeHtml(record.id)}" data-remove-context="${context}">移出</button>`;
+      return `<span class="creator-row-actions"><button class="row-action" type="button" data-edit-creator="${escapeHtml(record.id)}">编辑</button>${removeButton}</span>`;
     }
 
     function hasVideo(record) {
@@ -11048,18 +12195,67 @@
 
     function statusBadge(value, type = "") {
       const text = value || "-";
-      const cls = type || (String(text).includes("是") || String(text).includes("视频") || String(text).includes("直播") ? "good" : String(text).includes("否") ? "warn" : "");
+      const hasVideoText = String(text).includes("视频");
+      const hasLiveText = String(text).includes("直播");
+      const contentClass = hasVideoText && hasLiveText ? "video-live" : hasLiveText ? "live" : hasVideoText ? "video" : "";
+      const cls = type || contentClass || (String(text).includes("是") ? "good" : String(text).includes("否") ? "warn" : "");
       return `<span class="creator-status ${cls}">${escapeHtml(text)}</span>`;
+    }
+
+    function sampleItemsFor(record) {
+      return Array.isArray(record.samples) && record.samples.length
+        ? record.samples
+        : [{ sku: "-", color: record.product || "未填写", size: "-", qty: 1, status: "-" }];
+    }
+
+    function serializeSampleItems(record) {
+      if (!Array.isArray(record.samples) || !record.samples.length) return "";
+      return record.samples.map((item) => [
+        item.sku || "-",
+        item.color || "-",
+        item.size || "-",
+        Number(item.qty || 0),
+        item.status || "-"
+      ].join(" | ")).join("\n");
+    }
+
+    function parseSampleItems(value) {
+      return String(value || "").split(/\n+/).map((line) => {
+        const [sku, color, size, qty, status] = line.split("|").map((part) => part.trim());
+        if (!line.trim()) return null;
+        return { sku: sku || "-", color: color || "-", size: size || "-", qty: Math.max(0, Number(qty || 0)), status: status || "-" };
+      }).filter(Boolean);
+    }
+
+    function sampleSummary(record) {
+      const items = sampleItemsFor(record);
+      const totalQty = items.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+      const preview = items.slice(0, 3)
+        .map((item) => `${item.color || "-"} ${item.size || "-"}×${Number(item.qty || 0)}`)
+        .join("、");
+      return `
+        <button class="sample-summary-btn" type="button" data-sample-detail="${escapeHtml(record.id)}" title="查看完整寄样明细">
+          <span class="sample-summary-main">${escapeHtml(preview)}</span>
+          ${items.length > 3 ? `<span class="sample-summary-meta">共 ${items.length} 个规格 / ${totalQty} 件 · 点击查看</span>` : ""}
+        </button>
+      `;
     }
 
     function renderCreatorCenter() {
       const records = creatorRecords().map(creatorDisplayRecord);
+      const blanketRecords = blanketProjectCreators();
       const meta = window.IMPORTED_CREATOR_DATA || {};
       const importedCount = window.IMPORTED_CREATOR_DATA?.records?.length || 0;
       const customCount = state.customCreators?.length || 0;
       const query = (document.getElementById("creatorSearch")?.value || "").trim().toLowerCase();
       const uniqueNames = new Set(records.map((item) => item.name).filter(Boolean));
-      const headCreators = records.filter((item) => item.tier === "头达");
+      const selectedHeadLevel = document.getElementById("headLevelFilter")?.value || "";
+      const selectedHeadCategory = document.getElementById("headCategoryFilter")?.value || "";
+      const headRemovedIds = new Set((state.headRemovedCreators || []).map((item) => item.id));
+      const headCreators = records.filter((item) => (item.tier === "头达" || item.levelTag === "头达")
+        && !headRemovedIds.has(item.id)
+        && (!selectedHeadLevel || item.levelTag === selectedHeadLevel)
+        && (!selectedHeadCategory || item.categoryTag === selectedHeadCategory));
       const posted = records.filter(hasVideo).length;
       const live = records.filter(hasLive).length;
       const gmvK = headCreators.reduce((sum, item) => sum + Number(item.gmvK || 0), 0);
@@ -11072,11 +12268,15 @@
       }, {});
       const topProducts = Object.entries(productCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
       const maxProduct = Math.max(1, ...topProducts.map(([, count]) => count));
-      const filtered = query ? records.filter((item) => {
+      const selectedCreatorLevel = document.getElementById("creatorLevelFilter")?.value || "";
+      const selectedCreatorCategory = document.getElementById("creatorCategoryFilter")?.value || "";
+      const filtered = records.filter((item) => {
         const edit = creatorEditFor(item.id);
-        const text = [item.source, item.tier, item.name, item.product, item.videoStatus, item.liveStatus, item.relationship, item.note, edit.followStatus, edit.owner, edit.followNote].join(" ").toLowerCase();
-        return text.includes(query);
-      }) : records;
+        const text = [item.source, item.tier, item.name, item.product, item.shop, item.videoStatus, item.liveStatus, item.relationship, item.note, edit.followStatus, edit.owner, edit.followNote, ...creatorTagsFor(item)].join(" ").toLowerCase();
+        return (!query || text.includes(query))
+          && (!selectedCreatorLevel || item.levelTag === selectedCreatorLevel)
+          && (!selectedCreatorCategory || item.categoryTag === selectedCreatorCategory);
+      });
       const totalCreatorPages = Math.max(1, Math.ceil(filtered.length / creatorPageSize));
       creatorPage = Math.min(Math.max(1, creatorPage), totalCreatorPages);
       const pageStart = (creatorPage - 1) * creatorPageSize;
@@ -11114,16 +12314,149 @@
         </div>
       `).join("");
 
+      const blanketStatusClass = (status) => ({
+        "待跟进": "status-pending",
+        "待确认寄样": "status-pending",
+        "维护中": "status-active",
+        "已寄样": "status-sampled",
+        "已出内容": "status-content",
+        "已出单": "status-success",
+        "暂停": "status-paused",
+        "放弃": "status-abandoned"
+      }[status] || "status-pending");
+
+      const blanketView = blanketRecords.map((item) => {
+        const edit = state.creatorEdits?.[item.id] || {};
+        const followStatus = edit.followStatus || item.followStatus || "待跟进";
+        const relationship = `${item.relationship || ""} ${edit.followNote || ""}`;
+        const risk = ["暂停", "放弃"].includes(followStatus) || /风险|异常|失联|未回复|延期/.test(relationship);
+        return { item, edit, followStatus, risk };
+      });
+      const blanketCounts = {
+        all: blanketView.length,
+        pending: blanketView.filter(({ followStatus }) => ["待跟进", "待确认寄样"].includes(followStatus)).length,
+        sampled: blanketView.filter(({ followStatus }) => followStatus === "已寄样").length,
+        content: blanketView.filter(({ followStatus }) => followStatus === "已出内容").length,
+        success: blanketView.filter(({ followStatus }) => followStatus === "已出单").length,
+        risk: blanketView.filter(({ risk }) => risk).length
+      };
+      const blanketMetrics = [
+        ["all", "达人总数"],
+        ["pending", "待推进"],
+        ["sampled", "已寄样"],
+        ["content", "已出内容"],
+        ["success", "已出单"],
+        ["risk", "风险达人"]
+      ];
+      document.getElementById("blanketOverviewMetrics").innerHTML = blanketMetrics.map(([key, label]) => `
+        <button class="blanket-metric ${blanketCreatorFilter === key ? "active" : ""}" type="button" data-blanket-summary-filter="${key}">
+          <span>${label}</span><strong>${blanketCounts[key]}</strong>
+        </button>
+      `).join("");
+      const followupItems = blanketView
+        .filter(({ followStatus, risk }) => risk || ["待跟进", "待确认寄样"].includes(followStatus))
+        .sort((a, b) => Number(b.risk) - Number(a.risk))
+        .slice(0, 5);
+      document.getElementById("blanketFollowupList").innerHTML = followupItems.length ? followupItems.map(({ item, followStatus, risk }) => `
+        <button class="blanket-alert ${risk ? "risk" : ""}" type="button" data-edit-creator="${escapeHtml(item.id)}">
+          <span>${escapeHtml(item.name || "未命名达人")} · ${escapeHtml(followStatus)}</span>
+          <b>${escapeHtml(item.owner || "未分配")}</b>
+        </button>
+      `).join("") : `<div class="empty">暂无待推进或风险事项。</div>`;
+
+      document.getElementById("blanketCreatorRows").innerHTML = blanketRecords.map((item) => {
+        const edit = state.creatorEdits?.[item.id] || {};
+        const followStatus = edit.followStatus || item.followStatus || "待跟进";
+        const owner = edit.owner || item.owner || "-";
+        const tags = [
+          item.name,
+          item.tier,
+          item.videoStatus,
+          item.contact,
+          item.product,
+          item.shop,
+          ...creatorTagsFor(item),
+          owner,
+          followStatus,
+          followStatus.includes("寄样") ? "sampled" : ""
+        ].join(" ").toLowerCase();
+        const followOptions = ["待跟进", "待确认寄样", "维护中", "已寄样", "已出内容", "已出单", "暂停", "放弃"];
+        const relationshipText = `${item.relationship || ""} ${edit.followNote || ""}`;
+        const risk = ["暂停", "放弃"].includes(followStatus) || /风险|异常|失联|未回复|延期/.test(relationshipText);
+        const filterKey = ["待跟进", "待确认寄样"].includes(followStatus) ? "pending"
+          : followStatus === "已寄样" ? "sampled"
+          : followStatus === "已出内容" ? "content"
+          : followStatus === "已出单" ? "success"
+          : "";
+        return `
+          <tr class="blanket-record" data-row-edit="${escapeHtml(item.id)}" data-blanket-filter-key="${filterKey}" data-blanket-risk="${risk ? "true" : "false"}" data-blanket-tags="${escapeHtml(tags)}">
+            <td>
+              <div class="creator-profile">
+                ${creatorAvatar(item, true)}
+                <span>
+                  <b>${escapeHtml(item.name || "-")}</b>
+                  <small>${escapeHtml(item.source || "-")} · ${escapeHtml(item.tier || "-")}</small>
+                  <small class="creator-contact">${escapeHtml(item.contact || "-")}</small>
+                  ${creatorTagSummary(item)}
+                </span>
+              </div>
+            </td>
+            <td>${statusBadge(item.videoStatus || item.liveStatus)}</td>
+            <td>${sampleSummary(item)}</td>
+            <td>${escapeHtml(item.shop || "-")}</td>
+            <td>${item.commission ? pct(item.commission * 100) : "-"}</td>
+            <td>${item.adCommission ? pct(item.adCommission * 100) : "-"}</td>
+            <td><span class="creator-row-note">${escapeHtml(item.relationship || "-")}</span></td>
+            <td>
+              <select class="blanket-status-select ${blanketStatusClass(followStatus)}" data-blanket-status="${escapeHtml(item.id)}" aria-label="${escapeHtml(item.name || "达人")}跟进状态">
+                ${followOptions.map((option) => `<option ${option === followStatus ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}
+              </select>
+            </td>
+            <td>${escapeHtml(owner)}</td>
+            <td>${escapeHtml(item.period || "-")}</td>
+            <td>${creatorActionButton(item, "blanket")}</td>
+          </tr>
+        `;
+      }).join("");
+
       document.getElementById("headCreatorCount").textContent = `${headCreators.length} 位头达`;
+      const headFollowups = headCreators.map((item) => ({ item, edit: creatorEditFor(item.id) }));
+      const activeHeadFollowups = headFollowups.filter(({ edit }) => !["放弃", "暂停"].includes(edit.followStatus));
+      const pendingHead = activeHeadFollowups.filter(({ edit }) => ["待跟进", "待确认寄样"].includes(edit.followStatus)).length;
+      const sampledHead = activeHeadFollowups.filter(({ edit }) => edit.followStatus === "已寄样").length;
+      const maintainingHead = activeHeadFollowups.filter(({ edit }) => ["维护中", "已寄样", "已出内容", "已出单"].includes(edit.followStatus)).length;
+      const unassignedHead = activeHeadFollowups.filter(({ edit }) => !edit.owner).length;
+      document.getElementById("headFollowupMetrics").innerHTML = [
+        ["待推进", num(pendingHead), pendingHead ? "优先确认合作或寄样" : "暂无待推进", pendingHead ? "warn" : "up"],
+        ["已寄样", num(sampledHead), "等待内容或反馈", "up"],
+        ["维护合作中", num(maintainingHead), "含寄样、内容与出单", "up"],
+        ["未分配负责人", num(unassignedHead), unassignedHead ? "需要明确归属" : "均已分配", unassignedHead ? "warn" : "up"]
+      ].map(metricHtml).join("");
+      const headQueue = [...activeHeadFollowups]
+        .sort((a, b) => Number(!a.edit.owner) - Number(!b.edit.owner))
+        .slice(0, 6);
+      document.getElementById("headFollowupQueue").innerHTML = headQueue.length ? headQueue.map(({ item, edit }) => {
+        return `
+          <div class="item">
+            <span class="dot ${["待跟进", "待确认寄样"].includes(edit.followStatus) ? "amber" : "green"}"></span>
+            <div>
+              <b>${escapeHtml(item.name || "未命名达人")} · ${escapeHtml(edit.followStatus || "待跟进")}</b>
+              <small>${escapeHtml(edit.owner || "未分配负责人")}｜店铺 ${escapeHtml(item.shop || "未设置")}｜近7日GMV ${Number(item.gmvK || 0).toFixed(1)}K</small>
+            </div>
+            ${creatorActionButton(item)}
+          </div>
+        `;
+      }).join("") : `<div class="empty">暂无需要处理的头达跟进事项。</div>`;
       document.getElementById("headCreatorRows").innerHTML = headCreators.length ? [...headCreators]
         .sort((a, b) => Number(b.gmvK || 0) - Number(a.gmvK || 0))
         .map((item) => {
           const edit = creatorEditFor(item.id);
           return `
-          <tr>
+          <tr data-row-edit="${escapeHtml(item.id)}">
             <td>${creatorProfile(item, true)}<small>${escapeHtml(item.contact || "-")}</small></td>
             <td>${statusBadge(item.videoStatus || item.liveStatus, Number(item.gmvK || 0) > 0 ? "hot" : "")}</td>
             <td>${escapeHtml(item.product || "-")}</td>
+            <td>${escapeHtml(item.shop || "-")}</td>
             <td><b>${Number(item.gmvK || 0).toFixed(1)}</b></td>
             <td>${item.commission ? pct(item.commission * 100) : "-"}</td>
             <td>${item.adCommission ? pct(item.adCommission * 100) : "-"}</td>
@@ -11131,8 +12464,7 @@
             <td>${statusBadge(edit.followStatus, edit.followStatus === "放弃" || edit.followStatus === "暂停" ? "warn" : edit.followStatus === "已出单" ? "hot" : "good")}</td>
             <td>${escapeHtml(edit.owner || "-")}</td>
             <td>${escapeHtml(item.period || "-")}</td>
-            <td>${escapeHtml(edit.nextDate || "-")}</td>
-            <td>${creatorActionButton(item)}</td>
+            <td>${creatorActionButton(item, "head")}</td>
           </tr>
         `;
         }).join("") : `<tr><td colspan="12"><div class="empty">暂无头达数据。</div></td></tr>`;
@@ -11144,7 +12476,7 @@
       document.getElementById("creatorRows").innerHTML = pageRows.length ? pageRows.map((item) => {
         const edit = creatorEditFor(item.id);
         return `
-        <tr>
+        <tr data-row-edit="${escapeHtml(item.id)}">
           <td>${escapeHtml(item.source || "-")}<br><small>${escapeHtml(item.tier || "-")}</small></td>
           <td>${creatorProfile(item)}</td>
           <td>${escapeHtml(item.contact || item.email || "-")}</td>
@@ -11152,9 +12484,9 @@
           <td>${statusBadge(item.videoStatus)}</td>
           <td>${statusBadge(item.liveStatus)}</td>
           <td>${escapeHtml(item.product || "-")}</td>
+          <td>${escapeHtml(item.shop || "-")}</td>
           <td>${statusBadge(edit.followStatus, edit.followStatus === "放弃" || edit.followStatus === "暂停" ? "warn" : edit.followStatus === "已出单" ? "hot" : "good")}</td>
           <td>${escapeHtml(edit.owner || "-")}</td>
-          <td>${escapeHtml(edit.nextDate || "-")}</td>
           <td>${creatorActionButton(item)}</td>
         </tr>
       `;
@@ -11162,12 +12494,14 @@
     }
 
     function findCreator(id) {
-      const record = creatorRecords().find((item) => item.id === id);
+      const record = creatorRecords().find((item) => item.id === id)
+        || blanketProjectCreators().find((item) => item.id === id);
       return record ? creatorDisplayRecord(record) : null;
     }
 
     function fillCreatorEditForm(record) {
       const edit = creatorEditFor(record.id);
+      const savedEdit = state.creatorEdits?.[record.id] || {};
       const form = document.getElementById("creatorEditForm");
       form.elements.id.value = record.id;
       form.elements.avatar.value = record.avatar || "";
@@ -11177,19 +12511,22 @@
       form.elements.tier.value = record.tier || "";
       form.elements.period.value = record.period || "";
       form.elements.product.value = record.product || "";
+      form.elements.shop.value = record.shop || "";
+      form.elements.levelTag.value = record.levelTag || "";
+      form.elements.categoryTag.value = record.categoryTag || "";
+      form.elements.sampleDetails.value = serializeSampleItems(record);
       form.elements.videoStatus.value = record.videoStatus || "";
       form.elements.gmvK.value = record.gmvK || 0;
       form.elements.commission.value = record.commission || 0;
       form.elements.adCommission.value = record.adCommission || 0;
-      form.elements.followStatus.value = edit.followStatus || "待跟进";
-      form.elements.owner.value = edit.owner || "";
-      form.elements.nextDate.value = edit.nextDate || "";
+      form.elements.followStatus.value = savedEdit.followStatus || record.followStatus || edit.followStatus || "待跟进";
+      form.elements.owner.value = savedEdit.owner || record.owner || "";
       form.elements.relationship.value = record.relationship || record.note || "";
       form.elements.followNote.value = edit.followNote || "";
       form.elements.avatarFile.value = "";
       setAvatarPreview("creatorEditAvatarPreview", record.avatar || "", record.name || "");
       document.getElementById("creatorModalTitle").textContent = record.name || "编辑达人";
-      document.getElementById("deleteCustomCreator").style.display = state.customCreators?.some((item) => item.id === record.id) ? "" : "none";
+      document.getElementById("deleteCustomCreator").style.display = document.getElementById("creators")?.dataset.creatorPage === "all" ? "none" : "";
     }
 
     function openCreatorEditor(id) {
@@ -11207,20 +12544,28 @@
       const record = findCreator(id);
       if (!record) return;
       const history = creatorHistoryFor(id);
+      const latestEdit = state.creatorEdits?.[id] || {};
+      const latestSavedAt = history[0]?.savedAt || record.period || "";
       document.getElementById("creatorHistoryTitle").textContent = `${record.name || "达人"} · 历史记录`;
       document.getElementById("creatorHistoryContent").innerHTML = `
         <div class="history-summary">
           ${creatorAvatar(record)}
           <div>
             <b>${escapeHtml(record.name || "-")}</b>
-            <small>带货产品：${escapeHtml(record.product || "-")}<br>近7日GMV：${Number(record.gmvK || 0).toFixed(1)}K · 合作情况：${escapeHtml(record.relationship || record.note || "-")}</small>
+            <small>寄样产品：${escapeHtml(record.product || "-")}<br>近7日GMV：${Number(record.gmvK || 0).toFixed(1)}K · 合作情况：${escapeHtml(record.relationship || record.note || "-")}</small>
           </div>
         </div>
         <div class="history-list">
+          <div class="history-item latest">
+            <b>最新记录 · ${latestSavedAt ? formatDateTime(latestSavedAt) : "当前资料"}</b>
+            <small>状态：${escapeHtml(latestEdit.followStatus || record.followStatus || "待跟进")} · 负责人：${escapeHtml(latestEdit.owner || record.owner || "-")} · 店铺：${escapeHtml(record.shop || "-")}</small>
+            <p>${escapeHtml(record.relationship || record.note || "暂无合作情况")}</p>
+            <p>${escapeHtml(latestEdit.followNote || "暂无跟进备注")}</p>
+          </div>
           ${history.length ? history.map((item) => `
             <div class="history-item">
               <b>${escapeHtml(item.action || "编辑")} · ${formatDateTime(item.savedAt)}</b>
-              <small>状态：${escapeHtml(item.followStatus || "-")} · 负责人：${escapeHtml(item.owner || "-")} · 下次跟进：${escapeHtml(item.nextDate || "-")}</small>
+              <small>状态：${escapeHtml(item.followStatus || "-")} · 负责人：${escapeHtml(item.owner || "-")}</small>
               <p>${escapeHtml(item.relationship || "暂无合作情况")}</p>
               <p>${escapeHtml(item.followNote || "暂无跟进备注")}</p>
             </div>
@@ -11232,6 +12577,39 @@
 
     function closeCreatorHistory() {
       document.getElementById("creatorHistoryModal").hidden = true;
+    }
+
+    function openCreatorSampleDetail(id) {
+      const record = findCreator(id);
+      if (!record) return;
+      const items = sampleItemsFor(record);
+      const totalQty = items.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+      document.getElementById("creatorSampleTitle").textContent = `${record.name || "达人"} · 寄样明细`;
+      document.getElementById("creatorSampleContent").innerHTML = `
+        <div class="sample-detail-summary">
+          <div><b>${escapeHtml(record.name || "-")}</b><br><small>${escapeHtml(record.contact || "-")}</small></div>
+          <b>共 ${items.length} 个规格 / ${totalQty} 件</b>
+        </div>
+        <div class="table-wrap">
+          <table class="sample-detail-table">
+            <thead><tr><th>SKU</th><th>颜色</th><th>尺寸</th><th>数量</th><th>寄样状态</th></tr></thead>
+            <tbody>${items.map((item) => `
+              <tr>
+                <td>${escapeHtml(item.sku || "-")}</td>
+                <td>${escapeHtml(item.color || "-")}</td>
+                <td>${escapeHtml(item.size || "-")}</td>
+                <td>${Number(item.qty || 0)} 件</td>
+                <td>${escapeHtml(item.status || "-")}</td>
+              </tr>
+            `).join("")}</tbody>
+          </table>
+        </div>
+      `;
+      document.getElementById("creatorSampleModal").hidden = false;
+    }
+
+    function closeCreatorSampleDetail() {
+      document.getElementById("creatorSampleModal").hidden = true;
     }
 
     async function saveCreatorEdit(form) {
@@ -11249,6 +12627,10 @@
         tier: data.tier,
         period: data.period,
         product: data.product,
+        shop: data.shop || "",
+        levelTag: data.levelTag || "",
+        categoryTag: data.categoryTag || "",
+        samples: parseSampleItems(data.sampleDetails),
         products: data.product ? data.product.split(/[\/,，、]+/).map((item) => item.trim()).filter(Boolean) : [],
         videoStatus: data.videoStatus,
         liveStatus: data.videoStatus?.includes("直播") ? "直播" : record.liveStatus || "",
@@ -11270,6 +12652,10 @@
         tier: nextRecord.tier,
         period: nextRecord.period,
         product: nextRecord.product,
+        shop: nextRecord.shop,
+        levelTag: nextRecord.levelTag,
+        categoryTag: nextRecord.categoryTag,
+        samples: nextRecord.samples,
         videoStatus: nextRecord.videoStatus,
         liveStatus: nextRecord.liveStatus,
         gmvK: nextRecord.gmvK,
@@ -11278,7 +12664,6 @@
         relationship: nextRecord.relationship,
         followStatus: data.followStatus || "待跟进",
         owner: data.owner || "",
-        nextDate: data.nextDate || "",
         followNote: data.followNote || ""
       };
       appendCreatorHistory({ ...record, id }, { ...data, avatar, gmvK: nextRecord.gmvK }, "保存整行");
@@ -11288,16 +12673,25 @@
       renderCreatorCenter();
     }
 
-    function deleteCustomCreator() {
-      const id = document.getElementById("creatorEditForm").elements.id.value;
-      const record = state.customCreators?.find((item) => item.id === id);
-      if (!record) return;
-      state.customCreators = (state.customCreators || []).filter((item) => item.id !== id);
-      if (state.creatorEdits) delete state.creatorEdits[id];
+    function removeCreatorFromSection(id, context) {
+      const record = findCreator(id);
+      const targetName = context === "head" ? "头部达人栏目" : "毛毯项目";
+      if (!record || !window.confirm(`确认将达人“${record.name || "未命名达人"}”移出${targetName}？达人主档仍保留在达人库。`)) return;
+      const key = context === "head" ? "headRemovedCreators" : "blanketRemovedCreators";
+      state[key] ||= [];
+      if (!state[key].some((item) => item.id === id)) {
+        state[key].push({ id, removedAt: new Date().toISOString(), name: record.name || "" });
+      }
       saveState();
       closeCreatorEditor();
-      showToast("平台新增达人已删除");
       renderCreatorCenter();
+      filterBlanketCreatorPreview();
+      showToast(`已移出${targetName}，达人库主档保留`);
+    }
+
+    function deleteCustomCreator() {
+      const context = document.getElementById("creators")?.dataset.creatorPage || "blanket";
+      if (context !== "all") removeCreatorFromSection(document.getElementById("creatorEditForm").elements.id.value, context);
     }
 
     async function saveCreator(form) {
@@ -11305,9 +12699,10 @@
       const id = crypto.randomUUID();
       const avatarFile = form.elements.avatarFile.files?.[0];
       const avatar = avatarFile ? await readImageAsDataUrl(avatarFile) : "";
+      const creatorPageName = document.getElementById("creators")?.dataset.creatorPage || "blanket";
       const record = {
         id,
-        source: "平台新增",
+        source: creatorPageName === "blanket" ? "毛毯项目" : "平台新增",
         tier: data.tier || "自建达人",
         avatar,
         name: data.name,
@@ -11317,6 +12712,9 @@
         videoStatus: data.videoStatus,
         liveStatus: data.videoStatus?.includes("直播") ? "直播" : "",
         product: data.product,
+        shop: data.shop || "",
+        levelTag: data.levelTag || "",
+        categoryTag: data.categoryTag || "",
         products: data.product ? data.product.split(/[\/,，、]+/).map((item) => item.trim()).filter(Boolean) : [],
         gmvK: Number(data.gmvK || 0),
         commission: 0,
@@ -11331,12 +12729,14 @@
         avatar,
         tier: record.tier,
         product: record.product,
+        shop: record.shop,
+        levelTag: record.levelTag,
+        categoryTag: record.categoryTag,
         videoStatus: record.videoStatus,
         gmvK: record.gmvK,
         relationship: record.relationship,
         followStatus: data.followStatus || "待跟进",
         owner: data.owner || "",
-        nextDate: data.nextDate || "",
         followNote: data.followNote || ""
       };
       appendCreatorHistory(record, { ...data, avatar, gmvK: record.gmvK }, "新增达人");
@@ -11490,17 +12890,17 @@
           rows: creatorRecords().map((item) => ({ ...item, ...creatorEditFor(item.id) })),
           columns: [
             ["source", "来源"], ["tier", "类型"], ["name", "达人昵称"], ["contact", "脱敏联系方式"], ["period", "日期/更新"],
-            ["videoStatus", "视频状态"], ["liveStatus", "直播状态"], ["product", "带货产品"], ["gmvK", "近7日GMV(k)"],
+            ["videoStatus", "视频状态"], ["liveStatus", "直播状态"], ["product", "寄样产品"], ["shop", "店铺"], ["levelTag", "层级标签"], ["categoryTag", "类目标签"], ["gmvK", "近7日GMV(k)"],
             ["commission", "合作佣金"], ["adCommission", "广告佣金"], ["followStatus", "跟进状态"], ["owner", "负责人"],
-            ["nextDate", "下次跟进"], ["relationship", "合作情况"], ["followNote", "跟进备注"]
+            ["relationship", "合作情况"], ["followNote", "跟进备注"]
           ]
         },
         {
           title: "达人历史",
           rows: state.creatorHistory || [],
           columns: [
-            ["savedAt", "保存时间"], ["action", "动作"], ["name", "达人昵称"], ["product", "带货产品"], ["gmvK", "近7日GMV(k)"],
-            ["followStatus", "跟进状态"], ["owner", "负责人"], ["nextDate", "下次跟进"], ["relationship", "合作情况"], ["followNote", "跟进备注"]
+            ["savedAt", "保存时间"], ["action", "动作"], ["name", "达人昵称"], ["product", "寄样产品"], ["shop", "店铺"], ["gmvK", "近7日GMV(k)"],
+            ["followStatus", "跟进状态"], ["owner", "负责人"], ["relationship", "合作情况"], ["followNote", "跟进备注"]
           ]
         }
       ];
@@ -11530,6 +12930,51 @@
 
     document.querySelectorAll(".tab").forEach((tab) => {
       tab.addEventListener("click", () => setView(tab.dataset.view));
+    });
+
+    const creatorNavMenu = document.getElementById("creatorNavMenu");
+    const creatorNavTrigger = document.getElementById("creatorNavTrigger");
+    const creatorPageTitles = {
+      blanket: "毛毯项目跟进",
+      head: "头部达人跟进",
+      all: "达人库"
+    };
+
+    function setCreatorPage(pageName = "blanket") {
+      document.getElementById("creators").dataset.creatorPage = pageName;
+      document.querySelectorAll("[data-creator-section]").forEach((section) => {
+        section.hidden = section.dataset.creatorSection !== pageName;
+      });
+      document.querySelectorAll("[data-creator-page]").forEach((item) => {
+        item.classList.toggle("active", item.dataset.creatorPage === pageName);
+      });
+      const title = document.getElementById("creatorPageTitle");
+      if (title) title.textContent = creatorPageTitles[pageName] || creatorPageTitles.blanket;
+    }
+
+    creatorNavTrigger?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const willOpen = !creatorNavMenu.classList.contains("open");
+      creatorNavMenu.classList.toggle("open", willOpen);
+      creatorNavTrigger.setAttribute("aria-expanded", String(willOpen));
+      if (!document.getElementById("creators").dataset.creatorPage) setCreatorPage("blanket");
+    });
+
+    document.querySelectorAll("[data-creator-page]").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        setView("creators");
+        setCreatorPage(button.dataset.creatorPage);
+        creatorNavMenu?.classList.remove("open");
+        creatorNavTrigger?.setAttribute("aria-expanded", "false");
+        window.setTimeout(() => document.getElementById("creators")?.scrollIntoView({ behavior: "auto", block: "start" }), 0);
+      });
+    });
+
+    document.addEventListener("click", (event) => {
+      if (creatorNavMenu?.contains(event.target)) return;
+      creatorNavMenu?.classList.remove("open");
+      creatorNavTrigger?.setAttribute("aria-expanded", "false");
     });
 
     document.querySelectorAll("[data-jump]").forEach((btn) => {
@@ -11580,10 +13025,12 @@
     document.getElementById("reportRole").addEventListener("change", updateReportHelp);
     document.querySelector("#reportForm [name='date']").addEventListener("change", renderPendingReviewQueue);
     document.querySelector("#reportForm [name='author']").addEventListener("input", renderPendingReviewQueue);
+    document.querySelector("#reportForm [name='author']").addEventListener("change", renderReports);
 
     document.getElementById("resetReportForm").addEventListener("click", () => {
       const form = document.getElementById("reportForm");
       form.reset();
+      delete form.dataset.editingReportId;
       form.elements.date.value = today;
       updateReportHelp();
     });
@@ -11615,6 +13062,7 @@
     document.getElementById("creatorForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       await saveCreator(event.currentTarget);
+      closeCreatorEntryDialog();
     });
 
     document.getElementById("resetForm").addEventListener("click", () => {
@@ -11639,6 +13087,91 @@
       creatorPage = 1;
       renderCreatorCenter();
     });
+    ["creatorLevelFilter", "creatorCategoryFilter"].forEach((id) => document.getElementById(id)?.addEventListener("change", () => {
+      creatorPage = 1;
+      renderCreatorCenter();
+    }));
+    ["headLevelFilter", "headCategoryFilter"].forEach((id) => document.getElementById(id)?.addEventListener("change", renderCreatorCenter));
+
+    let blanketCreatorFilter = "all";
+
+    function filterBlanketCreatorPreview() {
+      const query = String(document.getElementById("blanketCreatorSearch")?.value || "").trim().toLowerCase();
+      const selectedLevel = String(document.getElementById("blanketLevelFilter")?.value || "").toLowerCase();
+      const selectedCategory = String(document.getElementById("blanketCategoryFilter")?.value || "").toLowerCase();
+      document.querySelectorAll(".blanket-record").forEach((card) => {
+        const tags = String(card.dataset.blanketTags || "").toLowerCase();
+        const matchesFilter = blanketCreatorFilter === "all"
+          || (blanketCreatorFilter === "risk" ? card.dataset.blanketRisk === "true" : card.dataset.blanketFilterKey === blanketCreatorFilter);
+        card.hidden = !matchesFilter || (query && !tags.includes(query))
+          || (selectedLevel && !tags.includes(selectedLevel))
+          || (selectedCategory && !tags.includes(selectedCategory));
+      });
+    }
+
+    document.getElementById("blanketCreatorSearch")?.addEventListener("input", filterBlanketCreatorPreview);
+    ["blanketLevelFilter", "blanketCategoryFilter"].forEach((id) => document.getElementById(id)?.addEventListener("change", filterBlanketCreatorPreview));
+
+    document.querySelectorAll("[data-blanket-filter]").forEach((button) => {
+      button.addEventListener("click", () => {
+        blanketCreatorFilter = button.dataset.blanketFilter || "all";
+        document.querySelectorAll("[data-blanket-filter]").forEach((item) => item.classList.toggle("active", item === button));
+        document.querySelectorAll("[data-blanket-summary-filter]").forEach((item) => item.classList.toggle("active", item.dataset.blanketSummaryFilter === blanketCreatorFilter));
+        filterBlanketCreatorPreview();
+      });
+    });
+
+    document.addEventListener("change", (event) => {
+      const statusSelect = event.target.closest("[data-blanket-status]");
+      if (!statusSelect) return;
+      const record = findCreator(statusSelect.dataset.blanketStatus);
+      if (!record) return;
+      state.creatorEdits ||= {};
+      const previous = state.creatorEdits[record.id] || {};
+      state.creatorEdits[record.id] = {
+        ...previous,
+        followStatus: statusSelect.value,
+        owner: previous.owner || record.owner || "",
+        followNote: previous.followNote || ""
+      };
+      appendCreatorHistory(record, {
+        ...state.creatorEdits[record.id],
+        relationship: record.relationship || record.note || ""
+      }, "调整跟进状态");
+      saveState();
+      renderCreatorCenter();
+      filterBlanketCreatorPreview();
+      showToast("跟进状态已更新");
+    });
+
+    document.querySelectorAll("[data-creator-jump]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.getElementById(button.dataset.creatorJump)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+
+    function openCreatorEntryDialog() {
+      const dialog = document.getElementById("creatorEntryDialog");
+      const backdrop = document.getElementById("creatorEntryBackdrop");
+      dialog.hidden = false;
+      dialog.classList.add("open");
+      backdrop.classList.add("open");
+      const form = document.getElementById("creatorForm");
+      window.setTimeout(() => form?.querySelector("[name='name']")?.focus(), 80);
+    }
+
+    function closeCreatorEntryDialog() {
+      const dialog = document.getElementById("creatorEntryDialog");
+      dialog.classList.remove("open");
+      dialog.hidden = true;
+      document.getElementById("creatorEntryBackdrop")?.classList.remove("open");
+    }
+
+    document.querySelectorAll("[data-open-creator-form]").forEach((button) => {
+      button.addEventListener("click", openCreatorEntryDialog);
+    });
+    document.getElementById("closeCreatorEntry")?.addEventListener("click", closeCreatorEntryDialog);
+    document.getElementById("creatorEntryBackdrop")?.addEventListener("click", closeCreatorEntryDialog);
 
     document.getElementById("creatorPrevPage").addEventListener("click", () => {
       creatorPage = Math.max(1, creatorPage - 1);
@@ -11688,6 +13221,12 @@
       if (event.target.id === "creatorHistoryModal") closeCreatorHistory();
     });
 
+    document.getElementById("closeCreatorSampleModal").addEventListener("click", closeCreatorSampleDetail);
+
+    document.getElementById("creatorSampleModal").addEventListener("click", (event) => {
+      if (event.target.id === "creatorSampleModal") closeCreatorSampleDetail();
+    });
+
     document.getElementById("creatorEditForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       await saveCreatorEdit(event.currentTarget);
@@ -11706,6 +13245,10 @@
 
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
+      if (!document.getElementById("creatorSampleModal").hidden) {
+        closeCreatorSampleDetail();
+        return;
+      }
       if (!document.getElementById("creatorHistoryModal").hidden) {
         closeCreatorHistory();
         return;
@@ -11723,11 +13266,28 @@
       const bringReviewBtn = event.target.closest("[data-bring-review]");
       const aiTaskBtn = event.target.closest("[data-ai-task]");
       const viewTaskBtn = event.target.closest("[data-view-task]");
+      const editReportBtn = event.target.closest("[data-edit-report]");
       const startTaskBtn = event.target.closest("[data-task-start]");
       const resultTaskBtn = event.target.closest("[data-task-result]");
       const deleteBtn = event.target.closest("[data-task-delete]");
+      const sampleDetailBtn = event.target.closest("[data-sample-detail]");
       const historyBtn = event.target.closest("[data-creator-history]");
       const editCreatorBtn = event.target.closest("[data-edit-creator]");
+      const removeCreatorBtn = event.target.closest("[data-remove-creator]");
+      const editableRow = event.target.closest("[data-row-edit]");
+      const blanketSummaryBtn = event.target.closest("[data-blanket-summary-filter]");
+      if (blanketSummaryBtn) {
+        blanketCreatorFilter = blanketSummaryBtn.dataset.blanketSummaryFilter || "all";
+        document.querySelectorAll("[data-blanket-summary-filter]").forEach((item) => item.classList.toggle("active", item === blanketSummaryBtn));
+        document.querySelectorAll("[data-blanket-filter]").forEach((item) => item.classList.toggle("active", item.dataset.blanketFilter === blanketCreatorFilter));
+        filterBlanketCreatorPreview();
+        document.getElementById("blanketCreatorCards")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+      if (sampleDetailBtn) {
+        openCreatorSampleDetail(sampleDetailBtn.dataset.sampleDetail);
+        return;
+      }
       if (addRowBtn) {
         addRepeatedRow(addRowBtn.dataset.addRow, addRowBtn.closest("[data-repeat-section]"));
         return;
@@ -11748,12 +13308,24 @@
         focusTaskFromReport(viewTaskBtn.dataset.viewTask);
         return;
       }
+      if (editReportBtn) {
+        editTodayReport(editReportBtn.dataset.editReport);
+        return;
+      }
       if (historyBtn) {
         openCreatorHistory(historyBtn.dataset.creatorHistory);
         return;
       }
       if (editCreatorBtn) {
         openCreatorEditor(editCreatorBtn.dataset.editCreator);
+        return;
+      }
+      if (removeCreatorBtn) {
+        removeCreatorFromSection(removeCreatorBtn.dataset.removeCreator, removeCreatorBtn.dataset.removeContext || "blanket");
+        return;
+      }
+      if (editableRow && !event.target.closest("button, select, input, textarea, [data-creator-history]")) {
+        openCreatorEditor(editableRow.dataset.rowEdit);
         return;
       }
       if (startTaskBtn) {

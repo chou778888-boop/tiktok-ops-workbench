@@ -10,6 +10,9 @@ const arrayKeys = {
   reports: "id",
   reportAnalyses: "key",
   customCreators: "id",
+  deletedCreators: "id",
+  blanketRemovedCreators: "id",
+  headRemovedCreators: "id",
   creatorHistory: "id"
 };
 
@@ -25,6 +28,9 @@ function normalizeData(data) {
     reports: Array.isArray(data?.reports) ? data.reports : [],
     reportAnalyses: Array.isArray(data?.reportAnalyses) ? data.reportAnalyses : [],
     customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
+    deletedCreators: Array.isArray(data?.deletedCreators) ? data.deletedCreators : [],
+    blanketRemovedCreators: Array.isArray(data?.blanketRemovedCreators) ? data.blanketRemovedCreators : [],
+    headRemovedCreators: Array.isArray(data?.headRemovedCreators) ? data.headRemovedCreators : [],
     creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
     creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
   };

@@ -18,6 +18,9 @@ const normalized = {
   reports: Array.isArray(payload.data.reports) ? payload.data.reports : [],
   reportAnalyses: Array.isArray(payload.data.reportAnalyses) ? payload.data.reportAnalyses : [],
   customCreators: Array.isArray(payload.data.customCreators) ? payload.data.customCreators : [],
+  deletedCreators: Array.isArray(payload.data.deletedCreators) ? payload.data.deletedCreators : [],
+  blanketRemovedCreators: Array.isArray(payload.data.blanketRemovedCreators) ? payload.data.blanketRemovedCreators : [],
+  headRemovedCreators: Array.isArray(payload.data.headRemovedCreators) ? payload.data.headRemovedCreators : [],
   creatorEdits: payload.data.creatorEdits && typeof payload.data.creatorEdits === "object"
     ? payload.data.creatorEdits
     : {},
@@ -48,6 +51,9 @@ console.log(JSON.stringify({
     reports: normalized.reports.length,
     reportAnalyses: normalized.reportAnalyses.length,
     customCreators: normalized.customCreators.length,
+    deletedCreators: normalized.deletedCreators.length,
+    blanketRemovedCreators: normalized.blanketRemovedCreators.length,
+    headRemovedCreators: normalized.headRemovedCreators.length,
     creatorEdits: Object.keys(normalized.creatorEdits).length,
     creatorHistory: normalized.creatorHistory.length
   }
