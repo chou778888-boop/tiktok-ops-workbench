@@ -3,6 +3,9 @@
   "name": "tiktok-ops-workbench",
   "compatibility_date": "2026-07-29",
   "pages_build_output_dir": "dist",
+  "ai": {
+    "binding": "AI"
+  },
   "d1_databases": [
     {
       "binding": "DB",

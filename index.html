@@ -10409,6 +10409,12 @@
           organization: "6家TikTok Shop：5家家纺、1家口腔；售后2人合并1份日报，其余6人分别提交。",
           workflow: "日报数据 → 经营诊断 → 异常转任务 → 负责人执行 → 复查 → 关闭或升级 → 周报汇总"
         },
+        coverage: {
+          observedRoles: [...new Set(currentReports.map((report) => report.role))],
+          currentReportCount: currentReports.length,
+          previousObservedRoles: [...new Set(previousReports.map((report) => report.role))],
+          previousReportCount: previousReports.length
+        },
         metricDefinitions: Object.fromEntries(Object.entries(REPORT_SCHEMAS).map(([name, schema]) => [name, schema.columns.map((column) => ({
           key: column.key,
           label: column.label,
