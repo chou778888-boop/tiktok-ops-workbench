@@ -9184,16 +9184,19 @@
         setSyncStatus("本地模式", "local");
         return false;
       }
+      const localStateAtLoadStart = normalizeState(structuredClone(state));
       setSyncStatus("连接云端", "saving");
       try {
         const response = await fetch(cloudEndpoint, { headers: { "accept": "application/json" } });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const payload = await response.json();
         if (payload?.data) {
-          state = normalizeState(payload.data);
-          cloudBaseline = normalizeState(payload.data);
+          const remoteState = normalizeState(payload.data);
+          const changesMadeWhileLoading = buildCloudPatch(localStateAtLoadStart, normalizeState(state));
+          state = applyCloudPatch(remoteState, changesMadeWhileLoading);
+          cloudBaseline = remoteState;
           localStorage.setItem(storeKey, JSON.stringify(state));
-          setSyncStatus("已同步", "");
+          setSyncStatus(cloudPatchIsEmpty(changesMadeWhileLoading) ? "已同步" : "正在同步新内容", cloudPatchIsEmpty(changesMadeWhileLoading) ? "" : "saving");
           return true;
         }
         cloudBaseline = normalizeState({});
@@ -13349,10 +13352,10 @@
     });
 
     async function initializeWorkbench() {
-      const loadedCloud = await loadCloudState();
+      await loadCloudState();
       cloudReady = cloudAvailable();
       render();
-      if (!loadedCloud) saveCloudState();
+      saveCloudState();
     }
 
     document.querySelector("#dailyForm [name='date']").value = today;
