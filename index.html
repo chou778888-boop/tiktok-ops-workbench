@@ -239,6 +239,38 @@
       line-height: 1.62;
     }
 
+    .report-task-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .report-task-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 32px;
+      padding: 6px 10px;
+      border: 1px solid rgba(44, 110, 232, 0.18);
+      border-radius: 10px;
+      background: rgba(44, 110, 232, 0.06);
+      color: #2c6ee8;
+      font-size: 11px;
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .report-task-link:hover {
+      border-color: rgba(44, 110, 232, 0.42);
+      background: rgba(44, 110, 232, 0.1);
+    }
+
+    .task-card.task-card-focus {
+      outline: 3px solid rgba(44, 110, 232, 0.28);
+      box-shadow: 0 12px 30px rgba(44, 110, 232, 0.18);
+    }
+
     .report-role-fields {
       grid-column: 1 / -1;
       display: grid;
@@ -5523,7 +5555,6 @@
       </div>
       <nav class="tabs" aria-label="页面导航">
         <button class="tab active" data-view="overview" type="button">总览</button>
-        <button class="tab" data-view="entry" type="button">数据录入</button>
         <button class="tab" data-view="reports" type="button">日报中心</button>
         <button class="tab" data-view="tasks" type="button">任务中心</button>
         <button class="tab" data-view="creators" type="button">达人中心</button>
@@ -5535,7 +5566,7 @@
         <button class="ghost" id="exportCsv" type="button">导出CSV</button>
         <button class="ghost" id="importJson" type="button">导入</button>
         <input id="importFile" type="file" accept="application/json,.json" hidden />
-        <button class="primary" data-jump="entry" type="button">今日录入</button>
+        <button class="primary" data-jump="reports" type="button">填写日报</button>
       </div>
     </header>
 
@@ -5545,7 +5576,7 @@
           <div class="hero-card">
             <div class="kicker"><span class="pulse"></span> 今日经营总览</div>
             <h1>多店铺数据先汇总，再进入分析。</h1>
-            <p>首页优先呈现核心经营结果：GMV、订单、退货数量、广告ROI，并与昨日做环比。异常和任务作为后续动作，不抢占总览主视线。</p>
+            <p>首页数据由各岗位已提交日报自动汇总：GMV、订单、退货数量、广告ROI，并与昨日做环比。异常和任务作为后续动作，不抢占总览主视线。</p>
             <div class="hero-stats" id="heroStats"></div>
           </div>
         </div>
@@ -5599,7 +5630,7 @@
                   <th>GMV</th>
                   <th>订单</th>
                   <th>销量</th>
-                  <th>样品</th>
+                  <th>寄样</th>
                   <th>广告成本</th>
                   <th>ROI</th>
                   <th>联盟GMV</th>
@@ -5655,7 +5686,7 @@
         </div>
       </section>
 
-      <section id="entry" class="view">
+      <section id="entry" class="view" hidden aria-hidden="true">
         <div class="split">
           <div class="panel">
             <div class="panel-head">
@@ -5671,7 +5702,15 @@
               </div>
               <div class="field">
                 <label>店铺</label>
-                <input name="store" placeholder="DreamWeave" required />
+                <select name="store" required>
+                  <option value="">请选择店铺</option>
+                  <option>DreamWeave</option>
+                  <option>sweet dream</option>
+                  <option>Dreamland</option>
+                  <option>Dreamdaily</option>
+                  <option>MoonDream</option>
+                  <option>Himood Smile</option>
+                </select>
               </div>
               <div class="field">
                 <label>负责人</label>
@@ -5775,7 +5814,15 @@
               </div>
               <div class="field">
                 <label>店铺</label>
-                <input name="store" placeholder="DreamWeave" />
+                <select name="store">
+                  <option value="">请选择店铺</option>
+                  <option>DreamWeave</option>
+                  <option>sweet dream</option>
+                  <option>Dreamland</option>
+                  <option>Dreamdaily</option>
+                  <option>MoonDream</option>
+                  <option>Himood Smile</option>
+                </select>
               </div>
               <div class="field">
                 <label>关联 SKU</label>
@@ -5819,7 +5866,15 @@
             </div>
             <div class="field">
               <label>店铺</label>
-              <input name="store" placeholder="DreamWeave" required />
+              <select name="store" required>
+                <option value="">请选择店铺</option>
+                <option>DreamWeave</option>
+                <option>sweet dream</option>
+                <option>Dreamland</option>
+                <option>Dreamdaily</option>
+                <option>MoonDream</option>
+                <option>Himood Smile</option>
+              </select>
             </div>
             <div class="field">
               <label>产品</label>
@@ -5947,6 +6002,7 @@
                   <option>BD</option>
                   <option>店铺维护</option>
                   <option>店群运营</option>
+                  <option>其他</option>
                 </select>
               </div>
               <div class="field">
@@ -5997,6 +6053,8 @@
                 <option>BD</option>
                 <option>店铺维护</option>
                 <option>店群运营</option>
+                <option>其他</option>
+                <option>运营总览</option>
               </select>
               <button class="ghost" id="copyWeeklyDigest" type="button">复制周报</button>
             </div>
@@ -6034,6 +6092,11 @@
             <span class="badge blue" id="reportRecordCount">0 份日报</span>
           </div>
           <div class="report-cards" id="reportCards"></div>
+          <div class="creator-pager" id="reportPager" hidden>
+            <button class="small-btn" id="reportPrevPage" type="button">上一页</button>
+            <span id="reportPageInfo">第 1 / 1 页</span>
+            <button class="small-btn" id="reportNextPage" type="button">下一页</button>
+          </div>
         </div>
       </section>
 
@@ -8026,6 +8089,8 @@
     }
 
     let state = loadState();
+    let reportPage = 1;
+    const reportPageSize = 10;
     let creatorPage = 1;
     const creatorPageSize = 10;
     let cloudReady = false;
@@ -8271,8 +8336,74 @@
       return { text: `较昨日 ${sign}${change.toFixed(1)}%${suffix}`, cls: improved ? "up" : "down" };
     }
 
+    function overviewEntries() {
+      const bySlot = new Map((state.entries || []).map((entry) => [
+        `${entry.date}|${entry.store}`,
+        { ...entry, source: "历史录入" }
+      ]));
+      const reports = uniqueReportsBySlot((state.reports || [])
+        .filter((report) => report.status !== "草稿" && Array.isArray(report.roleMetrics))
+        .sort((a, b) => String(a.updatedAt || a.createdAt || "").localeCompare(String(b.updatedAt || b.createdAt || ""))));
+
+      reports.forEach((report) => {
+        (report.roleMetrics || []).forEach((row) => {
+          if (!REPORT_STORES.some((store) => store.name === row.store)) return;
+          const key = `${report.date}|${row.store}`;
+          const entry = bySlot.get(key) || {
+            id: `report-${report.date}-${row.store}`,
+            date: report.date,
+            store: row.store,
+            gmv: 0,
+            orders: 0,
+            units: 0,
+            sampleQty: 0,
+            returns: 0,
+            badReviews: 0,
+            adSpend: 0,
+            adGmv: 0,
+            affiliateGmv: 0,
+            productCardGmv: 0,
+            sps: "",
+            source: "日报同步"
+          };
+          const values = row.values || {};
+          entry.owner = report.author || entry.owner || "";
+          entry.source = "日报同步";
+          if (report.role === "店群运营") {
+            ["gmv", "orders", "units", "productCardGmv", "affiliateGmv", "adSpend"].forEach((field) => {
+              if (values[field] !== "" && values[field] !== null && values[field] !== undefined) {
+                entry[field] = Number(values[field]) || 0;
+              }
+            });
+            if (values.adRoi !== "" && values.adRoi !== null && values.adRoi !== undefined) {
+              entry.adGmv = Number(entry.adSpend || 0) * (Number(values.adRoi) || 0);
+            }
+          } else if (report.role === "售后组") {
+            ["returns", "returnAmount"].forEach((field) => {
+              if (values[field] !== "" && values[field] !== null && values[field] !== undefined) {
+                entry[field] = Number(values[field]) || 0;
+              }
+            });
+            if (values.sps !== "" && values.sps !== null && values.sps !== undefined) entry.sps = Number(values.sps) || 0;
+          } else if (report.role === "BD" && values.samplesSent !== "" && values.samplesSent !== null && values.samplesSent !== undefined) {
+            if (!entry._bdSynced) {
+              entry.sampleQty = 0;
+              entry._bdSynced = true;
+            }
+            entry.sampleQty = Number(entry.sampleQty || 0) + (Number(values.samplesSent) || 0);
+          }
+          bySlot.set(key, entry);
+        });
+      });
+      return [...bySlot.values()].map((entry) => {
+        const normalized = { ...entry };
+        delete normalized._bdSynced;
+        return normalized;
+      });
+    }
+
     function aggregateByDate(date) {
-      return state.entries.filter((entry) => entry.date === date).reduce((acc, entry) => {
+      return overviewEntries().filter((entry) => entry.date === date).reduce((acc, entry) => {
         acc.gmv += Number(entry.gmv || 0);
         acc.orders += Number(entry.orders || 0);
         acc.units += Number(entry.units || 0);
@@ -8287,11 +8418,11 @@
     }
 
     function latestDate() {
-      return [...new Set(state.entries.map((entry) => entry.date).filter(Boolean))].sort().pop() || today;
+      return [...new Set(overviewEntries().map((entry) => entry.date).filter(Boolean))].sort().pop() || today;
     }
 
     function previousDate(currentDate) {
-      const dates = [...new Set(state.entries.map((entry) => entry.date).filter(Boolean))].sort();
+      const dates = [...new Set(overviewEntries().map((entry) => entry.date).filter(Boolean))].sort();
       const index = dates.indexOf(currentDate);
       return index > 0 ? dates[index - 1] : "";
     }
@@ -8316,7 +8447,7 @@
 
     function getLatestEntries() {
       const byStore = new Map();
-      [...state.entries].sort((a, b) => String(b.date).localeCompare(String(a.date))).forEach((entry) => {
+      overviewEntries().sort((a, b) => String(b.date).localeCompare(String(a.date))).forEach((entry) => {
         if (!byStore.has(entry.store)) byStore.set(entry.store, entry);
       });
       return [...byStore.values()];
@@ -8406,6 +8537,35 @@
           });
         }
       });
+      const currentDate = latestDate();
+      uniqueReportsBySlot((state.reports || []).filter((report) => report.status !== "草稿" && report.date === currentDate)).forEach((report) => {
+        (report.closureItems?.anomalies || []).forEach((item, index) => {
+          if (!item.issue) return;
+          anomalies.push({
+            id: item.id || `${report.id}-reported-${index}`,
+            level: item.risk === "高" ? "紧急" : item.risk === "中" ? "重要" : "观察",
+            type: "日报异常",
+            store: item.object || report.stores || "未指定店铺",
+            sku: "",
+            title: item.issue,
+            detail: [item.reason ? `原因：${item.reason}` : "", item.impact ? `影响：${item.impact}` : ""].filter(Boolean).join("｜") || "来自已提交日报",
+            owner: report.author || "待分配"
+          });
+        });
+        (report.roleData?.inspectionIssues || []).forEach((item, index) => {
+          if (!item.issue) return;
+          anomalies.push({
+            id: `${report.id}-inspection-${index}`,
+            level: item.result && !/待|未/.test(item.result) ? "观察" : "重要",
+            type: "店铺维护异常",
+            store: item.store || "未选店铺",
+            sku: "",
+            title: `${item.store || "未选店铺"}：${item.issue}`,
+            detail: `原因：${item.reason || "未填写"}｜处理：${item.result || "待处理"}`,
+            owner: report.author || "店铺维护"
+          });
+        });
+      });
       return anomalies;
     }
 
@@ -8464,7 +8624,7 @@
         const risks = detectAnomalies().filter((item) => item.store === entry.store).length;
         return `
           <tr>
-            <td><b>${entry.store}</b><br><small>${entry.owner || "-"}</small></td>
+            <td><b>${entry.store}</b><br><small>${entry.owner || "-"} · ${entry.source || "历史录入"}</small></td>
             <td>${entry.date || "-"}</td>
             <td>${money(entry.gmv)}</td>
             <td>${num(entry.orders)}</td>
@@ -8477,7 +8637,7 @@
             <td>${entry.sps || "-"}</td>
           </tr>
         `;
-      }).join("") : `<tr><td colspan="11"><div class="empty">暂无店铺数据，先去“数据录入”保存一条。</div></td></tr>`;
+      }).join("") : `<tr><td colspan="11"><div class="empty">暂无店铺数据，提交日报后会自动同步到这里。</div></td></tr>`;
 
       drawGmvTrend();
       drawSourceDonut(totals);
@@ -8523,7 +8683,7 @@
       const { ctx, width, height } = setupCanvas(canvas);
       ctx.clearRect(0, 0, width, height);
 
-      const dates = [...new Set(state.entries.map((entry) => entry.date).filter(Boolean))].sort().slice(-7);
+      const dates = [...new Set(overviewEntries().map((entry) => entry.date).filter(Boolean))].sort().slice(-7);
       const points = dates.map((date) => ({ date, value: aggregateByDate(date).gmv }));
       if (!points.length) {
         ctx.fillStyle = "#6f7480";
@@ -8781,7 +8941,7 @@
             ? `<button class="small-btn" data-task-result="${task.id}" type="button">修改执行结果</button><span class="badge blue">等待日报复查</span>`
             : `<span class="badge green">复查已关闭</span>`;
       return `
-        <div class="task-card ${priorityClass}">
+        <div class="task-card ${priorityClass}" data-task-id="${escapeHtml(task.id)}">
           <b>${escapeHtml(task.title)}</b>
           <p>${escapeHtml(task.action || "暂无处理动作")}</p>
           <div class="task-meta">
@@ -8811,6 +8971,21 @@
       form.elements.status.value = task.status === "处理中" ? "待复盘" : task.status;
       document.getElementById("taskResultTitle").textContent = task.title || "提交处理结果";
       document.getElementById("taskResultModal").hidden = false;
+    }
+
+    function focusTaskFromReport(taskId) {
+      setView("tasks");
+      requestAnimationFrame(() => {
+        const card = [...document.querySelectorAll("[data-task-id]")].find((item) => item.dataset.taskId === taskId);
+        if (!card) {
+          showToast("关联任务不存在或已删除");
+          return;
+        }
+        document.querySelectorAll(".task-card-focus").forEach((item) => item.classList.remove("task-card-focus"));
+        card.classList.add("task-card-focus");
+        card.scrollIntoView({ behavior: "smooth", block: "center" });
+        window.setTimeout(() => card.classList.remove("task-card-focus"), 2400);
+      });
     }
 
     function closeTaskResultEditor() {
@@ -8843,30 +9018,27 @@
 
     const REPORT_SCHEMAS = {
       "售后组": {
-        help: "两名售后每天汇总一份。SPS、退货和退货金额按六店分别填写，其余售后结果填写六店合计；周报自动识别低分店铺和退货集中店铺。",
+        help: "两名售后每天汇总一份。每店填写 SPS 总分及商品满意度、履约与物流、客户服务三个维度，并填写退货 / 退款单量和金额；自动周报只汇总 SPS 总分。",
         columns: [
-          { key: "sps", label: "SPS", unit: "", decimal: true, aggregate: "latest" },
+          { key: "sps", label: "SPS 总分", unit: "", decimal: true, aggregate: "latest" },
           { key: "consultations", label: "咨询", unit: "单" },
           { key: "lateReplies", label: "未及时回复", unit: "单" },
-          { key: "refunds", label: "退款", unit: "单" },
-          { key: "refundAmount", label: "退款金额", unit: "$", money: true },
-          { key: "returns", label: "退货", unit: "单" },
-          { key: "returnAmount", label: "退货金额", unit: "$", money: true },
+          { key: "returns", label: "退货 / 退款（单）", unit: "" },
+          { key: "returnAmount", label: "退货 / 退款金额（$）", unit: "$", money: true },
           { key: "badReviews", label: "新增差评", unit: "条" },
           { key: "reviewsResolved", label: "差评修改/删除", unit: "条" },
           { key: "appeals", label: "申诉", unit: "条" },
           { key: "appealSuccess", label: "申诉成功", unit: "条" },
           { key: "appealProcessing", label: "申诉处理中", unit: "条" },
-          { key: "compensation", label: "补发/赔付", unit: "单" },
-          { key: "unfinished", label: "未完成", unit: "单" },
+          { key: "claims", label: "索赔", unit: "单" },
+          { key: "unfinished", label: "未完成索赔", unit: "单" },
           { key: "highRisk", label: "高风险订单", unit: "单" }
         ]
       },
       "BD": {
-        help: "三名BD各自提交。插件触达量不填，日报重点记录联盟消息状态、审样寄样、重点达人跟进和老达人复投结果。",
+        help: "三名BD各自提交。插件触达量不填，日报重点记录联盟消息状态、产品寄样、重点达人跟进和老达人复投结果。",
         columns: [
           { key: "messageStatus", label: "联盟消息", type: "status", options: ["", "已处理完成", "有积压"], warning: "有积压" },
-          { key: "samplesApproved", label: "审样通过", unit: "个" },
           { key: "samplesSent", label: "寄样", unit: "个" },
           { key: "oldCreatorContacts", label: "老达人联系", unit: "人" },
           { key: "confirmedReinvest", label: "确认合作", unit: "人" }
@@ -8891,6 +9063,16 @@
           { key: "appealSuccess", label: "申诉成功", unit: "条" }
         ]
       },
+      "其他": {
+        help: "适用于新人入职、培训期成员和暂未归入固定岗位的工作。填写可核对的完成数量、学习产出、问题与协作需求，避免只写过程流水账。",
+        columns: [
+          { key: "completedItems", label: "完成事项", unit: "项" },
+          { key: "trainingItems", label: "学习 / 培训", unit: "项" },
+          { key: "documentsUpdated", label: "SOP / 文档更新", unit: "项" },
+          { key: "questionsRaised", label: "提出问题", unit: "个" },
+          { key: "questionsResolved", label: "已解决问题", unit: "个" }
+        ]
+      },
       "店群运营": {
         help: "两名店群运营各自提交一份，只填写本人负责店铺。先看经营结果，再写异常判断、分派任务和复查结论。",
         columns: [
@@ -8900,8 +9082,7 @@
           { key: "productCardGmv", label: "商品卡GMV", unit: "$", money: true },
           { key: "affiliateGmv", label: "联盟GMV", unit: "$", money: true },
           { key: "adSpend", label: "广告成本", unit: "$", money: true },
-          { key: "adRoi", label: "广告ROI", unit: "" },
-          { key: "samples", label: "样品", unit: "个" }
+          { key: "adRoi", label: "广告ROI", unit: "" }
         ]
       }
     };
@@ -8989,20 +9170,16 @@
       if (role === "BD") {
         container.innerHTML = `
           <div class="report-template-head">
-            <div><h3>BD日报 · 今日结果</h3><p>按实际结果填写，普通聊天记录不需要逐条搬运。</p></div>
+            <div><h3>BD日报 · 今日结果</h3><p>负责多家店铺时可增加行，点击下拉直接选择店铺。</p></div>
             <span class="badge blue">个人提交</span>
           </div>
-          <section class="template-section">
-            <div class="template-section-head"><b>联盟消息</b><small>不统计回复条数</small></div>
-            <div class="role-result-grid">
-              ${templateField("负责店铺", "responsibleStores", { placeholder: "例如 DreamWeave、Dreamland" })}
-              ${templateField("处理状态", "messageStatus", { type: "select", options: ["", "已处理完成", "有积压"] })}
-              ${templateField("积压原因", "backlogReason", { placeholder: "有积压时填写" })}
-            </div>
+          <section class="template-section" data-repeat-section="responsibleStores" data-min-rows="1">
+            <div class="template-section-head"><span class="template-section-title"><b>负责店铺与联盟消息</b><small>一行对应一家店，新增行会同时新增完整消息字段</small></span>${repeatControls("responsibleStores")}</div>
+            <div class="template-row compact" data-role-row="responsibleStores"><span class="template-row-number">1</span>${rowField("店铺", "store", { type: "select", options: storeOptions() })}${rowField("联盟消息", "messageStatus", { type: "select", options: ["", "已处理完成", "有积压"] })}${rowField("积压原因", "backlogReason", { placeholder: "有积压时填写" })}</div>
           </section>
           <section class="template-section" data-repeat-section="samples" data-min-rows="1">
-            <div class="template-section-head"><span class="template-section-title"><b>审样寄样</b><small>按实际数量增减行数</small></span>${repeatControls("samples")}</div>
-            ${[1, 2].map((index) => `<div class="template-row" data-role-row="samples"><span class="template-row-number">${index}</span>${rowField("店铺", "store", { type: "select", options: storeOptions() })}${rowField("产品", "product")}${rowField("通过", "approved", { type: "number" })}${rowField("寄出", "sent", { type: "number" })}</div>`).join("")}
+            <div class="template-section-head"><span class="template-section-title"><b>产品寄样</b><small>按实际数量增减行数</small></span>${repeatControls("samples")}</div>
+            ${[1, 2].map((index) => `<div class="template-row" data-role-row="samples"><span class="template-row-number">${index}</span>${rowField("店铺", "store", { type: "select", options: storeOptions() })}${rowField("产品", "product")}${rowField("寄样数量", "sent", { type: "number" })}</div>`).join("")}
           </section>
           <section class="template-section" data-repeat-section="followups" data-min-rows="1">
             <div class="template-section-head"><span class="template-section-title"><b>重点达人跟进</b><small>写事项和明确结果</small></span>${repeatControls("followups")}</div>
@@ -9021,24 +9198,55 @@
         return;
       }
 
+      if (role === "其他") {
+        container.innerHTML = `
+          <div class="report-template-head">
+            <div><h3>其他日报 · 今日结果</h3><p>适用于新人、培训期或跨岗位协作；记录可核对的产出和需要支持的问题。</p></div>
+            <span class="badge blue">个人提交</span>
+          </div>
+          <section class="template-section">
+            <div class="template-section-head"><b>结构化结果</b><small>数量填实际完成结果，无则填 0</small></div>
+            <div class="role-result-grid">
+              ${templateField("完成事项（项）", "completedItems", { type: "number" })}
+              ${templateField("学习 / 培训（项）", "trainingItems", { type: "number" })}
+              ${templateField("SOP / 文档更新（项）", "documentsUpdated", { type: "number" })}
+              ${templateField("提出问题（个）", "questionsRaised", { type: "number" })}
+              ${templateField("已解决问题（个）", "questionsResolved", { type: "number" })}
+            </div>
+          </section>
+          <section class="template-section">
+            <div class="template-section-head"><b>工作说明</b><small>写结果、协助需求和下一步</small></div>
+            <div class="role-result-grid">
+              ${templateField("今日总结", "workSummary", { placeholder: "完成或学会了什么" })}
+              ${templateField("需要协助", "helpNeeded", { placeholder: "无则填写无" })}
+              ${templateField("明日计划", "tomorrowPlan", { placeholder: "下一步具体动作" })}
+            </div>
+          </section>
+        `;
+        return;
+      }
+
       if (role === "售后组") {
         container.innerHTML = `
           <div class="report-template-head">
-            <div><h3>售后组日报 · 今日结果</h3><p>两名售后合并提交；先填六店 SPS 与退货，再填售后合计。</p></div>
+            <div><h3>售后组日报 · 今日结果</h3><p>两名售后合并提交；按六店填写 SPS 总分、三个维度与退货 / 退款，再填其他售后合计。</p></div>
             <span class="badge blue">团队汇总</span>
           </div>
           <section class="template-section">
-            <div class="template-section-head"><b>六店 SPS 与退货明细</b><small>每店独立填写，作为健康和退货诊断的唯一日报口径</small></div>
+            <div class="template-section-head"><b>六店 SPS、退货 / 退款</b><small>SPS 填总分和三个维度；自动周报只显示总分</small></div>
             <div class="report-matrix">
               <table>
-                <thead><tr><th>店铺</th><th>SPS</th><th>退货（单）</th><th>退货金额（$）</th></tr></thead>
+                <thead><tr><th>店铺</th><th>SPS 总分</th><th>商品满意度</th><th>履约与物流</th><th>客户服务</th><th>退货 / 退款（单）</th><th>退货 / 退款金额（$）</th></tr></thead>
                 <tbody>
                   ${REPORT_STORES.map((store) => `
                     <tr class="report-store-row" data-store="${escapeHtml(store.name)}">
                       <td>${escapeHtml(store.name)}<span class="store-group">${store.group}</span></td>
-                      <td><input data-report-key="sps" type="number" min="0" max="5" step="0.1" inputmode="decimal" aria-label="${escapeHtml(store.name)} SPS" /></td>
-                      <td><input data-report-key="returns" type="number" min="0" step="1" inputmode="numeric" aria-label="${escapeHtml(store.name)} 退货数量" /></td>
-                      <td><input data-report-key="returnAmount" type="number" min="0" step="0.01" inputmode="decimal" aria-label="${escapeHtml(store.name)} 退货金额" /></td>
+                      <td><input data-report-key="sps" type="number" min="0" max="5" step="0.1" inputmode="decimal" aria-label="${escapeHtml(store.name)} SPS 总分" /></td>
+                      <td><input data-report-key="spsProductSatisfaction" type="number" min="0" max="5" step="0.1" inputmode="decimal" aria-label="${escapeHtml(store.name)} 商品满意度" /></td>
+                      <td><input data-report-key="spsFulfillmentLogistics" type="number" min="0" max="5" step="0.1" inputmode="decimal" aria-label="${escapeHtml(store.name)} 履约与物流" /></td>
+                      <td><input data-report-key="spsCustomerService" type="number" min="0" max="5" step="0.1" inputmode="decimal" aria-label="${escapeHtml(store.name)} 客户服务" /></td>
+                      <td><input data-report-key="returns" type="number" min="0" step="1" inputmode="numeric" aria-label="${escapeHtml(store.name)} 退货 / 退款数量" /></td>
+                      <td><input data-report-key="returnAmount" type="number" min="0" step="0.01" inputmode="decimal" aria-label="${escapeHtml(store.name)} 退货 / 退款金额" /></td>
                     </tr>
                   `).join("")}
                 </tbody>
@@ -9046,19 +9254,17 @@
             </div>
           </section>
           <section class="template-section">
-            <div class="template-section-head"><b>六店售后合计</b><small>以下字段只填一次，不与上方分店数据重复</small></div>
+            <div class="template-section-head"><b>其他售后合计</b><small>以下字段只填一次，不与上方数据重复</small></div>
             <div class="role-result-grid">
               ${templateField("咨询（单）", "consultations", { type: "number" })}
               ${templateField("未及时回复（单）", "lateReplies", { type: "number" })}
-              ${templateField("退款（单）", "refunds", { type: "number" })}
-              ${templateField("退款金额（$）", "refundAmount", { type: "number", step: "0.01" })}
               ${templateField("新增差评（条）", "badReviews", { type: "number" })}
               ${templateField("删除或修改（条）", "reviewsResolved", { type: "number" })}
               ${templateField("申诉（条）", "appeals", { type: "number" })}
               ${templateField("申诉成功（条）", "appealSuccess", { type: "number" })}
               ${templateField("申诉处理中（条）", "appealProcessing", { type: "number" })}
-              ${templateField("补发/赔付（单）", "compensation", { type: "number" })}
-              ${templateField("补发/赔付未完成（单）", "unfinished", { type: "number" })}
+              ${templateField("索赔（单）", "claims", { type: "number" })}
+              ${templateField("索赔未完成（单）", "unfinished", { type: "number" })}
               ${templateField("高风险订单（单）", "highRisk", { type: "number" })}
             </div>
           </section>
@@ -9090,16 +9296,9 @@
             ${templateField("活动待处理（项）", "campaignPending", { type: "number" })}
           </div>
         </section>
-        <section class="template-section">
-          <div class="template-section-head"><b>店铺巡检与其他结果</b><small>六店每日检查</small></div>
-          <div class="role-result-grid">
-            ${templateField("已检查（家）", "shopsChecked", { type: "number" })}
-            ${templateField("新增违规（条）", "violations", { type: "number" })}
-            ${templateField("提交申诉（条）", "appeals", { type: "number" })}
-            ${templateField("申诉成功（条）", "appealSuccess", { type: "number" })}
-            ${templateField("数据及表格", "dataTables", { placeholder: "完成了哪些更新" })}
-            ${templateField("其他重要结果", "otherResult", { placeholder: "无则留空" })}
-          </div>
+        <section class="template-section" data-repeat-section="inspectionIssues" data-min-rows="1">
+          <div class="template-section-head"><span class="template-section-title"><b>店铺违规与异常</b><small>仅记录实际发现的问题，无异常可留空</small></span>${repeatControls("inspectionIssues")}</div>
+          <div class="template-row" data-role-row="inspectionIssues"><span class="template-row-number">1</span>${rowField("店铺", "store", { type: "select", options: storeOptions() })}${rowField("违规 / 异常", "issue")}${rowField("原因", "reason")}${rowField("处理结果", "result")}</div>
         </section>
       `;
     }
@@ -9107,7 +9306,7 @@
     function renderReportClosureFields(role) {
       const container = document.getElementById("reportClosureFields");
       if (!container) return;
-      const objectLabel = role === "BD" ? "店铺 / 达人 / 链接" : role === "店铺维护" ? "店铺 / 产品 / 链接" : role === "售后组" ? "店铺 / 链接" : "店铺 / 指标";
+      const objectLabel = role === "BD" ? "店铺 / 达人 / 链接" : role === "店铺维护" ? "店铺 / 产品 / 链接" : role === "售后组" ? "店铺 / 链接" : role === "其他" ? "事项 / 流程 / 协作" : "店铺 / 指标";
       const issueLabel = role === "售后组" ? "异常数据" : "问题";
       const impactField = role === "店铺维护" ? rowField("影响", "impact") : "";
       const approvalTitle = role === "售后组" ? "需审批" : "即时审批记录";
@@ -9115,7 +9314,7 @@
       container.innerHTML = `
         <section class="template-section" data-repeat-section="anomaly" data-min-rows="1">
           <div class="template-section-head"><span class="template-section-title"><b>核心异常</b><small>与下方任务按顺序关联，未填写对应任务时系统自动创建</small></span>${repeatControls("anomaly")}</div>
-          ${[1, 2, 3].map((index) => `<div class="template-row ${role === "店铺维护" ? "five" : ""}" data-closure-row="anomaly"><span class="template-row-number">${index}</span>${rowField(objectLabel, "object")}${rowField(issueLabel, "issue")}${impactField}${rowField("原因判断", "reason")}${rowField("风险", "risk", { type: "select", options: ["", "高", "中", "低"] })}</div>`).join("")}
+          ${[1, 2, 3].map((index) => `<div class="template-row ${role === "店铺维护" ? "five" : ""}" data-closure-row="anomaly"><span class="template-row-number">${index}</span>${rowField(objectLabel, "object")}${rowField(issueLabel, "issue")}${impactField}${rowField("原因判断", "reason")}${rowField("风险", "risk", { type: "select", options: ["", "无", "高", "中", "低"] })}</div>`).join("")}
         </section>
         <section class="template-section" data-repeat-section="review" data-min-rows="1">
           <div class="template-section-head"><span class="template-section-title"><b>昨日复查</b><small>从待复查任务带入后，选择关闭、继续或升级</small></span>${repeatControls("review")}</div>
@@ -9268,11 +9467,27 @@
 
     function collectRoleData(role) {
       if (role === "店群运营") return { matrix: collectMatrixMetrics() };
-      if (role === "BD") {
+      if (role === "其他") {
         return {
-          responsibleStores: roleFieldValue("responsibleStores"),
-          messageStatus: roleFieldValue("messageStatus"),
-          backlogReason: roleFieldValue("backlogReason"),
+          completedItems: roleFieldValue("completedItems"),
+          trainingItems: roleFieldValue("trainingItems"),
+          documentsUpdated: roleFieldValue("documentsUpdated"),
+          questionsRaised: roleFieldValue("questionsRaised"),
+          questionsResolved: roleFieldValue("questionsResolved"),
+          workSummary: roleFieldValue("workSummary"),
+          helpNeeded: roleFieldValue("helpNeeded"),
+          tomorrowPlan: roleFieldValue("tomorrowPlan")
+        };
+      }
+      if (role === "BD") {
+        const responsibleStoreRows = roleRows("responsibleStores");
+        const responsibleStores = [...new Set(responsibleStoreRows.map((row) => row.store).filter(Boolean))];
+        const backlogRows = responsibleStoreRows.filter((row) => row.messageStatus === "有积压");
+        return {
+          responsibleStores: responsibleStores.join("、"),
+          responsibleStoreRows,
+          messageStatus: backlogRows.length ? "有积压" : responsibleStoreRows.some((row) => row.messageStatus === "已处理完成") ? "已处理完成" : "",
+          backlogReason: backlogRows.map((row) => `${row.store || "未选店铺"}：${row.backlogReason || "未填写原因"}`).join("；"),
           samples: roleRows("samples"),
           followups: roleRows("followups"),
           oldCreatorContacts: roleFieldValue("oldCreatorContacts"),
@@ -9290,6 +9505,7 @@
         return { matrix: storeMetrics, summary };
       }
       const plugins = roleRows("plugin");
+      const inspectionIssues = roleRows("inspectionIssues");
       return {
         plugin: plugins[0] || {},
         plugins,
@@ -9303,12 +9519,7 @@
         campaignApplied: roleFieldValue("campaignApplied"),
         campaignSuccess: roleFieldValue("campaignSuccess"),
         campaignPending: roleFieldValue("campaignPending"),
-        shopsChecked: roleFieldValue("shopsChecked"),
-        violations: roleFieldValue("violations"),
-        appeals: roleFieldValue("appeals"),
-        appealSuccess: roleFieldValue("appealSuccess"),
-        dataTables: roleFieldValue("dataTables"),
-        otherResult: roleFieldValue("otherResult")
+        inspectionIssues
       };
     }
 
@@ -9320,6 +9531,18 @@
 
     function roleDataMetrics(role, data) {
       if (role === "店群运营") return data.matrix || [];
+      if (role === "其他") {
+        return [{
+          store: "个人汇总",
+          values: {
+            completedItems: data.completedItems,
+            trainingItems: data.trainingItems,
+            documentsUpdated: data.documentsUpdated,
+            questionsRaised: data.questionsRaised,
+            questionsResolved: data.questionsResolved
+          }
+        }];
+      }
       if (role === "售后组") {
         const summaryHasValue = Object.values(data.summary || {}).some((value) => value !== "" && value !== null && value !== undefined);
         return [
@@ -9345,17 +9568,21 @@
             campaignSuccess: data.campaignSuccess,
             campaignPending: data.campaignPending,
             shopsChecked: data.shopsChecked,
-            violations: data.violations,
+            violations: (data.inspectionIssues || []).length || data.violations,
             appeals: data.appeals,
             appealSuccess: data.appealSuccess
           }
         }];
       }
       const byStore = {};
+      (data.responsibleStoreRows || []).forEach((row) => {
+        if (!row.store) return;
+        byStore[row.store] ||= { samplesSent: 0 };
+        byStore[row.store].messageStatus = row.messageStatus || "";
+      });
       (data.samples || []).forEach((row) => {
         const store = row.store || "个人汇总";
-        byStore[store] ||= { samplesApproved: 0, samplesSent: 0 };
-        byStore[store].samplesApproved += Number(row.approved || 0);
+        byStore[store] ||= { samplesSent: 0 };
         byStore[store].samplesSent += Number(row.sent || 0);
       });
       return [
@@ -9363,7 +9590,7 @@
         {
           store: "个人汇总",
           values: {
-            messageStatus: data.messageStatus,
+            messageStatus: (data.responsibleStoreRows || []).length ? "" : data.messageStatus,
             oldCreatorContacts: data.oldCreatorContacts,
             confirmedReinvest: data.confirmedReinvest
           }
@@ -9373,12 +9600,24 @@
 
     function roleDataResults(role, data) {
       if (role === "店群运营") return "";
+      if (role === "其他") {
+        return [
+          `1. 完成事项：${data.completedItems || 0}项｜学习 / 培训：${data.trainingItems || 0}项｜SOP / 文档更新：${data.documentsUpdated || 0}项`,
+          `2. 问题：提出${data.questionsRaised || 0}个｜已解决${data.questionsResolved || 0}个`,
+          `3. 今日总结：${data.workSummary || "无"}`,
+          `4. 需要协助：${data.helpNeeded || "无"}`,
+          `5. 明日计划：${data.tomorrowPlan || "无"}`
+        ].join("\n");
+      }
       if (role === "BD") {
-        const sampleText = (data.samples || []).map((row) => `${row.store || "未选店铺"}｜产品${row.product || "-"}｜通过${row.approved || 0}个｜寄出${row.sent || 0}个`).join("；") || "无";
+        const messageText = (data.responsibleStoreRows || []).map((row) =>
+          `${row.store || "未选店铺"}｜${row.messageStatus || "未填写"}${row.backlogReason ? `｜原因：${row.backlogReason}` : ""}`
+        ).join("；") || `${data.messageStatus || "未填写"}${data.backlogReason ? `，原因：${data.backlogReason}` : ""}`;
+        const sampleText = (data.samples || []).map((row) => `${row.store || "未选店铺"}｜产品${row.product || "-"}｜寄样${row.sent || 0}个`).join("；") || "无";
         const followupText = (data.followups || []).map((row) => `${row.item || "-"}｜${row.result || "-"}`).join("；") || "无";
         return [
-          `1. 联盟消息：${data.messageStatus || "未填写"}${data.backlogReason ? `，原因：${data.backlogReason}` : ""}`,
-          `2. 审样寄样：${sampleText}`,
+          `1. 联盟消息：${messageText}`,
+          `2. 产品寄样：${sampleText}`,
           `3. 重点达人跟进：${followupText}`,
           `4. 老达人复投：联系${data.oldCreatorContacts || 0}人｜确认合作${data.confirmedReinvest || 0}人｜当前结果${data.reinvestResult || "无"}`,
           `5. 其他重要结果：${data.otherResult || "无"}`
@@ -9387,33 +9626,39 @@
       if (role === "售后组") {
         const storeLines = (data.matrix || []).map((row) => {
           const values = row.values || {};
-          return `${row.store}：SPS ${values.sps === null || values.sps === undefined || values.sps === "" ? "-" : values.sps}｜退货 ${values.returns || 0}单 / ${money(values.returnAmount || 0)}`;
+          const spsTotal = values.sps === null || values.sps === undefined || values.sps === "" ? "-" : values.sps;
+          const dimensions = [
+            ["商品满意度", values.spsProductSatisfaction],
+            ["履约与物流", values.spsFulfillmentLogistics],
+            ["客户服务", values.spsCustomerService]
+          ].map(([label, value]) => `${label} ${value === null || value === undefined || value === "" ? "-" : value}`).join("｜");
+          return `${row.store}：SPS 总分 ${spsTotal}｜${dimensions}｜退货 / 退款 ${values.returns || 0}单 / ${money(values.returnAmount || 0)}`;
         });
         const summary = data.summary || {};
         const totalReturns = (data.matrix || []).reduce((sum, row) => sum + Number(row.values?.returns || 0), 0);
         const totalReturnAmount = (data.matrix || []).reduce((sum, row) => sum + Number(row.values?.returnAmount || 0), 0);
         return [
-          `1. 六店SPS与退货：${storeLines.join("；") || "未填写"}`,
-          `2. 退货合计：${totalReturns}单 / ${money(totalReturnAmount)}`,
+          `1. 六店SPS与退货 / 退款：${storeLines.join("；") || "未填写"}`,
+          `2. 退货 / 退款合计：${totalReturns}单 / ${money(totalReturnAmount)}`,
           `3. 咨询：${summary.consultations || 0}单｜未及时回复：${summary.lateReplies || 0}单`,
-          `4. 退款：${summary.refunds || 0}单 / ${money(summary.refundAmount || 0)}`,
-          `5. 新增差评：${summary.badReviews || 0}条｜删除或修改：${summary.reviewsResolved || 0}条`,
-          `6. 申诉：${summary.appeals || 0}条｜成功：${summary.appealSuccess || 0}条｜处理中：${summary.appealProcessing || 0}条`,
-          `7. 补发/赔付：${summary.compensation || 0}单｜未完成：${summary.unfinished || 0}单`,
-          `8. 高风险订单：${summary.highRisk || 0}单`
+          `4. 新增差评：${summary.badReviews || 0}条｜删除或修改：${summary.reviewsResolved || 0}条`,
+          `5. 申诉：${summary.appeals || 0}条｜成功：${summary.appealSuccess || 0}条｜处理中：${summary.appealProcessing || 0}条`,
+          `6. 索赔：${summary.claims ?? summary.compensation ?? 0}单｜未完成：${summary.unfinished || 0}单`,
+          `7. 高风险订单：${summary.highRisk || 0}单`
         ].join("\n");
       }
       const pluginText = (data.plugins || [data.plugin]).filter((item) => item && Object.keys(item).length)
         .map((item) => `店铺${item.store || "-"}｜产品${item.product || "-"}｜建联${item.outreach || 0}｜运行${item.status || "未填写"}`)
         .join("；") || "无";
+      const inspectionText = (data.inspectionIssues || []).map((row) =>
+        `${row.store || "未选店铺"}｜${row.issue || "未填写异常"}｜原因：${row.reason || "未填写"}｜处理：${row.result || "待处理"}`
+      ).join("；") || "无异常";
       return [
         `1. 插件建联：${pluginText}`,
         `2. 链接维护：新上架${data.linksAdded || 0}条｜修改${data.linksUpdated || 0}条｜恢复${data.linksRestored || 0}条｜待处理${data.linksPending || 0}条`,
         `3. 库存与价格：库存调整${data.stockChanges || 0}项｜价格执行${data.priceChanges || 0}项｜风险${data.stockPriceRisk || "无"}`,
         `4. 活动执行：报名/续期${data.campaignApplied || 0}项｜成功${data.campaignSuccess || 0}项｜待处理${data.campaignPending || 0}项`,
-        `5. 店铺巡检：已检查${data.shopsChecked || 0}家｜新增违规${data.violations || 0}条｜提交申诉${data.appeals || 0}条｜申诉成功${data.appealSuccess || 0}条`,
-        `6. 数据及表格：${data.dataTables || "无"}`,
-        `7. 其他重要结果：${data.otherResult || "无"}`
+        `5. 店铺违规与异常：${inspectionText}`
       ].join("\n");
     }
 
@@ -9430,7 +9675,7 @@
     }
 
     function collectClosureData(role) {
-      const anomalyItems = closureRows("anomaly").map((row) => ({
+      const anomalyItems = closureRows("anomaly").filter((row) => row.risk !== "无").map((row) => ({
         id: crypto.randomUUID(),
         object: row.object || "",
         issue: row.issue || "",
@@ -9658,7 +9903,7 @@
         : [...new Set(roleMetrics.map((row) => row.store).filter((store) => REPORT_STORES.some((item) => item.name === store)))];
       const storesText = data.role === "BD" && roleData.responsibleStores
         ? roleData.responsibleStores
-        : stores.join("、");
+        : data.role === "其他" ? "个人" : stores.join("、");
       state.reports ||= [];
       const existingIndex = state.reports.findIndex((item) => sameReportSlot(item, data));
       const existing = existingIndex >= 0 ? state.reports[existingIndex] : null;
@@ -9782,6 +10027,7 @@
       if (role === "售后组") return [...REPORT_STORES, { name: "六店汇总", group: "团队" }];
       if (role === "店铺维护") return [{ name: "六店汇总", group: "团队" }];
       if (role === "BD") return [...REPORT_STORES, { name: "个人汇总", group: "人员" }];
+      if (role === "其他") return [{ name: "个人汇总", group: "人员" }];
       return REPORT_STORES;
     }
 
@@ -9790,6 +10036,7 @@
       const byStore = Object.fromEntries(weeklyRows(role).map((store) => [store.name, {
         reportDays: new Set(),
         values: Object.fromEntries(schema.columns.filter((column) => column.type !== "status").map((column) => [column.key, 0])),
+        present: new Set(),
         latestDates: {},
         statuses: Object.fromEntries(schema.columns.filter((column) => column.type === "status").map((column) => [column.key, {}]))
       }]));
@@ -9804,12 +10051,14 @@
               const statusCounts = byStore[row.store].statuses[column.key];
               statusCounts[value] = (statusCounts[value] || 0) + 1;
             } else if (column.aggregate === "latest") {
+              byStore[row.store].present.add(column.key);
               const latestDate = byStore[row.store].latestDates[column.key] || "";
               if (report.date >= latestDate) {
                 byStore[row.store].values[column.key] = Number(value) || 0;
                 byStore[row.store].latestDates[column.key] = report.date;
               }
             } else {
+              byStore[row.store].present.add(column.key);
               byStore[row.store].values[column.key] += Number(value) || 0;
             }
           });
@@ -9825,13 +10074,103 @@
       return warningCount ? `${column.warning} ${warningCount}天` : "正常";
     }
 
+    function weeklyDisplayColumns(role, schema) {
+      if (role === "售后组") {
+        return schema.columns.filter((column) => !["consultations", "lateReplies"].includes(column.key));
+      }
+      return schema.columns;
+    }
+
+    function weeklyDisplayValue(column, aggregate) {
+      if (!aggregate?.reportDays.size) return "-";
+      return column.type === "status"
+        ? weeklyStatusText(column, aggregate.statuses[column.key])
+        : aggregate.present.has(column.key) ? reportMetricValue(column, aggregate.values[column.key]) : "-";
+    }
+
+    function bdSampleProductSummary(reports, storeName = "") {
+      const products = new Map();
+      reports.forEach((report) => {
+        (report.roleData?.samples || []).forEach((row) => {
+          if (storeName && row.store !== storeName) return;
+          const sent = Number(row.sent || 0);
+          if (!sent) return;
+          const product = String(row.product || "未填写产品").trim() || "未填写产品";
+          products.set(product, (products.get(product) || 0) + sent);
+        });
+      });
+      return [...products.entries()]
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "zh-CN"))
+        .map(([product, sent]) => `${product} × ${num(sent)}`)
+        .join("、");
+    }
+
+    function maintenanceWeeklyIssues(reports) {
+      const issues = [];
+      reports.forEach((report) => {
+        const rows = report.roleData?.inspectionIssues || [];
+        rows.forEach((row) => {
+          if (!row.store && !row.issue && !row.reason && !row.result) return;
+          issues.push({
+            date: report.date,
+            store: row.store || "未选店铺",
+            issue: row.issue || "未填写异常",
+            reason: row.reason || "未填写",
+            result: row.result || "待处理"
+          });
+        });
+        if (!rows.length && Number(report.roleData?.violations || 0)) {
+          issues.push({
+            date: report.date,
+            store: "历史记录未拆分店铺",
+            issue: `新增违规 ${num(report.roleData.violations)} 条`,
+            reason: "旧日报未记录原因",
+            result: "请结合原日报复查"
+          });
+        }
+      });
+      return issues.sort((a, b) => a.store.localeCompare(b.store, "zh-CN") || a.date.localeCompare(b.date));
+    }
+
     function buildWeeklyDigest(role, range, reports, aggregates, taskStats) {
       if (!reports.length) return `【${role}周报｜${range.start}—${range.end}】\n本周暂无结构化日报。`;
+      if (role === "BD") {
+        const storeLines = REPORT_STORES.map((store) => {
+          const aggregate = aggregates[store.name];
+          if (!aggregate?.reportDays.size) return "";
+          return `${store.name}：${bdSampleProductSummary(reports, store.name) || "未填写产品明细"}｜寄样 ${num(aggregate.values.samplesSent)}个`;
+        }).filter(Boolean);
+        const anomalyCount = reports.reduce((sum, report) => sum + reportLines(report.anomalies).length, 0);
+        return [
+          `【BD周报｜${range.start}—${range.end}】`,
+          `日报：${reports.length}份｜覆盖店铺：${storeLines.length}家｜异常${anomalyCount}项`,
+          "",
+          "按店铺汇总：",
+          storeLines.map((line, index) => `${index + 1}. ${line}`).join("\n"),
+          "",
+          `任务闭环：新增${taskStats.total}项｜已完成${taskStats.closed}项｜逾期${taskStats.overdue}项`,
+          "下周重点：优先清空联盟消息积压，并持续追踪寄样后的内容发布、出单和复投结果。"
+        ].join("\n");
+      }
+      if (role === "店铺维护") {
+        const issues = maintenanceWeeklyIssues(reports);
+        return [
+          `【店铺维护周报｜${range.start}—${range.end}】`,
+          `实际违规 / 异常：${issues.length}项`,
+          "",
+          issues.length
+            ? issues.map((row, index) => `${index + 1}. ${row.store}｜${row.issue}｜原因：${row.reason}｜处理：${row.result}`).join("\n")
+            : "本周未记录店铺违规或异常。",
+          "",
+          `任务闭环：新增${taskStats.total}项｜已完成${taskStats.closed}项｜逾期${taskStats.overdue}项`
+        ].join("\n");
+      }
       const schema = reportSchema(role);
+      const displayColumns = weeklyDisplayColumns(role, schema);
       const storeLines = weeklyRows(role).map((store) => {
         const aggregate = aggregates[store.name];
         if (!aggregate?.reportDays.size) return "";
-        const details = schema.columns.map((column) => {
+        const details = displayColumns.map((column) => {
           if (column.type === "status") {
             const text = weeklyStatusText(column, aggregate.statuses[column.key]);
             return text === "-" ? "" : `${column.label} ${text}`;
@@ -9848,9 +10187,12 @@
         "",
         "汇总结果：",
         storeLines.map((line, index) => `${index + 1}. ${line}`).join("\n"),
+        role === "BD" ? `\n寄样产品：${bdSampleProductSummary(reports) || "日报未填写产品寄样明细"}` : "",
         "",
         `任务闭环：新增${taskStats.total}项｜已完成${taskStats.closed}项｜逾期${taskStats.overdue}项`,
-        "下周重点：优先处理高风险异常、逾期任务和连续出现的同类问题。"
+        role === "其他"
+          ? "下周重点：优先解决未闭环问题，把学习结果沉淀为SOP或清单，并由带教人复查。"
+          : "下周重点：优先处理高风险异常、逾期任务和连续出现的同类问题。"
       ].join("\n");
     }
 
@@ -9899,7 +10241,15 @@
         const affiliateGmv = aggregateTotal(aggregates, "affiliateGmv");
         const productCardGmv = aggregateTotal(aggregates, "productCardGmv");
         const adSpend = aggregateTotal(aggregates, "adSpend");
-        const returns = aggregateTotal(aggregates, "returns");
+        const afterSalesReports = (state.reports || []).filter((report) =>
+          report.role === "售后组"
+          && report.date >= range.start
+          && report.date <= range.end
+          && Array.isArray(report.roleMetrics)
+        );
+        const afterSalesAggregates = aggregateWeeklyReports(afterSalesReports, "售后组");
+        const returns = aggregateTotal(afterSalesAggregates, "returns");
+        const hasAfterSalesReturns = Object.values(afterSalesAggregates).some((aggregate) => aggregate.present?.has("returns"));
         const affiliateShare = gmv ? affiliateGmv / gmv : 0;
         const productShare = gmv ? productCardGmv / gmv : 0;
         const returnRate = orders ? returns / orders : 0;
@@ -9923,35 +10273,24 @@
             `广告成本 ${money(adSpend)}。ROI不能单独判断好坏，应与毛利保本线、自然GMV增量和素材衰减一起复查；低于店铺保本ROI时停止盲目放量。`);
         }
 
-        if (orders) {
+        if (orders && hasAfterSalesReturns) {
           push(returnRate > 0.05 ? "high" : returnRate > 0.03 ? "medium" : "good", "增长质量", `退货单量占比 ${(returnRate * 100).toFixed(2)}%`,
             returnRate > 0.03 ? "增长同时伴随售后压力。应联动VOC、链接表达、产品批次和达人话术，避免用新增订单掩盖利润流失。" : "当前退货压力可控，仍需结合退款金额、差评和产品满意度持续观察。");
+        } else if (orders) {
+          push("info", "增长质量", "缺少同周售后数据，暂不计算退货 / 退款占比",
+            "店群运营已记录订单，但售后组尚未提供同周退货 / 退款口径。数据补齐前不下增长质量结论。");
         }
       }
 
       if (role === "BD") {
-        const approved = aggregateTotal(aggregates, "samplesApproved");
         const samples = aggregateTotal(aggregates, "samplesSent");
-        const oldContacts = aggregateTotal(aggregates, "oldCreatorContacts");
-        const confirmed = aggregateTotal(aggregates, "confirmedReinvest");
-        const dispatchRate = approved ? samples / approved : 0;
-        const reinvestRate = oldContacts ? confirmed / oldContacts : 0;
-        const backlogDays = Object.values(aggregates).reduce((sum, aggregate) => sum + Number(aggregate?.statuses?.messageStatus?.有积压 || 0), 0);
-
-        push(backlogDays ? "high" : "good", "机会承接", `联盟消息积压 ${backlogDays} 人次`,
-          backlogDays ? "消息积压意味着达人机会池没有被当天承接，应确认积压店铺、原因和清空时间。" : "联盟消息均记录为已处理完成，继续用重点跟进结果判断承接质量。");
-        push(approved && dispatchRate < 0.8 ? "medium" : "good", "寄样执行", `审样通过 ${approved} 个｜寄出 ${samples} 个`,
-          `当期寄出/通过为 ${(dispatchRate * 100).toFixed(1)}%。该比例只检查执行衔接，不代表样品最终内容产出。`);
-        push(oldContacts && reinvestRate < 0.2 ? "medium" : "good", "复投推进", `老达人确认合作率 ${(reinvestRate * 100).toFixed(1)}%`,
-          `联系 ${oldContacts} 人，确认合作 ${confirmed} 人。应继续按历史GMV、内容稳定性和可复拍性分层，而不是平均跟进。`);
-        push("info", "数据下一层", "发布、出单和达人GMV在周报中需要补充",
-          "当前日报适合控制每日执行，但不能单独评价达人产出。AI结论会把这一缺口标记为数据限制，不会把寄样量当作最终成绩。");
+        push(samples ? "good" : "info", "寄样执行", `本周寄样 ${samples} 个`,
+          "按店铺汇总寄样产品和实际寄出数量。");
       }
 
       if (role === "售后组") {
         const consultations = aggregateTotal(aggregates, "consultations");
         const lateReplies = aggregateTotal(aggregates, "lateReplies");
-        const refunds = aggregateTotal(aggregates, "refunds");
         const returns = aggregateTotal(aggregates, "returns");
         const badReviews = aggregateTotal(aggregates, "badReviews");
         const unfinished = aggregateTotal(aggregates, "unfinished");
@@ -9967,26 +10306,32 @@
           lowSps.length ? "低于3.5的店铺需要优先拆解商品满意度、履约与客服维度，并关注联盟能力受限带来的流量风险。" : "SPS按店铺持续记录；分数正常时仍需观察单项指标和变化趋势。");
         push(lateRate > 0.03 ? "high" : lateRate > 0.01 ? "medium" : "good", "响应护栏", `未及时回复占比 ${(lateRate * 100).toFixed(2)}%`,
           `咨询 ${consultations} 单，未及时回复 ${lateReplies} 单。先按时段和店铺定位积压，再检查排班、标准答复和升级机制。`);
-        push(badReviews || returns ? "medium" : "good", "VOC信号", `退货 ${returns} 单｜新增差评 ${badReviews} 条`,
+        push(badReviews || returns ? "medium" : "good", "VOC信号", `退货 / 退款 ${returns} 单｜新增差评 ${badReviews} 条`,
           "不要只按订单处理售后。应把原因归并为产品、链接表达、达人话术、物流和客服五类，连续出现的问题必须回流到商品与内容。");
-        push(unfinished ? "high" : "good", "闭环质量", `未完成补发/赔付 ${unfinished} 单`,
-          unfinished ? "未闭环订单会继续累积体验风险。每单必须有负责人、承诺时间和复查节点。" : `本周退款 ${refunds} 单，当前补发与赔付事项已完成闭环。`);
+        push(unfinished ? "high" : "good", "闭环质量", `未完成索赔 ${unfinished} 单`,
+          unfinished ? "未闭环订单会继续累积体验风险。每单必须有负责人、承诺时间和复查节点。" : "本周退货 / 退款与索赔事项已完成闭环。");
       }
 
       if (role === "店铺维护") {
-        const pendingLinks = aggregateTotal(aggregates, "linksPending");
-        const linksUpdated = aggregateTotal(aggregates, "linksUpdated") + aggregateTotal(aggregates, "linksAdded") + aggregateTotal(aggregates, "linksRestored");
-        const violations = aggregateTotal(aggregates, "violations");
-        const appeals = aggregateTotal(aggregates, "appeals");
-        const campaignSuccess = aggregateTotal(aggregates, "campaignSuccess");
-        const pluginWarnings = Object.values(aggregates).reduce((sum, aggregate) => sum + Number(aggregate?.statuses?.pluginStatus?.异常 || 0), 0);
+        const issues = maintenanceWeeklyIssues(reports);
+        push(issues.length ? "medium" : "good", "店铺异常", `实际违规 / 异常 ${issues.length} 项`,
+          issues.length ? "按店铺查看异常、原因和处理结果，未完成事项继续进入任务闭环。" : "本周未记录店铺违规或异常。");
+      }
 
-        push(pendingLinks ? "high" : "good", "链接可售性", `完成维护 ${linksUpdated} 项｜待处理 ${pendingLinks} 项`,
-          pendingLinks ? "待处理链接应按GMV影响和挂车范围排序，并以“前台价格、库存、购物车和活动状态均正常”作为完成标准。" : "本周链接维护已闭环，继续保留前台复查证据，避免只记录后台操作完成。");
-        push(pluginWarnings ? "high" : "good", "达人入口", `插件异常 ${pluginWarnings} 店次`,
-          pluginWarnings ? "插件异常会直接影响新增达人机会池，应记录中断时长、影响店铺和恢复结果，并同步给对应BD。" : "插件运行未记录异常，BD侧仍需观察回复与样品申请是否同步变化。");
-        push(violations ? "medium" : "good", "规则护栏", `新增违规 ${violations} 条｜提交申诉 ${appeals} 条`,
-          violations ? "先判断违规属于商品、内容、履约还是账户层级；申诉只是处理中，平台结果返回后才能关闭。" : `活动成功 ${campaignSuccess} 项，当前无新增违规记录。`);
+      if (role === "其他") {
+        const completed = aggregateTotal(aggregates, "completedItems");
+        const training = aggregateTotal(aggregates, "trainingItems");
+        const documents = aggregateTotal(aggregates, "documentsUpdated");
+        const raised = aggregateTotal(aggregates, "questionsRaised");
+        const resolved = aggregateTotal(aggregates, "questionsResolved");
+        const resolutionRate = raised ? resolved / raised : 1;
+
+        push(completed ? "good" : "info", "工作产出", `完成事项 ${completed} 项`,
+          completed ? "继续用可核对的结果描述工作，不只记录参与过程。" : "本周尚未记录完成事项，应补充可验证的交付结果。");
+        push(training || documents ? "good" : "info", "学习沉淀", `学习 / 培训 ${training} 项｜SOP / 文档更新 ${documents} 项`,
+          "新人学习应沉淀为笔记、SOP修订或可复用清单，避免知识只停留在个人。");
+        push(raised && resolutionRate < 0.8 ? "medium" : "good", "问题解决", `提出 ${raised} 个｜已解决 ${resolved} 个`,
+          raised ? `问题解决率 ${(resolutionRate * 100).toFixed(1)}%。未解决问题应明确带教人、截止时间和复查标准。` : "本周未记录待解决问题；如存在阻塞，应及时进入异常和任务闭环。");
       }
 
       return insights.slice(0, 4);
@@ -10216,10 +10561,171 @@
       }
     }
 
+    function renderOverallWeeklyReport(range) {
+      const reports = uniqueReportsBySlot((state.reports || []).filter((report) =>
+        report.date >= range.start
+        && report.date <= range.end
+        && Array.isArray(report.roleMetrics)
+      ));
+      const previousRange = { start: addDays(range.start, -7), end: addDays(range.end, -7) };
+      const previousReports = uniqueReportsBySlot((state.reports || []).filter((report) =>
+        report.date >= previousRange.start
+        && report.date <= previousRange.end
+        && Array.isArray(report.roleMetrics)
+      ));
+      const reportsByRole = (role) => reports.filter((report) => report.role === role);
+      const previousReportsByRole = (role) => previousReports.filter((report) => report.role === role);
+      const operationReports = reportsByRole("店群运营");
+      const bdReports = reportsByRole("BD");
+      const afterSalesReports = reportsByRole("售后组");
+      const maintenanceReports = reportsByRole("店铺维护");
+      const otherReports = reportsByRole("其他");
+      const operationAggregates = aggregateWeeklyReports(operationReports, "店群运营");
+      const bdAggregates = aggregateWeeklyReports(bdReports, "BD");
+      const afterSalesAggregates = aggregateWeeklyReports(afterSalesReports, "售后组");
+      const maintenanceAggregates = aggregateWeeklyReports(maintenanceReports, "店铺维护");
+      const otherAggregates = aggregateWeeklyReports(otherReports, "其他");
+      const previousOperationReports = previousReportsByRole("店群运营");
+      const previousOperationAggregates = aggregateWeeklyReports(previousOperationReports, "店群运营");
+      const previousBdAggregates = aggregateWeeklyReports(previousReportsByRole("BD"), "BD");
+      const previousAfterSalesAggregates = aggregateWeeklyReports(previousReportsByRole("售后组"), "售后组");
+      const previousMaintenanceAggregates = aggregateWeeklyReports(previousReportsByRole("店铺维护"), "店铺维护");
+      const previousOtherAggregates = aggregateWeeklyReports(previousReportsByRole("其他"), "其他");
+      const reportIds = new Set(reports.map((report) => report.id));
+      const tasks = (state.tasks || []).filter((task) => reportIds.has(task.sourceReport));
+      const previousReportIds = new Set(previousReports.map((report) => report.id));
+      const previousTasks = (state.tasks || []).filter((task) => previousReportIds.has(task.sourceReport));
+      const closed = tasks.filter((task) => task.status === "已完成").length;
+      const pendingReview = tasks.filter((task) => task.status === "待复盘").length;
+      const overdue = tasks.filter((task) => task.status !== "已完成" && task.due && task.due < today).length;
+      const highRisks = reports.filter((report) => report.risk === "高").length;
+      const expected = ["售后组", "BD", "店铺维护", "店群运营"].reduce((sum, role) => sum + weeklyExpectedReports(role, range), 0);
+      const coveredStores = REPORT_STORES.filter((store) =>
+        reports.some((report) => (report.roleMetrics || []).some((row) => row.store === store.name))
+      ).length;
+      const closeRate = tasks.length ? closed / tasks.length * 100 : null;
+      const previousClosed = previousTasks.filter((task) => task.status === "已完成").length;
+      const previousCloseRate = previousTasks.length ? previousClosed / previousTasks.length * 100 : null;
+
+      const gmv = aggregateTotal(operationAggregates, "gmv");
+      const orders = aggregateTotal(operationAggregates, "orders");
+      const affiliateGmv = aggregateTotal(operationAggregates, "affiliateGmv");
+      const productCardGmv = aggregateTotal(operationAggregates, "productCardGmv");
+      const adSpend = aggregateTotal(operationAggregates, "adSpend");
+      const averageRoi = averageReportMetric(operationReports, "adRoi");
+      const previousGmv = aggregateTotal(previousOperationAggregates, "gmv");
+      const previousOrders = aggregateTotal(previousOperationAggregates, "orders");
+      const previousAverageRoi = averageReportMetric(previousOperationReports, "adRoi");
+      const sent = aggregateTotal(bdAggregates, "samplesSent");
+      const backlogDays = Object.values(bdAggregates).reduce((sum, aggregate) => sum + Number(aggregate?.statuses?.messageStatus?.有积压 || 0), 0);
+      const oldContacts = aggregateTotal(bdAggregates, "oldCreatorContacts");
+      const confirmed = aggregateTotal(bdAggregates, "confirmedReinvest");
+      const previousSent = aggregateTotal(previousBdAggregates, "samplesSent");
+      const previousConfirmed = aggregateTotal(previousBdAggregates, "confirmedReinvest");
+      const returns = aggregateTotal(afterSalesAggregates, "returns");
+      const returnAmount = aggregateTotal(afterSalesAggregates, "returnAmount");
+      const badReviews = aggregateTotal(afterSalesAggregates, "badReviews");
+      const unfinishedClaims = aggregateTotal(afterSalesAggregates, "unfinished");
+      const previousReturns = aggregateTotal(previousAfterSalesAggregates, "returns");
+      const previousBadReviews = aggregateTotal(previousAfterSalesAggregates, "badReviews");
+      const latestSps = REPORT_STORES.map((store) => ({
+        store: store.name,
+        value: Number(afterSalesAggregates[store.name]?.values?.sps || 0)
+      })).filter((item) => item.value > 0);
+      const lowSps = latestSps.filter((item) => item.value < 3.5);
+      const linksDone = aggregateTotal(maintenanceAggregates, "linksAdded")
+        + aggregateTotal(maintenanceAggregates, "linksUpdated")
+        + aggregateTotal(maintenanceAggregates, "linksRestored");
+      const linksPending = aggregateTotal(maintenanceAggregates, "linksPending");
+      const pluginWarnings = Object.values(maintenanceAggregates).reduce((sum, aggregate) => sum + Number(aggregate?.statuses?.pluginStatus?.异常 || 0), 0);
+      const violations = aggregateTotal(maintenanceAggregates, "violations");
+      const previousLinksDone = aggregateTotal(previousMaintenanceAggregates, "linksAdded")
+        + aggregateTotal(previousMaintenanceAggregates, "linksUpdated")
+        + aggregateTotal(previousMaintenanceAggregates, "linksRestored");
+      const previousLinksPending = aggregateTotal(previousMaintenanceAggregates, "linksPending");
+      const otherCompleted = aggregateTotal(otherAggregates, "completedItems");
+      const otherTraining = aggregateTotal(otherAggregates, "trainingItems");
+      const otherRaised = aggregateTotal(otherAggregates, "questionsRaised");
+      const otherResolved = aggregateTotal(otherAggregates, "questionsResolved");
+      const previousOtherCompleted = aggregateTotal(previousOtherAggregates, "completedItems");
+      const previousOtherTraining = aggregateTotal(previousOtherAggregates, "trainingItems");
+      const affiliateShare = gmv ? affiliateGmv / gmv : 0;
+      const productShare = gmv ? productCardGmv / gmv : 0;
+      const comparePercent = (current, previous) => previous
+        ? `${current - previous >= 0 ? "+" : ""}${((current - previous) / previous * 100).toFixed(1)}%`
+        : previousReports.length ? "-" : "无上周数据";
+      const comparePoints = (current, previous) => previous
+        ? `${current - previous >= 0 ? "+" : ""}${(current - previous).toFixed(2)}`
+        : previousReports.length ? "-" : "无上周数据";
+
+      document.getElementById("weeklyMetrics").innerHTML = [
+        [`${reports.length}/${expected}`, "日报提交", `${range.start}—${range.end}`],
+        [coveredStores, "覆盖店铺", `共 ${REPORT_STORES.length} 家店`],
+        [highRisks, "高风险日报", highRisks ? "需要管理层关注" : "暂无高风险"],
+        [pendingReview, "待复查任务", pendingReview ? "复查后才能关闭" : "暂无待复查"],
+        [closeRate === null ? "-" : `${closeRate.toFixed(0)}%`, "任务闭环率", tasks.length ? `${closed}/${tasks.length} 已完成` : "暂无闭环任务"]
+      ].map(([value, label, detail]) => `<div class="weekly-metric"><b>${value}</b><span>${label}<br>${detail}</span></div>`).join("");
+
+      const rows = [
+        ["经营结果", `GMV ${money(gmv)}｜订单 ${num(orders)}｜联盟占比 ${(affiliateShare * 100).toFixed(1)}%｜商品卡占比 ${(productShare * 100).toFixed(1)}%`, `广告成本 ${money(adSpend)}｜平均ROI ${averageRoi ? averageRoi.toFixed(2) : "-"}`, `GMV ${comparePercent(gmv, previousGmv)}｜订单 ${comparePercent(orders, previousOrders)}｜ROI ${comparePoints(averageRoi, previousAverageRoi)}`],
+        ["BD与达人", `寄样 ${num(sent)}｜老达人联系 ${num(oldContacts)}｜确认合作 ${num(confirmed)}`, backlogDays ? `联盟消息积压 ${backlogDays} 店次` : "联盟消息无积压", `寄样 ${comparePercent(sent, previousSent)}｜确认合作 ${comparePercent(confirmed, previousConfirmed)}`],
+        ["售后与健康", `退货 / 退款 ${num(returns)}单 / ${money(returnAmount)}｜新增差评 ${num(badReviews)}条`, `${lowSps.length ? `低SPS：${lowSps.map((item) => `${item.store} ${item.value.toFixed(1)}`).join("、")}` : "SPS无低分店铺"}｜未完成索赔 ${num(unfinishedClaims)}单`, `退货 / 退款 ${comparePercent(returns, previousReturns)}｜差评 ${comparePercent(badReviews, previousBadReviews)}`],
+        ["店铺维护", `完成链接维护 ${num(linksDone)}项｜待处理 ${num(linksPending)}项`, `插件异常 ${num(pluginWarnings)}店次｜新增违规 ${num(violations)}条`, `完成维护 ${comparePercent(linksDone, previousLinksDone)}｜待处理 ${comparePercent(linksPending, previousLinksPending)}`],
+        ["新人 / 其他", `参与 ${new Set(otherReports.map((report) => normalizedReportAuthor(report.author)).filter(Boolean)).size}人｜完成事项 ${num(otherCompleted)}项｜学习 ${num(otherTraining)}项`, `问题提出 ${num(otherRaised)}个｜已解决 ${num(otherResolved)}个`, `完成事项 ${comparePercent(otherCompleted, previousOtherCompleted)}｜学习 ${comparePercent(otherTraining, previousOtherTraining)}`],
+        ["任务闭环", `新增 ${tasks.length}项｜完成 ${closed}项｜待复查 ${pendingReview}项｜逾期 ${overdue}项`, closeRate === null ? "暂无闭环任务" : `闭环率 ${closeRate.toFixed(0)}%`, previousCloseRate === null ? "无上周数据" : `闭环率较上周 ${closeRate === null ? "-" : `${closeRate - previousCloseRate >= 0 ? "+" : ""}${(closeRate - previousCloseRate).toFixed(1)}个百分点`}`]
+      ];
+      document.getElementById("weeklyTable").innerHTML = `
+        <table>
+          <thead><tr><th>运营模块</th><th>本周结果</th><th>风险与待办</th><th>环比上周</th></tr></thead>
+          <tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`).join("")}</tbody>
+        </table>
+      `;
+
+      document.getElementById("weeklyDigest").textContent = [
+        `【运营整体周报｜${range.start}—${range.end}】`,
+        `日报 ${reports.length}/${expected} 份｜覆盖 ${coveredStores}/${REPORT_STORES.length} 店｜高风险 ${highRisks} 份`,
+        "",
+        `1. 经营：GMV ${money(gmv)}｜订单 ${num(orders)}｜联盟占比 ${(affiliateShare * 100).toFixed(1)}%｜商品卡占比 ${(productShare * 100).toFixed(1)}%｜广告ROI ${averageRoi ? averageRoi.toFixed(2) : "-"}`,
+        `2. BD：寄样 ${num(sent)}｜消息积压 ${num(backlogDays)} 店次｜老达人确认 ${num(confirmed)}/${num(oldContacts)}`,
+        `3. 售后：退货 / 退款 ${num(returns)}单 / ${money(returnAmount)}｜差评 ${num(badReviews)}条｜低SPS店铺 ${lowSps.length ? lowSps.map((item) => item.store).join("、") : "无"}`,
+        `4. 维护：链接完成 ${num(linksDone)}项｜待处理 ${num(linksPending)}项｜插件异常 ${num(pluginWarnings)}店次｜违规 ${num(violations)}条`,
+        `5. 闭环：任务 ${tasks.length}项｜完成 ${closed}项｜待复查 ${pendingReview}项｜逾期 ${overdue}项`,
+        `6. 环比：GMV ${comparePercent(gmv, previousGmv)}｜订单 ${comparePercent(orders, previousOrders)}｜广告ROI ${comparePoints(averageRoi, previousAverageRoi)}｜寄样 ${comparePercent(sent, previousSent)}｜退货 / 退款 ${comparePercent(returns, previousReturns)}`,
+        "",
+        `下周重点：${[
+          lowSps.length ? `修复 ${lowSps.map((item) => item.store).join("、")} SPS` : "",
+          backlogDays ? "清空联盟消息积压" : "",
+          linksPending ? "关闭待处理链接" : "",
+          overdue ? "处理逾期任务" : ""
+        ].filter(Boolean).join("；") || "保持当前节奏，继续观察经营、达人、售后和店铺健康变化。"}`
+      ].join("\n");
+
+      const overallInsights = [
+        { level: highRisks ? "high" : "good", label: "经营风险", title: `${highRisks} 份高风险日报`, body: highRisks ? "按影响GMV、平台权益和客户体验排序处理，并确保每项进入任务闭环。" : "本周未发现高风险日报，继续观察跨岗位联动指标。" },
+        { level: backlogDays || linksPending ? "medium" : "good", label: "执行阻塞", title: `消息积压 ${backlogDays} 店次｜待处理链接 ${linksPending} 项`, body: "BD机会承接与链接可售性必须同步，避免达人已经推进但商品入口不可用。" },
+        { level: lowSps.length || unfinishedClaims ? "high" : "good", label: "店铺健康", title: `低SPS店铺 ${lowSps.length} 家｜未完成索赔 ${unfinishedClaims} 单`, body: "将SPS、退货退款、差评和问题SKU放在一起判断，不用新增订单掩盖售后风险。" },
+        { level: overdue || pendingReview ? "medium" : "good", label: "任务闭环", title: `待复查 ${pendingReview} 项｜逾期 ${overdue} 项`, body: "执行结果必须带证据进入后续日报复查，关闭后才能计入闭环率。" }
+      ];
+      document.getElementById("weeklyInsights").innerHTML = overallInsights.map((item) => `
+        <article class="insight-card ${item.level}">
+          <span class="insight-label">${escapeHtml(item.label)}</span>
+          <h4>${escapeHtml(item.title)}</h4>
+          <p>${escapeHtml(item.body)}</p>
+        </article>
+      `).join("");
+      const confidence = Math.min(100, expected ? reports.length / expected * 100 : 0);
+      document.getElementById("weeklyConfidence").textContent = `${confidence.toFixed(0)}%`;
+      renderCachedAiAnalysis("运营总览", range);
+    }
+
     function renderWeeklyReport() {
       const anchor = document.getElementById("weeklyAnchor")?.value || today;
       const role = document.getElementById("weeklyRole")?.value || "售后组";
       const range = weekRange(anchor);
+      if (role === "运营总览") {
+        renderOverallWeeklyReport(range);
+        return;
+      }
       const reports = uniqueReportsBySlot((state.reports || []).filter((report) => report.role === role && report.date >= range.start && report.date <= range.end && Array.isArray(report.roleMetrics)));
       const aggregates = aggregateWeeklyReports(reports, role);
       const reportIds = new Set(reports.map((report) => report.id));
@@ -10234,28 +10740,58 @@
       const displayRows = weeklyRows(role);
       const coveredStores = role === "店铺维护"
         ? (reports.length ? 6 : 0)
-        : REPORT_STORES.filter((store) => aggregates[store.name]?.reportDays.size).length;
+        : role === "其他"
+          ? new Set(reports.map((report) => normalizedReportAuthor(report.author)).filter(Boolean)).size
+          : REPORT_STORES.filter((store) => aggregates[store.name]?.reportDays.size).length;
+      const coverageLabel = role === "其他" ? "参与人员" : "覆盖店铺";
+      const coverageDetail = role === "其他" ? "按填写人去重" : `共 ${REPORT_STORES.length} 家店`;
       const highRisks = reports.filter((report) => report.risk === "高").length;
-      const closeRate = tasks.length ? closed / tasks.length * 100 : 0;
+      const closeRate = tasks.length ? closed / tasks.length * 100 : null;
 
       document.getElementById("weeklyMetrics").innerHTML = [
         [reports.length, "日报提交", `${range.start}—${range.end}`],
-        [coveredStores, "覆盖店铺", `共 ${REPORT_STORES.length} 家店`],
+        [coveredStores, coverageLabel, coverageDetail],
         [highRisks, "高风险日报", highRisks ? "需要经营负责人关注" : "本周暂无高风险"],
         [pendingReview, "待复查任务", pendingReview ? "复查后才能计入闭环" : "暂无待复查"],
-        [`${closeRate.toFixed(0)}%`, "任务闭环率", `${closed}/${tasks.length || 0} 已完成`]
+        [closeRate === null ? "-" : `${closeRate.toFixed(0)}%`, "任务闭环率", tasks.length ? `${closed}/${tasks.length} 已完成` : "暂无闭环任务"]
       ].map(([value, label, detail]) => `<div class="weekly-metric"><b>${value}</b><span>${label}<br>${detail}</span></div>`).join("");
 
       const schema = reportSchema(role);
-      document.getElementById("weeklyTable").innerHTML = `
+      const displayColumns = weeklyDisplayColumns(role, schema);
+      const firstColumnLabel = role === "其他" ? "人员 / 汇总" : "店铺";
+      const showReportDays = role !== "售后组";
+      document.getElementById("weeklyTable").innerHTML = role === "BD" ? `
         <table>
-          <thead><tr><th>店铺</th><th>填报天数</th>${schema.columns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")}</tr></thead>
+          <thead><tr><th>店铺</th><th>寄样产品</th><th>寄样数量</th></tr></thead>
+          <tbody>${REPORT_STORES.map((store) => {
+            const aggregate = aggregates[store.name];
+            return `
+            <tr>
+              <td>${escapeHtml(store.name)}<span class="store-group">${escapeHtml(store.group)}</span></td>
+              <td>${escapeHtml(bdSampleProductSummary(reports, store.name) || "-")}</td>
+              <td>${aggregate.present.has("samplesSent") ? num(aggregate.values.samplesSent) : "-"}</td>
+            </tr>
+          `}).join("")}</tbody>
+        </table>
+      ` : role === "店铺维护" ? `
+        <table>
+          <thead><tr><th>店铺</th><th>违规 / 异常</th><th>原因</th><th>处理结果</th></tr></thead>
+          <tbody>${maintenanceWeeklyIssues(reports).map((row) => `
+            <tr>
+              <td>${escapeHtml(row.store)}<span class="store-group">${escapeHtml(row.date)}</span></td>
+              <td>${escapeHtml(row.issue)}</td>
+              <td>${escapeHtml(row.reason)}</td>
+              <td>${escapeHtml(row.result)}</td>
+            </tr>
+          `).join("") || `<tr><td colspan="4">本周未记录店铺违规或异常</td></tr>`}</tbody>
+        </table>
+      ` : `
+        <table>
+          <thead><tr><th>${firstColumnLabel}</th>${showReportDays ? "<th>填报天数</th>" : ""}${displayColumns.map((column) => `<th>${escapeHtml(column.label)}</th>`).join("")}</tr></thead>
           <tbody>${displayRows.map((store) => {
             const aggregate = aggregates[store.name];
-            return `<tr><td>${escapeHtml(store.name)}<span class="store-group">${store.group}</span></td><td>${aggregate.reportDays.size || "-"}</td>${schema.columns.map((column) => {
-              const value = column.type === "status"
-                ? weeklyStatusText(column, aggregate.statuses[column.key])
-                : (aggregate.reportDays.size ? reportMetricValue(column, aggregate.values[column.key]) : "-");
+            return `<tr><td>${escapeHtml(store.name)}<span class="store-group">${store.group}</span></td>${showReportDays ? `<td>${aggregate.reportDays.size || "-"}</td>` : ""}${displayColumns.map((column) => {
+              const value = weeklyDisplayValue(column, aggregate);
               return `<td>${escapeHtml(value || "-")}</td>`;
             }).join("")}</tr>`;
           }).join("")}</tbody>
@@ -10279,14 +10815,11 @@
       const highRisks = todayReports.filter((item) => item.risk === "高").length;
       const reportTasks = state.tasks.filter((item) => item.sourceReport && item.status !== "已完成");
       const overdue = reportTasks.filter((item) => item.due && item.due < today).length;
-      const submittedUnits = Math.min(1, reportRoleCount(todayReports, "售后组"))
-        + Math.min(3, reportRoleCount(todayReports, "BD"))
-        + Math.min(1, reportRoleCount(todayReports, "店铺维护"))
-        + Math.min(2, reportRoleCount(todayReports, "店群运营"));
+      const submittedUnits = todayReports.length;
 
       document.getElementById("reportProgress").textContent = `${submittedUnits}/7 已提交`;
       document.getElementById("reportMetrics").innerHTML = [
-        ["今日提交", `${submittedUnits}/7`, "售后1份 · 其余成员6份"],
+        ["今日提交", `${submittedUnits}/7`, "计划基准 7 份 · 实际提交不封顶"],
         ["高风险异常", num(highRisks), highRisks ? "需要立即处理" : "暂无高风险"],
         ["日报待办", num(reportTasks.length), "已同步任务中心"],
         ["逾期任务", num(overdue), overdue ? "需要升级处理" : "暂无逾期"]
@@ -10296,7 +10829,11 @@
 
       document.getElementById("dailyDigest").textContent = buildDailyDigest(todayReports);
       document.getElementById("reportRecordCount").textContent = `${allReports.length} 份日报`;
-      document.getElementById("reportCards").innerHTML = allReports.length ? allReports.map((report) => `
+      const totalReportPages = Math.max(1, Math.ceil(allReports.length / reportPageSize));
+      reportPage = Math.min(Math.max(1, reportPage), totalReportPages);
+      const reportPageStart = (reportPage - 1) * reportPageSize;
+      const pageReports = allReports.slice(reportPageStart, reportPageStart + reportPageSize);
+      document.getElementById("reportCards").innerHTML = pageReports.length ? pageReports.map((report) => `
         <article class="report-card">
           <div class="report-card-head">
             <div><b>${escapeHtml(report.role)}｜${escapeHtml(report.author)}</b><br><small>${escapeHtml(report.date)} · ${escapeHtml(report.stores || "未指定店铺")}</small></div>
@@ -10306,11 +10843,26 @@
           ${report.results || !Array.isArray(report.roleMetrics) || !report.roleMetrics.length ? `<div class="report-section"><strong>今日结果</strong><p>${escapeHtml(reportResultsText(report))}</p></div>` : ""}
           <div class="report-section"><strong>核心异常</strong><p>${escapeHtml(report.anomalies || "无")}</p></div>
           <div class="report-section"><strong>昨日复查</strong><p>${escapeHtml(report.reviews || "无")}</p></div>
-          <div class="report-section"><strong>今日任务</strong><p>${escapeHtml(report.tasksText || "无")}</p></div>
+          <div class="report-section"><strong>今日任务</strong><p>${escapeHtml(report.tasksText || "无")}</p>${renderReportTaskLinks(report)}</div>
           <div class="report-section"><strong>即时审批记录</strong><p>${escapeHtml(report.approvals || "无")}</p></div>
         </article>
       `).join("") : `<div class="empty">暂无日报。提交后系统会自动生成团队摘要并同步任务。</div>`;
+      const reportPager = document.getElementById("reportPager");
+      reportPager.hidden = allReports.length <= reportPageSize;
+      document.getElementById("reportPageInfo").textContent = `第 ${reportPage} / ${totalReportPages} 页 · 每页10条`;
+      document.getElementById("reportPrevPage").disabled = reportPage <= 1;
+      document.getElementById("reportNextPage").disabled = reportPage >= totalReportPages;
       renderWeeklyReport();
+    }
+
+    function renderReportTaskLinks(report) {
+      const tasks = (state.tasks || []).filter((task) => task.sourceReport === report.id);
+      if (!tasks.length) return "";
+      return `<div class="report-task-links">${tasks.map((task) => `
+        <button class="report-task-link" data-view-task="${escapeHtml(task.id)}" type="button">
+          查看任务 · ${escapeHtml(task.title || "未命名")}
+        </button>
+      `).join("")}</div>`;
     }
 
     function escapeHtml(value) {
@@ -11076,6 +11628,18 @@
       renderCreatorCenter();
     });
 
+    document.getElementById("reportPrevPage").addEventListener("click", () => {
+      reportPage = Math.max(1, reportPage - 1);
+      renderReports();
+      document.getElementById("reportCards").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.getElementById("reportNextPage").addEventListener("click", () => {
+      reportPage += 1;
+      renderReports();
+      document.getElementById("reportCards").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
     document.getElementById("creatorAvatarFile").addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
       const dataUrl = file ? await readImageAsDataUrl(file) : "";
@@ -11136,6 +11700,7 @@
       const removeRowBtn = event.target.closest("[data-remove-row]");
       const bringReviewBtn = event.target.closest("[data-bring-review]");
       const aiTaskBtn = event.target.closest("[data-ai-task]");
+      const viewTaskBtn = event.target.closest("[data-view-task]");
       const startTaskBtn = event.target.closest("[data-task-start]");
       const resultTaskBtn = event.target.closest("[data-task-result]");
       const deleteBtn = event.target.closest("[data-task-delete]");
@@ -11155,6 +11720,10 @@
       }
       if (aiTaskBtn) {
         createTaskFromAiDiagnosis(aiTaskBtn.dataset.aiTask);
+        return;
+      }
+      if (viewTaskBtn) {
+        focusTaskFromReport(viewTaskBtn.dataset.viewTask);
         return;
       }
       if (historyBtn) {
