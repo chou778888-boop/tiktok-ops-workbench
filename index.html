@@ -11397,6 +11397,7 @@
     const storeKey = "tiktok_ops_workbench_v1";
     const currentAuthorKey = "tiktok_ops_current_author";
     const cloudEndpoint = "/api/state";
+    const workbenchRelease = "__WORKBENCH_RELEASE__";
     function localDateValue(date = new Date()) {
       const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
       return localTime.toISOString().slice(0, 10);
@@ -12027,6 +12028,13 @@
     let cloudSaveQueued = false;
     let cloudSaveRetryCount = 0;
     let cloudBaseline = normalizeState({});
+    let cloudRevision = 0;
+    let cloudRefreshInFlight = false;
+    let cloudRefreshTimer = null;
+    let cloudRefreshFailureCount = 0;
+    let cloudRenderDeferred = false;
+    let releaseCheckTimer = null;
+    let releaseReloadDeferred = false;
     let activeAiAnalysisContext = null;
     let lastReportReceipt = null;
     let activeReportEditUpdatedAt = "";
@@ -12202,6 +12210,7 @@
           const changesMadeWhileLoading = buildCloudPatch(localStateAtLoadStart, normalizeState(state));
           state = applyCloudPatch(remoteState, changesMadeWhileLoading);
           cloudBaseline = remoteState;
+          cloudRevision = Number(payload.revision || 0);
           localStorage.setItem(storeKey, JSON.stringify(state));
           hydrateCostProfilesFromTeam();
           setSyncStatus(cloudPatchIsEmpty(changesMadeWhileLoading) ? "已同步" : "正在同步新内容", cloudPatchIsEmpty(changesMadeWhileLoading) ? "" : "saving");
@@ -12220,6 +12229,10 @@
 
     async function saveCloudState() {
       if (!cloudReady || !cloudAvailable()) return;
+      if (cloudRefreshInFlight) {
+        cloudSaveQueued = true;
+        return;
+      }
       if (cloudSaveInFlight) {
         cloudSaveQueued = true;
         return;
@@ -12261,6 +12274,7 @@
         const pendingPatch = buildCloudPatch(snapshot, normalizeState(state));
         state = applyCloudPatch(remoteState, pendingPatch);
         cloudBaseline = remoteState;
+        cloudRevision = Number(payload.revision || cloudRevision);
         if (lastReportReceipt?.taskIds?.length) {
           const currentTaskIds = new Set((state.tasks || []).map((task) => task.id));
           const missingReceiptTasks = lastReportReceipt.taskIds.filter((id) => !currentTaskIds.has(id));
@@ -12316,6 +12330,134 @@
       if (!cloudReady || !cloudAvailable()) return;
       clearTimeout(cloudSaveTimer);
       cloudSaveTimer = setTimeout(saveCloudState, 420);
+    }
+
+    function cloudUiBusy() {
+      if (document.querySelector(".modal-backdrop:not([hidden])")) return true;
+      return [...document.querySelectorAll('form[data-cloud-dirty="true"]')]
+        .some((form) => form.getClientRects().length > 0);
+    }
+
+    function renderReceivedCloudState() {
+      hydrateCostProfilesFromTeam();
+      render();
+      cloudRenderDeferred = false;
+    }
+
+    function applyDeferredCloudUi() {
+      if (cloudUiBusy()) return;
+      if (releaseReloadDeferred) {
+        location.reload();
+        return;
+      }
+      if (cloudRenderDeferred) {
+        renderReceivedCloudState();
+        setSyncStatus("已同步", "");
+      }
+    }
+
+    async function refreshCloudState({ force = false } = {}) {
+      if (!cloudAvailable() || cloudRefreshInFlight || cloudSaveInFlight) return false;
+      cloudRefreshInFlight = true;
+      try {
+        if (!cloudReady) {
+          cloudReady = Boolean(await loadCloudState());
+          if (cloudReady) {
+            renderReceivedCloudState();
+            cloudRefreshFailureCount = 0;
+          }
+          return cloudReady;
+        }
+
+        if (!force) {
+          const metaResponse = await fetch(`${cloudEndpoint}?meta=1&t=${Date.now()}`, {
+            cache: "no-store",
+            headers: { "accept": "application/json" }
+          });
+          if (!metaResponse.ok) throw new Error(`HTTP ${metaResponse.status}`);
+          const meta = await metaResponse.json();
+          if (Number(meta.revision || 0) <= cloudRevision) {
+            cloudRefreshFailureCount = 0;
+            return false;
+          }
+        }
+
+        const localPendingPatch = buildCloudPatch(cloudBaseline, normalizeState(state));
+        const response = await fetch(`${cloudEndpoint}?t=${Date.now()}`, {
+          cache: "no-store",
+          headers: { "accept": "application/json" }
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json();
+        if (!payload?.data || Number(payload.revision || 0) <= cloudRevision) return false;
+
+        const remoteState = normalizeState(payload.data);
+        state = applyCloudPatch(remoteState, localPendingPatch);
+        cloudBaseline = remoteState;
+        cloudRevision = Number(payload.revision || cloudRevision);
+        localStorage.setItem(storeKey, JSON.stringify(state));
+        cloudRefreshFailureCount = 0;
+
+        if (cloudUiBusy()) {
+          cloudRenderDeferred = true;
+          setSyncStatus("已接收更新，填写完成后显示", "saving");
+        } else {
+          renderReceivedCloudState();
+          setSyncStatus("已同步", "");
+        }
+        if (!cloudPatchIsEmpty(localPendingPatch)) scheduleCloudSave();
+        return true;
+      } catch (error) {
+        cloudRefreshFailureCount += 1;
+        console.warn("Cloud refresh failed", error);
+        if (cloudRefreshFailureCount >= 3) {
+          setSyncStatus("云端连接不稳定，正在重试", "error");
+        }
+        return false;
+      } finally {
+        cloudRefreshInFlight = false;
+        if (cloudSaveQueued) {
+          cloudSaveQueued = false;
+          clearTimeout(cloudSaveTimer);
+          cloudSaveTimer = setTimeout(saveCloudState, 80);
+        }
+      }
+    }
+
+    function scheduleCloudRefresh(delay = 20000) {
+      clearTimeout(cloudRefreshTimer);
+      if (!cloudAvailable()) return;
+      cloudRefreshTimer = setTimeout(async () => {
+        if (!document.hidden) await refreshCloudState();
+        scheduleCloudRefresh();
+      }, delay);
+    }
+
+    async function checkWorkbenchRelease() {
+      if (!cloudAvailable() || workbenchRelease.includes("__WORKBENCH_")) return;
+      try {
+        const response = await fetch(`/release.json?t=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (!payload?.release || payload.release === workbenchRelease) return;
+        if (cloudUiBusy()) {
+          releaseReloadDeferred = true;
+          setSyncStatus("工作台有新版本，填写完成后刷新", "saving");
+        } else {
+          location.reload();
+        }
+      } catch (error) {
+        console.warn("Release check failed", error);
+      }
+    }
+
+    function scheduleReleaseCheck(delay = 45000) {
+      clearTimeout(releaseCheckTimer);
+      if (!cloudAvailable()) return;
+      releaseCheckTimer = setTimeout(async () => {
+        if (!document.hidden) await checkWorkbenchRelease();
+        scheduleReleaseCheck();
+      }, delay);
     }
 
     function money(value) {
@@ -17288,6 +17430,7 @@
         const remoteState = normalizeState(payload.data);
         state.costProfiles = remoteState.costProfiles;
         cloudBaseline.costProfiles = structuredClone(remoteState.costProfiles);
+        cloudRevision = Number(payload.revision || cloudRevision);
         localStorage.setItem(storeKey, JSON.stringify(state));
         hydrateCostProfilesFromTeam();
         const imageCount = upserts.filter((profile) => profile.image).length;
@@ -18069,7 +18212,36 @@
       cloudReady = Boolean(await loadCloudState());
       render();
       if (cloudReady) saveCloudState();
+      scheduleCloudRefresh();
+      scheduleReleaseCheck();
     }
+
+    function markCloudFormDirty(event) {
+      const form = event.target?.closest?.("form");
+      if (form && form.id !== "entryLoginForm") form.dataset.cloudDirty = "true";
+    }
+
+    document.addEventListener("input", markCloudFormDirty, true);
+    document.addEventListener("change", markCloudFormDirty, true);
+    document.addEventListener("submit", () => {
+      window.setTimeout(applyDeferredCloudUi, 0);
+    }, true);
+    document.addEventListener("reset", (event) => {
+      if (event.target?.matches?.("form")) delete event.target.dataset.cloudDirty;
+      window.setTimeout(applyDeferredCloudUi, 0);
+    }, true);
+    document.addEventListener("click", () => window.setTimeout(applyDeferredCloudUi, 0), true);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) return;
+      refreshCloudState();
+      checkWorkbenchRelease();
+      applyDeferredCloudUi();
+    });
+    window.addEventListener("focus", () => {
+      refreshCloudState();
+      checkWorkbenchRelease();
+      applyDeferredCloudUi();
+    });
 
     document.getElementById("entryLoginForm")?.addEventListener("submit", (event) => {
       event.preventDefault();

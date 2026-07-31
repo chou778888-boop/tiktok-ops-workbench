@@ -164,6 +164,17 @@ async function readState(db) {
 }
 
 async function handleGet(request, env) {
+  const url = new URL(request.url);
+  if (url.searchParams.get("meta") === "1") {
+    const row = await env.DB.prepare(
+      "SELECT version, updated_at, revision FROM workbench_state WHERE id = ?"
+    ).bind("main").first();
+    return json(200, {
+      version: row?.version || "v2",
+      updatedAt: row?.updated_at || null,
+      revision: Number(row?.revision || 0)
+    }, request);
+  }
   const state = await readState(env.DB);
   if (!state) return json(200, { version: "v2", updatedAt: null, revision: 0, data: null }, request);
   return json(200, state, request);
