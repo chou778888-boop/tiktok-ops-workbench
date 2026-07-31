@@ -9128,6 +9128,42 @@
     </footer>
   </section>
 
+  <script>
+    (() => {
+      window.__workbenchBootBound = true;
+      window.__workbenchEnterRequested = false;
+      const form = document.getElementById("entryLoginForm");
+      const button = document.getElementById("enterWorkbench");
+      form?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (window.__workbenchMainReady) return;
+        window.__workbenchEnterRequested = true;
+        if (button) {
+          button.disabled = true;
+          button.innerHTML = '正在载入工作台 <span>↗</span>';
+        }
+      });
+
+      const date = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+      fetch(`/api/state?summary=1&date=${encodeURIComponent(date)}`, {
+        cache: "no-store",
+        headers: { accept: "application/json" }
+      }).then((response) => response.ok ? response.json() : null).then((payload) => {
+        const summary = payload?.summary;
+        if (!summary) return;
+        window.__workbenchEntrySummary = summary;
+        const reportMetric = document.getElementById("entryReportMetric");
+        const storeMetric = document.getElementById("entryStoreMetric");
+        const taskMetric = document.getElementById("entryTaskMetric");
+        const dateMetric = document.getElementById("entryCoverDate");
+        if (reportMetric) reportMetric.textContent = `${summary.reports}/${summary.reportTarget}`;
+        if (storeMetric) storeMetric.textContent = `${summary.stores}/${summary.storeTarget}`;
+        if (taskMetric) taskMetric.textContent = String(summary.openTasks);
+        if (dateMetric) dateMetric.innerHTML = `${summary.date}<br />团队摘要已就绪`;
+      }).catch(() => {});
+    })();
+  </script>
+
   <div class="app" id="workbenchApp" inert>
     <header class="topbar">
       <div class="brand">
@@ -11413,7 +11449,8 @@
   </div>
   <div class="toast" id="toast">已保存</div>
 
-  <script>
+  <script id="workbenchMain">
+    window.__workbenchMainReady = true;
     const isWindowsClient = /^Win/i.test(navigator.platform || "") || /Windows/i.test(navigator.userAgent || "");
     if (isWindowsClient) document.documentElement.classList.add("windows-performance");
     const storeKey = "tiktok_ops_workbench_v1";
@@ -12165,6 +12202,18 @@
     }
 
     function renderEntranceSnapshot() {
+      const bootSummary = !cloudReady ? window.__workbenchEntrySummary : null;
+      if (bootSummary) {
+        const reportMetric = document.getElementById("entryReportMetric");
+        const storeMetric = document.getElementById("entryStoreMetric");
+        const taskMetric = document.getElementById("entryTaskMetric");
+        const dateMetric = document.getElementById("entryCoverDate");
+        if (reportMetric) reportMetric.textContent = `${bootSummary.reports}/${bootSummary.reportTarget}`;
+        if (storeMetric) storeMetric.textContent = `${bootSummary.stores}/${bootSummary.storeTarget}`;
+        if (taskMetric) taskMetric.textContent = String(bootSummary.openTasks);
+        if (dateMetric) dateMetric.innerHTML = `${escapeHtml(bootSummary.date)}<br />团队摘要已就绪`;
+        return;
+      }
       const reports = uniqueReportsBySlot((state.reports || []).filter((report) =>
         report.status === "已提交" && report.date === today
       ));
@@ -17767,10 +17816,14 @@
       applyDeferredCloudUi();
     });
 
-    document.getElementById("entryLoginForm")?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      enterWorkbench();
-    });
+    if (!window.__workbenchBootBound) {
+      document.getElementById("entryLoginForm")?.addEventListener("submit", (event) => {
+        event.preventDefault();
+        enterWorkbench();
+      });
+    } else {
+      document.getElementById("entryLoginForm")?.addEventListener("submit", () => enterWorkbench());
+    }
     document.getElementById("toggleEntryPassword")?.addEventListener("click", () => {
       const password = document.getElementById("entryPassword");
       const toggle = document.getElementById("toggleEntryPassword");
@@ -17789,6 +17842,7 @@
     document.getElementById("weeklyAnchor").value = today;
     updateReportHelp();
     initializeWorkbench();
+    if (window.__workbenchEnterRequested) enterWorkbench();
   </script>
 </body>
 </html>

@@ -180,8 +180,45 @@ async function readState(db) {
   };
 }
 
+function buildEntrySummary(data, date) {
+  const current = normalizeData(data);
+  const reportsBySlot = new Map();
+  current.reports.forEach((report) => {
+    if (report?.status !== "已提交" || report?.date !== date) return;
+    const slot = `${report.role}|${reportSlotAuthor(report.role, report.author)}`;
+    reportsBySlot.set(slot, report);
+  });
+  const reports = [...reportsBySlot.values()];
+  const stores = new Set(reports.flatMap((report) =>
+    (Array.isArray(report.roleMetrics) ? report.roleMetrics : [])
+      .map((row) => String(row?.store || "").trim())
+      .filter(Boolean)
+  ));
+  const openTasks = current.tasks.filter((task) =>
+    !["已完成", "已作废"].includes(String(task?.status || ""))
+  );
+  return {
+    date,
+    reports: reports.length,
+    reportTarget: 7,
+    stores: stores.size,
+    storeTarget: 6,
+    openTasks: openTasks.length
+  };
+}
+
 async function handleGet(request, env) {
   const url = new URL(request.url);
+  if (url.searchParams.get("summary") === "1") {
+    const state = await readState(env.DB);
+    const date = String(url.searchParams.get("date") || new Date().toISOString().slice(0, 10));
+    return json(200, {
+      version: state?.version || "v2",
+      updatedAt: state?.updatedAt || null,
+      revision: Number(state?.revision || 0),
+      summary: buildEntrySummary(state?.data || null, date)
+    }, request);
+  }
   if (url.searchParams.get("meta") === "1") {
     const row = await env.DB.prepare(
       "SELECT version, updated_at, revision FROM workbench_state WHERE id = ?"
