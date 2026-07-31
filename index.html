@@ -44,6 +44,10 @@
       overflow: hidden;
     }
 
+    body.cover-active #workbenchApp {
+      visibility: hidden;
+    }
+
     .entry-cover {
       --cover-ink: #f5f4ef;
       position: fixed;
@@ -424,6 +428,23 @@
     @media (prefers-reduced-motion: reduce) {
       .entry-cover::after { animation: none; }
       .entry-cover, .entry-enter, .entry-enter span { transition: none; }
+    }
+
+    .windows-performance .entry-login-stage::before {
+      animation: none;
+    }
+
+    .windows-performance .entry-login-stage::after {
+      filter: none;
+      opacity: 0.42;
+    }
+
+    .windows-performance .entry-login-card,
+    .windows-performance .topbar,
+    .windows-performance .panel,
+    .windows-performance .chart-tooltip,
+    .windows-performance .data-menu-panel {
+      backdrop-filter: none !important;
     }
 
     @media (max-width: 980px) {
@@ -11392,8 +11413,9 @@
   </div>
   <div class="toast" id="toast">已保存</div>
 
-  <script src="assets/creator-data.js"></script>
   <script>
+    const isWindowsClient = /^Win/i.test(navigator.platform || "") || /Windows/i.test(navigator.userAgent || "");
+    if (isWindowsClient) document.documentElement.classList.add("windows-performance");
     const storeKey = "tiktok_ops_workbench_v1";
     const currentAuthorKey = "tiktok_ops_current_author";
     const cloudEndpoint = "/api/state";
@@ -11426,596 +11448,6 @@
       creatorHistory: [],
       costProfiles: []
     };
-
-    const sampleData = {
-      entries: [
-        {
-          id: crypto.randomUUID(),
-          date: today,
-          store: "DreamWeave",
-          owner: "运营A",
-          sps: 3.0,
-          gmv: 38680,
-          orders: 2456,
-          units: 2600,
-          sampleQty: 99,
-          productCardGmv: 3490,
-          affiliateGmv: 35190,
-          adGmv: 11410,
-          adSpend: 2282,
-          topSku: "JZZ white / grey",
-          topSkuUnits: 1120,
-          returns: 89,
-          badReviews: 18,
-          note: "SPS低于3.5，新增达人计划受限；本周主要靠旧达人视频反复出单。",
-          plan: "优先修商品满意度和退货问题，复盘旧达人视频，观察酒店枕2pcs涨价后的转化。"
-        },
-        {
-          id: crypto.randomUUID(),
-          date: today,
-          store: "Dreamland",
-          owner: "运营B",
-          sps: 4.1,
-          gmv: 21457,
-          orders: 1743,
-          units: 1900,
-          sampleQty: 363,
-          productCardGmv: 10560,
-          affiliateGmv: 14130,
-          adGmv: 10000,
-          adSpend: 1850,
-          topSku: "酒店枕 2pcs",
-          topSkuUnits: 680,
-          returns: 49,
-          badReviews: 8,
-          note: "商品卡和联盟结构较均衡，广告ROI稳定。",
-          plan: "继续放大主推SKU，跟踪涨价后的销量和利润。"
-        },
-        {
-          id: crypto.randomUUID(),
-          date: today,
-          store: "Sweet Dream",
-          owner: "运营C",
-          sps: 3.6,
-          gmv: 9596,
-          orders: 729,
-          units: 810,
-          sampleQty: 101,
-          productCardGmv: 3440,
-          affiliateGmv: 7400,
-          adGmv: 0,
-          adSpend: 0,
-          topSku: "JZZ purple",
-          topSkuUnits: 260,
-          returns: 27,
-          badReviews: 18,
-          note: "差评上升，商品卡持续下滑。",
-          plan: "排查差评关键词和详情页卖点，恢复商品卡转化。"
-        },
-        {
-          id: crypto.randomUUID(),
-          date: yesterday,
-          store: "DreamWeave",
-          owner: "运营A",
-          sps: 3.1,
-          gmv: 26000,
-          orders: 1851,
-          units: 1960,
-          sampleQty: 133,
-          productCardGmv: 4530,
-          affiliateGmv: 21470,
-          adGmv: 16650,
-          adSpend: 3100,
-          topSku: "JZZ white / grey",
-          topSkuUnits: 760,
-          returns: 72,
-          badReviews: 12,
-          note: "上期GMV较低，联盟占比较高。",
-          plan: "对比达人视频结构和商品卡变化。"
-        },
-        {
-          id: crypto.randomUUID(),
-          date: yesterday,
-          store: "Dreamland",
-          owner: "运营B",
-          sps: 4.1,
-          gmv: 30200,
-          orders: 2480,
-          units: 2700,
-          sampleQty: 168,
-          productCardGmv: 4910,
-          affiliateGmv: 5720,
-          adGmv: 4900,
-          adSpend: 900,
-          topSku: "酒店枕 2pcs",
-          topSkuUnits: 740,
-          returns: 35,
-          badReviews: 6,
-          note: "昨日基础盘高，今日回落。",
-          plan: "检查渠道结构变化。"
-        },
-        {
-          id: crypto.randomUUID(),
-          date: yesterday,
-          store: "Sweet Dream",
-          owner: "运营C",
-          sps: 3.8,
-          gmv: 10960,
-          orders: 913,
-          units: 940,
-          sampleQty: 206,
-          productCardGmv: 3840,
-          affiliateGmv: 7130,
-          adGmv: 0,
-          adSpend: 0,
-          topSku: "JZZ purple",
-          topSkuUnits: 300,
-          returns: 18,
-          badReviews: 8,
-          note: "昨日表现稳定。",
-          plan: "继续观察商品卡。"
-        }
-      ],
-      products: [
-        {
-          id: crypto.randomUUID(),
-          date: today,
-          store: "DreamWeave",
-          product: "JZZ",
-          sku: "white / grey",
-          units: 1120,
-          gmv: 23640,
-          productCardGmv: 3490,
-          affiliateGmv: 20150,
-          price: 21.99,
-          stock: 5200,
-          returns: 89,
-          badReviews: 18
-        },
-        {
-          id: crypto.randomUUID(),
-          date: today,
-          store: "Dreamland",
-          product: "酒店枕",
-          sku: "2pcs",
-          units: 680,
-          gmv: 14960,
-          productCardGmv: 10560,
-          affiliateGmv: 4200,
-          price: 22.99,
-          stock: 3600,
-          returns: 49,
-          badReviews: 8
-        },
-        {
-          id: crypto.randomUUID(),
-          date: today,
-          store: "Sweet Dream",
-          product: "JZZ",
-          sku: "purple",
-          units: 260,
-          gmv: 7400,
-          productCardGmv: 3440,
-          affiliateGmv: 3960,
-          price: 19.99,
-          stock: 1800,
-          returns: 27,
-          badReviews: 18
-        }
-      ],
-      tasks: [
-        {
-          id: crypto.randomUUID(),
-          title: "排查 DreamWeave SPS 低分和退货原因",
-          assignee: "运营A",
-          priority: "紧急",
-          store: "DreamWeave",
-          sku: "JZZ white / grey",
-          due: today,
-          status: "待处理",
-          source: "风险指标",
-          action: "拆分商品满意度、退货、差评关键词，确认是否与颜色/尺寸认知有关。",
-          result: ""
-        },
-        {
-          id: crypto.randomUUID(),
-          title: "整理酒店枕2pcs涨价后利润测算",
-          assignee: "产品运营",
-          priority: "重要",
-          store: "Dreamland",
-          sku: "酒店枕 2pcs",
-          due: today,
-          status: "处理中",
-          source: "利润观察",
-          action: "售价涨1美元，先按六月结算比例估算利润，七月结算出来后校正。",
-          result: ""
-        }
-      ]
-    };
-
-    const storesForSimulation = [
-      { store: "DreamWeave", owner: "陈航", baseGmv: 4400, baseOrders: 320, sps: 3.3, product: "JZZ", sku: "white / grey", price: 21.99, stock: 5200 },
-      { store: "sweet dream", owner: "陈航", baseGmv: 1550, baseOrders: 112, sps: 3.8, product: "JZZ", sku: "purple", price: 19.99, stock: 1800 },
-      { store: "Dreamland", owner: "陈航", baseGmv: 3100, baseOrders: 230, sps: 4.1, product: "酒店枕", sku: "2pcs", price: 22.99, stock: 3600 },
-      { store: "Dreamdaily", owner: "林可", baseGmv: 2200, baseOrders: 165, sps: 4.2, product: "JZZ", sku: "blue", price: 20.99, stock: 2900 },
-      { store: "MoonDream", owner: "林可", baseGmv: 1800, baseOrders: 136, sps: 4.0, product: "酒店枕", sku: "2pcs", price: 23.99, stock: 2500 },
-      { store: "Himood Smile", owner: "林可", baseGmv: 900, baseOrders: 74, sps: 4.1, product: "牙贴", sku: "standard", price: 14.99, stock: 2400 }
-    ];
-
-    function dateOffset(daysAgo) {
-      return new Date(Date.now() - daysAgo * 86400000).toISOString().slice(0, 10);
-    }
-
-    function buildSevenDayData() {
-      const entries = [];
-      const products = [];
-      const reports = [];
-      const tasks = [];
-      const wave = [0.88, 0.93, 0.9, 1.04, 1.12, 0.98, 1.18];
-      const completedWeek = weekRange(addDays(today, -7));
-      const dates = Array.from({ length: 7 }, (_, index) => addDays(completedWeek.start, index));
-      const dayEntries = new Map();
-      const lastTaskBySlot = new Map();
-
-      dates.forEach((date, position) => {
-        const currentEntries = [];
-        storesForSimulation.forEach((cfg, storeIndex) => {
-          const storeFactor = 1 + storeIndex * 0.035;
-          const trend = wave[position] * storeFactor;
-          const gmv = Math.round(cfg.baseGmv * trend);
-          const orders = Math.round(cfg.baseOrders * (0.92 + trend * 0.1));
-          const units = Math.round(orders * (1.06 + storeIndex * 0.03));
-          const sampleQty = Math.max(0, Math.round((18 + storeIndex * 7) * (0.85 + position * 0.04)));
-          const adSpend = Math.round(gmv * (storeIndex === 1 ? 0.025 : 0.055 + position * 0.002));
-          const adRoiBase = storeIndex === 0 && position > 4 ? 4.1 : 5.2 + storeIndex * 0.35;
-          const adGmv = Math.round(adSpend * adRoiBase);
-          const affiliateGmv = Math.round(gmv * (storeIndex === 0 ? 0.68 + position * 0.018 : 0.34 + storeIndex * 0.045));
-          const productCardGmv = Math.round(gmv * (storeIndex === 0 ? 0.16 + position * 0.006 : 0.28 + position * 0.009));
-          const returns = Math.round(orders * (storeIndex === 0 ? 0.045 + position * 0.004 : 0.018 + storeIndex * 0.004));
-          const badReviews = Math.max(0, Math.round(orders * (storeIndex === 1 ? 0.012 + position * 0.001 : 0.004 + storeIndex * 0.001)));
-          const sps = Math.max(2.8, Number((cfg.sps - (storeIndex === 0 ? position * 0.03 : 0) + (position % 2) * 0.03).toFixed(1)));
-          const entry = {
-            id: crypto.randomUUID(),
-            date,
-            store: cfg.store,
-            owner: cfg.owner,
-            sps,
-            gmv,
-            orders,
-            units,
-            sampleQty,
-            productCardGmv,
-            affiliateGmv,
-            adGmv,
-            adSpend,
-            topSku: `${cfg.product} ${cfg.sku}`,
-            topSkuUnits: Math.round(units * (0.35 + storeIndex * 0.04)),
-            returns,
-            badReviews,
-            note: position >= 5 && storeIndex === 0 ? "联盟占比持续偏高，SPS低于3.5，需优先修退货和商品满意度。" : "正常波动，继续观察渠道结构。",
-            plan: position >= 5 && storeIndex === 0 ? "复盘旧达人视频、提取退货原因、跟进商品卡优化。" : "保持主推SKU节奏，跟踪商品卡和联盟变化。"
-          };
-          entries.push(entry);
-          currentEntries.push(entry);
-
-          products.push({
-            id: crypto.randomUUID(),
-            date,
-            store: cfg.store,
-            product: cfg.product,
-            sku: cfg.sku,
-            units: Math.round(units * (0.34 + storeIndex * 0.04)),
-            gmv: Math.round(gmv * (0.52 + storeIndex * 0.04)),
-            productCardGmv: Math.round(productCardGmv * 0.85),
-            affiliateGmv: Math.round(affiliateGmv * 0.62),
-            price: cfg.price,
-            stock: Math.max(0, cfg.stock - position * (80 + storeIndex * 18)),
-            returns,
-            badReviews
-          });
-        });
-        dayEntries.set(date, currentEntries);
-      });
-
-      function simulationTaskState(position) {
-        if (position <= 2) return "已完成";
-        if (position <= 4) return "待复盘";
-        if (position === 5) return "处理中";
-        return "待处理";
-      }
-
-      function reportText(items, formatter) {
-        return items.length ? items.map((item, index) => `${index + 1}. ${formatter(item)}`).join("\n") : "无";
-      }
-
-      function makeReport({ date, position, role, author, stores, roleData, anomaly = null, taskTitle = "", taskOwner = "", approval = null }) {
-        const reportId = crypto.randomUUID();
-        const slot = `${role}|${author}`;
-        const previousTask = lastTaskBySlot.get(slot);
-        const reviews = previousTask ? [{
-          taskId: previousTask.id,
-          item: previousTask.title,
-          result: previousTask.status === "已完成" ? "指标恢复或问题未继续扩大，复查通过。" : "已收到阶段结果，继续跟踪至完成标准达成。",
-          status: previousTask.status === "已完成" ? "关闭" : "继续"
-        }] : [];
-        const anomalies = anomaly ? [{
-          id: crypto.randomUUID(),
-          object: anomaly.object,
-          issue: anomaly.issue,
-          impact: anomaly.impact || "",
-          reason: anomaly.reason,
-          risk: anomaly.risk
-        }] : [];
-        const taskItems = taskTitle ? [{
-          id: crypto.randomUUID(),
-          task: taskTitle,
-          owner: taskOwner || author,
-          due: `${addDays(date, 1)}T18:00`,
-          acceptance: anomaly?.acceptance || "提交处理结果和数据证据，复查确认异常不再扩大。",
-          reviewAt: `${addDays(date, 2)}T10:00`
-        }] : [];
-        const approvals = approval ? [approval] : [];
-        const report = {
-          id: reportId,
-          date,
-          role,
-          author,
-          stores,
-          risk: anomaly?.risk || "低",
-          status: "已提交",
-          roleMetrics: roleDataMetrics(role, roleData),
-          roleData,
-          results: roleDataResults(role, roleData),
-          anomalies: reportText(anomalies, (item) => `${item.object}｜问题：${item.issue}｜原因判断：${item.reason}｜风险：${item.risk}`),
-          reviews: reportText(reviews, (item) => `${item.item}｜复查结果：${item.result}｜状态：${item.status}`),
-          tasksText: reportText(taskItems, (item) => `${item.task}｜负责人：${item.owner}｜截止：${item.due.replace("T", " ")}｜完成标准：${item.acceptance}｜复查：${item.reviewAt.replace("T", " ")}`),
-          approvals: reportText(approvals, (item) => `${item.item}｜建议方案：${item.suggestion || "无"}｜协作进展：${item.result || "待协同"}｜配合人：${item.owner || author}`),
-          closureItems: { anomalies, reviews, tasks: taskItems, approvals },
-          createdAt: `${date}T18:${String(10 + position).padStart(2, "0")}:00`,
-          updatedAt: `${date}T18:${String(20 + position).padStart(2, "0")}:00`
-        };
-        reports.push(report);
-
-        if (taskItems.length) {
-          const item = taskItems[0];
-          const status = simulationTaskState(position);
-          const task = {
-            id: item.id,
-            title: item.task,
-            assignee: item.owner,
-            priority: taskPriority(anomaly?.risk || "中"),
-            store: anomaly?.object || stores,
-            sku: "",
-            due: item.due,
-            status,
-            source: `${role}日报`,
-            sourceReport: reportId,
-            sourceAnomaly: anomalies[0]?.id || "",
-            action: `原因判断：${anomaly?.reason || "按日报结论执行"}\n完成标准：${item.acceptance}`,
-            acceptance: item.acceptance,
-            reviewAt: item.reviewAt,
-            result: status === "待处理" ? "" : status === "处理中" ? "已完成初步排查，正在执行调整。" : "已完成日报要求的处理动作。",
-            evidence: status === "待处理" || status === "处理中" ? "" : "后台截图、处理清单和次日指标对比已归档。",
-            reviewResult: status === "已完成" ? "复查通过，任务关闭。" : "",
-            reviewedAt: status === "已完成" ? `${addDays(date, 2)}T10:20:00` : "",
-            reviewer: status === "已完成" ? "运营负责人" : "",
-            completedAt: status === "已完成" ? `${addDays(date, 2)}T10:20:00` : ""
-          };
-          tasks.push(task);
-          lastTaskBySlot.set(slot, task);
-        }
-      }
-
-      const bdPeople = [
-        { author: "张敏", stores: ["DreamWeave", "sweet dream"] },
-        { author: "李晨", stores: ["Dreamland", "Dreamdaily"] },
-        { author: "王悦", stores: ["MoonDream", "Himood Smile"] }
-      ];
-      const operatorPeople = [
-        { author: "陈航", stores: ["DreamWeave", "sweet dream", "Dreamland"] },
-        { author: "林可", stores: ["Dreamdaily", "MoonDream", "Himood Smile"] }
-      ];
-
-      dates.forEach((date, position) => {
-        const currentEntries = dayEntries.get(date) || [];
-        const byStore = Object.fromEntries(currentEntries.map((entry) => [entry.store, entry]));
-
-        operatorPeople.forEach((person, personIndex) => {
-          const roleData = {
-            matrix: person.stores.map((store) => {
-              const entry = byStore[store];
-              return {
-                store,
-                values: {
-                  gmv: entry.gmv,
-                  orders: entry.orders,
-                  units: entry.units,
-                  productCardGmv: entry.productCardGmv,
-                  affiliateGmv: entry.affiliateGmv,
-                  adSpend: entry.adSpend,
-                  adRoi: Number((entry.adGmv / Math.max(1, entry.adSpend)).toFixed(2)),
-                  samples: entry.sampleQty
-                }
-              };
-            })
-          };
-          const hasAnomaly = personIndex === 0 && [0, 3, 6].includes(position);
-          const anomaly = hasAnomaly ? {
-            object: "DreamWeave / JZZ",
-            issue: position === 0 ? "SPS低于3.5且退货偏高" : position === 3 ? "联盟GMV占比持续升高" : "GMV上涨但广告ROI回落",
-            impact: "影响联盟能力、利润质量和后续放量稳定性",
-            reason: position === 0 ? "商品满意度偏低，差评与退货集中在产品预期差异" : position === 3 ? "旧达人视频持续出单，商品卡承接不足" : "放量素材边际效率下降",
-            risk: position === 0 ? "高" : "中",
-            acceptance: "提交渠道结构、SPS分项或广告素材数据，次日复查关键指标。"
-          } : null;
-          makeReport({
-            date,
-            position,
-            role: "店群运营",
-            author: person.author,
-            stores: person.stores.join("、"),
-            roleData,
-            anomaly,
-            taskTitle: anomaly ? (position === 0 ? "拆解 DreamWeave SPS 与退货原因" : position === 3 ? "补强 DreamWeave 商品卡承接" : "复盘广告素材与保本ROI") : "",
-            taskOwner: person.author
-          });
-        });
-
-        bdPeople.forEach((person, personIndex) => {
-          const approved = 8 + personIndex * 2 + position;
-          const sent = Math.max(0, approved - (position % 3));
-          const backlog = personIndex === 1 && position === 4;
-          const roleData = {
-            responsibleStores: person.stores.join("、"),
-            messageStatus: backlog ? "有积压" : "已处理完成",
-            backlogReason: backlog ? "达人集中回复，晚间消息未在当日清空。" : "",
-            samples: person.stores.map((store, storeIndex) => ({
-              store,
-              product: store === "Himood Smile" ? "牙贴" : store.includes("Dreamland") || store === "MoonDream" ? "酒店枕2pcs" : "JZZ",
-              approved: Math.max(1, Math.round(approved / 2) + storeIndex),
-              sent: Math.max(1, Math.round(sent / 2) + storeIndex)
-            })),
-            followups: [{ item: `重点达人 ${String.fromCharCode(65 + personIndex)}-${position + 1}`, result: position % 2 ? "已确认脚本方向，待发布。" : "完成复投沟通，已确认排期。" }],
-            oldCreatorContacts: 12 + personIndex * 3 + position,
-            confirmedReinvest: 3 + personIndex + Math.floor(position / 2),
-            reinvestResult: "已按历史GMV和内容稳定性分层跟进。",
-            otherResult: position === 6 ? "完成本周达人池清理和下周优先级标记。" : "无"
-          };
-          const anomaly = backlog ? {
-            object: `${person.stores.join(" / ")} 达人消息`,
-            issue: "联盟消息出现积压",
-            impact: "可能错过达人合作窗口",
-            reason: "高峰时段消息集中，未完成二次分流",
-            risk: "中",
-            acceptance: "次日中午前清空积压，并按达人层级补充跟进状态。"
-          } : null;
-          makeReport({
-            date,
-            position,
-            role: "BD",
-            author: person.author,
-            stores: person.stores.join("、"),
-            roleData,
-            anomaly,
-            taskTitle: anomaly ? "清空联盟消息积压并完成达人分层" : "",
-            taskOwner: person.author
-          });
-        });
-
-        const afterSalesMatrix = storesForSimulation.map((store) => {
-          const entry = byStore[store.store];
-          return {
-            store: store.store,
-            values: {
-              sps: entry.sps,
-              returns: entry.returns,
-              returnAmount: Number((entry.returns * store.price * 0.86).toFixed(2))
-            }
-          };
-        });
-        const afterSalesData = {
-          matrix: afterSalesMatrix,
-          summary: {
-            consultations: 148 + position * 9,
-            lateReplies: position === 2 ? 3 : position % 3,
-            refunds: afterSalesMatrix.reduce((sum, row) => sum + row.values.returns, 0) + 7,
-            refundAmount: Number(afterSalesMatrix.reduce((sum, row) => sum + row.values.returnAmount, 0).toFixed(2)),
-            badReviews: currentEntries.reduce((sum, entry) => sum + entry.badReviews, 0),
-            reviewsResolved: 3 + Math.floor(position / 2),
-            appeals: 2 + position % 2,
-            appealSuccess: 1 + position % 2,
-            appealProcessing: 1,
-            compensation: 4 + position,
-            unfinished: position === 6 ? 3 : 1,
-            highRisk: position >= 5 ? 2 : 1
-          }
-        };
-        const afterSalesAnomaly = [0, 3, 6].includes(position) ? {
-          object: "DreamWeave / JZZ",
-          issue: "SPS低于3.5且退货金额居六店首位",
-          impact: "联盟能力受限并侵蚀实际利润",
-          reason: "商品满意度偏低，用户预期与实际体验存在落差",
-          risk: "高",
-          acceptance: "完成退货原因和VOC分类，给出链接、产品或话术修正建议。"
-        } : null;
-        makeReport({
-          date,
-          position,
-          role: "售后组",
-          author: "周妍",
-          stores: "六店",
-          roleData: afterSalesData,
-          anomaly: afterSalesAnomaly,
-          taskTitle: afterSalesAnomaly ? "汇总 DreamWeave 退货原因与VOC" : "",
-          taskOwner: "周妍"
-        });
-
-        const maintenanceAnomaly = position === 2 ? {
-          object: "Dreamdaily / JZZ blue",
-          issue: "活动价格与日常价格配置冲突",
-          impact: "活动报名可能失败或造成价格异常",
-          reason: "活动续期后未同步校验价格区间",
-          risk: "中",
-          acceptance: "完成活动价、库存和链接状态复核并保留截图。"
-        } : position === 5 ? {
-          object: "Dreamland / 酒店枕2pcs",
-          issue: "达人建联插件运行异常",
-          impact: "当日达人触达节奏中断",
-          reason: "插件任务队列未正常继续运行",
-          risk: "中",
-          acceptance: "恢复插件运行，补齐中断时段的达人触达并保留运行记录。"
-        } : null;
-        const maintenanceData = {
-          plugins: [
-            { store: "DreamWeave", product: "JZZ", outreach: 86 + position * 3, status: "正常" },
-            { store: "Dreamland", product: "酒店枕2pcs", outreach: 54 + position * 2, status: position === 5 ? "异常" : "正常" }
-          ],
-          linksAdded: position % 3,
-          linksUpdated: 3 + position,
-          linksRestored: position % 2,
-          linksPending: position === 2 ? 2 : 0,
-          stockChanges: 4 + position,
-          priceChanges: position === 2 ? 3 : 1,
-          stockPriceRisk: maintenanceAnomaly ? "活动价冲突，已进入复核。" : "无",
-          campaignApplied: 3 + position % 3,
-          campaignSuccess: 2 + position % 2,
-          campaignPending: position === 2 ? 1 : 0,
-          shopsChecked: 6,
-          violations: position === 4 ? 1 : 0,
-          appeals: position === 4 ? 1 : 0,
-          appealSuccess: position === 6 ? 1 : 0,
-          dataTables: "链接、库存、活动和违规巡检表已更新。",
-          otherResult: "六店基础设置已完成当日复核。"
-        };
-        makeReport({
-          date,
-          position,
-          role: "店铺维护",
-          author: "赵宁",
-          stores: "六店",
-          roleData: maintenanceData,
-          anomaly: maintenanceAnomaly,
-          taskTitle: maintenanceAnomaly ? (position === 2 ? "修正 Dreamdaily 活动价格配置" : "恢复 Dreamland 建联插件运行") : "",
-          taskOwner: "赵宁",
-          approval: position === 2 ? { item: "活动价调整", suggestion: "恢复至审批价格区间后重新报名", result: "已通过", owner: "赵宁" } : null
-        });
-      });
-
-      return {
-        entries,
-        products,
-        tasks,
-        reports,
-        reportAnalyses: [],
-        customCreators: structuredClone(state?.customCreators || []),
-        deletedCreators: structuredClone(state?.deletedCreators || []),
-        blanketRemovedCreators: structuredClone(state?.blanketRemovedCreators || []),
-        headRemovedCreators: structuredClone(state?.headRemovedCreators || []),
-        creatorEdits: structuredClone(state?.creatorEdits || {}),
-        creatorHistory: structuredClone(state?.creatorHistory || []),
-        costProfiles: structuredClone(state?.costProfiles || [])
-      };
-    }
 
     let state = loadState();
     let reportPage = 1;
@@ -12340,7 +11772,8 @@
 
     function renderReceivedCloudState() {
       hydrateCostProfilesFromTeam();
-      render();
+      if (document.body.classList.contains("cover-active")) renderEntranceSnapshot();
+      else render();
       cloudRenderDeferred = false;
     }
 
@@ -12754,7 +12187,53 @@
       document.body.classList.add("workbench-entered");
       const app = document.getElementById("workbenchApp");
       if (app) app.removeAttribute("inert");
+      window.requestAnimationFrame(() => window.requestAnimationFrame(render));
       window.setTimeout(() => document.querySelector(".topbar .tab.active")?.focus(), 180);
+    }
+
+    let creatorDataLoadPromise = null;
+
+    function activeViewName() {
+      return document.querySelector(".view.active")?.id || "overview";
+    }
+
+    function ensureCreatorDataLoaded() {
+      if (window.IMPORTED_CREATOR_DATA) return Promise.resolve(window.IMPORTED_CREATOR_DATA);
+      if (creatorDataLoadPromise) return creatorDataLoadPromise;
+      creatorDataLoadPromise = new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+        script.src = "assets/creator-data.js";
+        script.async = true;
+        script.onload = () => resolve(window.IMPORTED_CREATOR_DATA || {});
+        script.onerror = () => reject(new Error("达人数据载入失败"));
+        document.head.appendChild(script);
+      });
+      return creatorDataLoadPromise;
+    }
+
+    function renderCreatorLoadingState(message = "达人数据载入中…") {
+      const importMeta = document.getElementById("creatorImportMeta");
+      const metrics = document.getElementById("creatorMetrics");
+      const productBars = document.getElementById("creatorProductBars");
+      const actionList = document.getElementById("creatorActionList");
+      if (importMeta) importMeta.textContent = message;
+      if (metrics) metrics.innerHTML = "";
+      if (productBars) productBars.innerHTML = '<div class="empty">正在准备达人数据…</div>';
+      if (actionList) actionList.innerHTML = '<div class="empty">载入完成后自动显示</div>';
+    }
+
+    function renderCreatorView() {
+      if (window.IMPORTED_CREATOR_DATA) {
+        renderCreatorCenter();
+        return;
+      }
+      renderCreatorLoadingState();
+      ensureCreatorDataLoaded().then(() => {
+        if (activeViewName() === "creators") renderCreatorCenter();
+      }).catch((error) => {
+        console.warn("Creator data unavailable", error);
+        if (activeViewName() === "creators") renderCreatorLoadingState("载入失败，请刷新重试");
+      });
     }
 
     function setView(viewName) {
@@ -12765,12 +12244,27 @@
 
     function render() {
       renderEntranceSnapshot();
-      renderOverview();
-      renderEntries();
-      renderProducts();
-      renderReports();
-      renderTasks();
-      renderCreatorCenter();
+      const viewName = activeViewName();
+      if (viewName === "overview") {
+        renderOverview();
+        renderEntries();
+        renderProducts();
+        return;
+      }
+      if (viewName === "entry") {
+        renderEntries();
+        renderProducts();
+        return;
+      }
+      if (viewName === "reports") {
+        renderReports();
+        return;
+      }
+      if (viewName === "tasks") {
+        renderTasks();
+        return;
+      }
+      if (viewName === "creators") renderCreatorView();
     }
 
     function renderOverview() {
@@ -17312,7 +16806,7 @@
     function cloudCostImage(source) {
       const image = String(source || "");
       if (!/^data:image\/(?:png|jpe?g|webp);base64,/i.test(image)) return "";
-      return image.length <= 180000 ? image : "";
+      return image.length <= 220000 ? image : "";
     }
 
     function costProfileForTeam(profile) {
@@ -17362,6 +16856,7 @@
       const teamProfiles = Array.isArray(state?.costProfiles) ? state.costProfiles : [];
       if (!teamProfiles.length) return;
       const localProfiles = [...(costingState.profiles || [])];
+      let pendingImageCount = 0;
       teamProfiles.forEach((teamProfile) => {
         const identity = costProfileIdentity(teamProfile);
         const index = localProfiles.findIndex((item) =>
@@ -17370,17 +16865,32 @@
         if (index >= 0) {
           const local = localProfiles[index];
           const teamIsNewer = new Date(teamProfile.updatedAt || 0) >= new Date(local.updatedAt || 0);
+          const image = teamProfile.image || local.image || "";
           localProfiles[index] = teamIsNewer
-            ? { ...local, ...teamProfile, image: local.image || teamProfile.image || "" }
-            : local;
+            ? { ...local, ...teamProfile, image }
+            : { ...local, image };
+          if (!teamProfile.image && local.image) {
+            teamProfile.image = cloudCostImage(local.image);
+            if (teamProfile.image) pendingImageCount += 1;
+          }
         } else {
           localProfiles.push({ ...teamProfile, image: teamProfile.image || "" });
         }
       });
       costingState.profiles = uniqueCostProfiles(localProfiles);
       saveCostingState();
+      if (pendingImageCount) {
+        localStorage.setItem(storeKey, JSON.stringify(state));
+        scheduleCloudSave();
+      }
       renderCostProfiles();
-      setCostCloudSyncStatus(`云端已有 ${teamProfiles.length} 个 SKU`, "success");
+      const cloudImageCount = teamProfiles.filter((profile) => cloudCostImage(profile?.image)).length;
+      setCostCloudSyncStatus(
+        pendingImageCount
+          ? `正在补同步 ${pendingImageCount} 张图片…`
+          : `云端 ${teamProfiles.length} 个 SKU · ${cloudImageCount} 张图片`,
+        pendingImageCount ? "saving" : "success"
+      );
     }
 
     function costTeamEndpoint() {
@@ -17415,7 +16925,9 @@
         const remoteByIdentity = new Map(remoteProfiles.map((item) => [costProfileIdentity(item), item]));
         const upserts = localProfiles.map((profile) => {
           const existing = remoteById.get(String(profile.id)) || remoteByIdentity.get(costProfileIdentity(profile));
-          return existing ? { ...existing, ...profile, id: existing.id } : profile;
+          return existing
+            ? { ...existing, ...profile, id: existing.id, image: profile.image || existing.image || "" }
+            : profile;
         });
         const response = await fetch(endpoint, {
           method: "POST",
@@ -17428,6 +16940,15 @@
         const payload = await response.json();
         if (!response.ok) throw new Error(payload?.error || `云端保存失败（${response.status}）`);
         const remoteState = normalizeState(payload.data);
+        const expectedImageIds = new Set(
+          upserts.filter((profile) => profile.image).map((profile) => String(profile.id))
+        );
+        const confirmedImageCount = remoteState.costProfiles.filter((profile) =>
+          expectedImageIds.has(String(profile.id)) && cloudCostImage(profile.image)
+        ).length;
+        if (confirmedImageCount !== expectedImageIds.size) {
+          throw new Error("云端未完整收到 SKU 图片，请重新同步");
+        }
         state.costProfiles = remoteState.costProfiles;
         cloudBaseline.costProfiles = structuredClone(remoteState.costProfiles);
         cloudRevision = Number(payload.revision || cloudRevision);
@@ -17637,6 +17158,7 @@
         return;
       }
       upsertCostProfileToState(profile);
+      if (profile.image) setCostCloudSyncStatus("正在上传 SKU 图片…", "saving");
       renderCostProfiles();
       resetCostProfileForm();
       showToast(existingId ? "SKU 基础成本已更新" : "SKU 基础成本已保存");
@@ -18209,8 +17731,10 @@
     });
 
     async function initializeWorkbench() {
+      renderEntranceSnapshot();
       cloudReady = Boolean(await loadCloudState());
-      render();
+      if (document.body.classList.contains("cover-active")) renderEntranceSnapshot();
+      else render();
       if (cloudReady) saveCloudState();
       scheduleCloudRefresh();
       scheduleReleaseCheck();

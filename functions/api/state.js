@@ -23,6 +23,14 @@ const arrayKeys = {
   costProfiles: "id"
 };
 
+const maxCostImageLength = 220000;
+const costImagePattern = /^data:image\/(?:png|jpe?g|webp);base64,/i;
+
+function validCostImage(value) {
+  const image = String(value || "");
+  return !image || (image.length <= maxCostImageLength && costImagePattern.test(image));
+}
+
 function responseHeaders(request) {
   const headers = { ...baseHeaders };
   const origin = request?.headers?.get("origin") || "";
@@ -81,7 +89,7 @@ function normalizePatch(payload) {
   };
 }
 
-function mergeCollection(current, operations, keyField) {
+function mergeCollection(current, operations, keyField, collectionName) {
   const deleted = new Set(operations.deletes);
   const records = new Map();
 
@@ -92,7 +100,16 @@ function mergeCollection(current, operations, keyField) {
 
   operations.upserts.forEach((record, index) => {
     const key = String(record?.[keyField] || `incoming:${index}:${JSON.stringify(record)}`);
-    if (!deleted.has(key)) records.set(key, record);
+    if (deleted.has(key)) return;
+    if (collectionName === "costProfiles") {
+      const previous = records.get(key);
+      records.set(key, {
+        ...record,
+        image: String(record?.image || previous?.image || "")
+      });
+      return;
+    }
+    records.set(key, record);
   });
 
   return [...records.values()];
@@ -103,7 +120,7 @@ function applyPatch(currentData, patch) {
   const next = { ...current };
 
   Object.entries(arrayKeys).forEach(([name, keyField]) => {
-    next[name] = mergeCollection(current[name], patch.collections[name], keyField);
+    next[name] = mergeCollection(current[name], patch.collections[name], keyField, name);
   });
 
   next.creatorEdits = { ...current.creatorEdits, ...patch.creatorEdits.upserts };
@@ -189,6 +206,12 @@ async function handlePost(request, env) {
   }
 
   const patch = normalizePatch(payload);
+  const invalidCostImage = patch.collections.costProfiles.upserts.some((profile) =>
+    !validCostImage(profile?.image)
+  );
+  if (invalidCostImage) {
+    return json(413, { error: "SKU 图片格式无效或压缩后仍然过大" }, request);
+  }
   const maxAttempts = 24;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const current = await readState(env.DB);
@@ -202,6 +225,15 @@ async function handlePost(request, env) {
     }
     const nextData = applyPatch(current?.data || null, patch);
     const updatedAt = new Date().toISOString();
+
+    if (current && JSON.stringify(nextData) === JSON.stringify(current.data)) {
+      return json(200, {
+        version: current.version || "v2",
+        updatedAt: current.updatedAt,
+        revision: current.revision,
+        data: current.data
+      }, request);
+    }
 
     if (!current) {
       const inserted = await env.DB.prepare(
