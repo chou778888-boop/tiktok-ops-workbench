@@ -9690,49 +9690,49 @@
                   <span class="badge green">美国站 · 2026 最新口径</span>
                 </div>
                 <div class="cost-section" style="padding-bottom:18px">
-                  <div class="cost-section-head"><b>先选择 SKU 基础档案</b><span id="costOverrideHint">未选择时可使用示例数据</span></div>
+                  <div class="cost-section-head"><b>先选择 SKU 基础档案</b><span id="costOverrideHint">云端档案载入后自动选择最新 SKU</span></div>
                   <div class="cost-grid two">
-                    <div class="cost-field"><label>选择已录入 SKU</label><select id="costProfileSelect"><option value="">不使用基础档案 / 手动填写</option></select></div>
-                    <div class="cost-field"><label>基础数据状态</label><div style="display:flex;align-items:center;gap:10px"><div class="cost-sku-thumb" id="costSelectedSkuImage">暂无图</div><div class="cost-local-badge" id="costProfileStatus" style="display:inline-flex;color:#35634f;background:#edfff6;border-color:#ccebdd">当前使用示例数据</div></div></div>
+                    <div class="cost-field"><label>选择已录入 SKU</label><select id="costProfileSelect"><option value="">请选择云端 SKU</option></select></div>
+                    <div class="cost-field"><label>基础数据状态</label><div style="display:flex;align-items:center;gap:10px"><div class="cost-sku-thumb" id="costSelectedSkuImage">暂无图</div><div class="cost-local-badge" id="costProfileStatus" style="display:inline-flex;color:#35634f;background:#edfff6;border-color:#ccebdd">等待载入云端档案</div></div></div>
                   </div>
                 </div>
                 <div class="cost-decision-section">
                   <div class="cost-section-head"><b>01 · 快速决策参数</b><span>日常测算只需调整这里</span></div>
                   <div class="cost-grid">
                     <div class="cost-field"><label>销售场景</label><select name="channel"><option value="affiliate">达人自然出单</option><option value="organic">自然 / 商品卡</option><option value="ads">达人投流出单</option></select></div>
-                    <div class="cost-field"><label>商品售价 ($)</label><input name="price" type="number" step="0.01" value="32.99" /></div>
-                    <div class="cost-field"><label>卖家承担优惠 / 单 ($)</label><input name="discount" type="number" step="0.01" value="2" /><div class="cost-input-note">仅填 Seller Discount；不要填 TikTok 平台补贴</div></div>
-                    <div class="cost-field"><label>达人自然佣金 (%)</label><input name="creatorRate" type="number" step="0.1" value="15" /><div class="cost-input-note">仅达人自然出单计入</div></div>
-                    <div class="cost-field"><label>广告佣金 (%)</label><input name="adCommissionRate" type="number" step="0.1" value="5" /><div class="cost-input-note">投流订单替代达人自然佣金</div></div>
-                    <div class="cost-field"><label>TikTok 实际投流成本 / 成交单 ($)</label><input name="adCost" type="number" step="0.01" value="3.5" /><div class="cost-input-note">Ads Manager 实际净消耗 ÷ 归因成交单；不要填充值金额</div></div>
-                    <div class="cost-field"><label>预计退款率 (%)</label><input name="refundRate" type="number" step="0.1" value="5" /></div>
-                    <div class="cost-field"><label>目标贡献利润率 (%)</label><input name="targetMargin" type="number" step="0.1" value="20" /></div>
+                    <div class="cost-field"><label>商品售价 ($)</label><input name="price" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>卖家承担优惠 / 单 ($)</label><input name="discount" type="number" step="0.01" value="0" /><div class="cost-input-note">仅填 Seller Discount；不要填 TikTok 平台补贴</div></div>
+                    <div class="cost-field"><label>达人自然佣金 (%)</label><input name="creatorRate" type="number" step="0.1" value="0" /><div class="cost-input-note">仅达人自然出单计入</div></div>
+                    <div class="cost-field"><label>广告佣金 (%)</label><input name="adCommissionRate" type="number" step="0.1" value="0" /><div class="cost-input-note">投流订单替代达人自然佣金</div></div>
+                    <div class="cost-field"><label>TikTok 实际投流成本 / 成交单 ($)</label><input name="adCost" type="number" step="0.01" value="0" /><div class="cost-input-note">Ads Manager 实际净消耗 ÷ 归因成交单；不要填充值金额</div></div>
+                    <div class="cost-field"><label>预计退款率 (%)</label><input name="refundRate" type="number" step="0.1" value="0" /></div>
+                    <div class="cost-field"><label>目标贡献利润率 (%)</label><input name="targetMargin" type="number" step="0.1" value="0" /></div>
                   </div>
                 </div>
                 <div class="cost-section">
                   <div class="cost-section-head"><b>02 · 商品与履约固定成本</b><span class="cost-fixed-label">选择 SKU 后自动带入，通常无需修改</span></div>
                   <div class="cost-grid">
                     <div class="cost-field"><label>店铺</label><select name="store"><option>DreamWeave</option><option>sweet dream</option><option>Dreamland</option><option>Dreamdaily</option><option>MoonDream</option><option>Himood Smile</option></select></div>
-                    <div class="cost-field"><label>产品 / SKU</label><input name="sku" value="酒店枕 2pcs / white" /></div>
-                    <div class="cost-field"><label>采购成本 ($)</label><input name="purchase" type="number" step="0.01" value="7.8" /></div>
-                    <div class="cost-field"><label>包材 / 质检 ($)</label><input name="packaging" type="number" step="0.01" value="0.55" /></div>
-                    <div class="cost-field"><label>头程分摊 ($)</label><input name="firstMile" type="number" step="0.01" value="2.1" /></div>
-                    <div class="cost-field"><label>入库及仓储操作 ($)</label><input name="warehouse" type="number" step="0.01" value="1.15" /></div>
-                    <div class="cost-field"><label>尾程净支出 / 单 ($)</label><input name="lastMile" type="number" step="0.01" value="5.65" /><div class="cost-input-note">优先用结算单 Shipping 净支出 ÷ 结算件数，已扣买家运费及平台补贴</div></div>
-                    <div class="cost-field"><label>其他履约成本 ($)</label><input name="fulfillmentOther" type="number" step="0.01" value="0.3" /></div>
+                    <div class="cost-field"><label>产品 / SKU</label><input name="sku" value="" placeholder="请先选择云端 SKU" /></div>
+                    <div class="cost-field"><label>采购成本 ($)</label><input name="purchase" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>包材 / 质检 ($)</label><input name="packaging" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>头程分摊 ($)</label><input name="firstMile" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>入库及仓储操作 ($)</label><input name="warehouse" type="number" step="0.01" value="0" /></div>
+                    <div class="cost-field"><label>尾程净支出 / 单 ($)</label><input name="lastMile" type="number" step="0.01" value="0" /><div class="cost-input-note">优先用结算单 Shipping 净支出 ÷ 结算件数，已扣买家运费及平台补贴</div></div>
+                    <div class="cost-field"><label>其他履约成本 ($)</label><input name="fulfillmentOther" type="number" step="0.01" value="0" /></div>
                   </div>
                 </div>
                 <div class="cost-section">
                   <div class="cost-section-head"><b>03 · 平台固定费率与退货损失</b><span class="cost-fixed-label">按店铺政策维护</span></div>
                   <div class="cost-grid">
-                    <div class="cost-field"><label>Referral Fee (%) · 全场景</label><input name="platformRate" type="number" step="0.1" value="6" /><div class="cost-input-note">普通类目默认 6%；退款保留原推荐费的 20%，每 SKU 最高 $5</div></div>
-                    <div class="cost-field"><label>Smart Promotion (%) · 全场景</label><input name="smartPromotionRate" type="number" step="0.1" value="3.5" /><div class="cost-input-note">已加入计划时按店铺 GMV 收取；日常 3.5%，未参加填 0</div></div>
+                    <div class="cost-field"><label>Referral Fee (%) · 全场景</label><input name="platformRate" type="number" step="0.1" value="0" /><div class="cost-input-note">普通类目默认 6%；退款保留原推荐费的 20%，每 SKU 最高 $5</div></div>
+                    <div class="cost-field"><label>Smart Promotion (%) · 全场景</label><input name="smartPromotionRate" type="number" step="0.1" value="0" /><div class="cost-input-note">已加入计划时按店铺 GMV 收取；日常 3.5%，未参加填 0</div></div>
                     <div class="cost-field"><label>活动期附加费率 (%)</label><input name="campaignPeriodRate" type="number" step="0.1" value="0" /><div class="cost-input-note">活动日按 Seller Center 日历填写，普通日期填 0</div></div>
-                    <div class="cost-field"><label>退货处理损失 / 单 ($)</label><input name="returnLoss" type="number" step="0.01" value="4" /><div class="cost-input-note">按预计退款订单数量计提</div></div>
+                    <div class="cost-field"><label>退货处理损失 / 单 ($)</label><input name="returnLoss" type="number" step="0.01" value="0" /><div class="cost-input-note">按预计退款订单数量计提</div></div>
                   </div>
                 </div>
                 <div class="cost-actions">
-                  <button class="ghost" id="resetCostCalculator" type="button">恢复示例</button>
+                  <button class="ghost" id="resetCostCalculator" type="button">清空当前测算</button>
                   <button class="primary" type="submit">保存为测算方案</button>
                 </div>
               </form>
@@ -16655,18 +16655,23 @@
 
     const costingStoreKey = "tiktok_ops_costing_v1_local";
     const costDefaultValues = {
-      store: "DreamWeave", sku: "酒店枕 2pcs / white", channel: "affiliate",
-      price: 32.99, discount: 2, purchase: 7.8, packaging: .55,
-      firstMile: 2.1, warehouse: 1.15, lastMile: 5.65, fulfillmentOther: .3,
-      platformRate: 6, smartPromotionRate: 3.5, campaignPeriodRate: 0, creatorRate: 15, adCommissionRate: 5,
-      adCost: 3.5, refundRate: 5, returnLoss: 4, targetMargin: 20
+      store: "DreamWeave", sku: "", channel: "affiliate",
+      price: 0, discount: 0, purchase: 0, packaging: 0,
+      firstMile: 0, warehouse: 0, lastMile: 0, fulfillmentOther: 0,
+      platformRate: 0, smartPromotionRate: 0, campaignPeriodRate: 0, creatorRate: 0, adCommissionRate: 0,
+      adCost: 0, refundRate: 0, returnLoss: 0, targetMargin: 0
     };
+    const legacyCostProfileIds = new Set(["cost-test-1"]);
     let costingState = (() => {
       try {
         const parsed = JSON.parse(localStorage.getItem(costingStoreKey));
         return {
           history: Array.isArray(parsed?.history) ? parsed.history : [],
-          profiles: Array.isArray(parsed?.profiles) ? parsed.profiles.map((item) => ({ ...item, id: item.id || crypto.randomUUID(), product: item.product || "" })) : []
+          profiles: Array.isArray(parsed?.profiles)
+            ? parsed.profiles
+              .filter((item) => !legacyCostProfileIds.has(String(item?.id || "")))
+              .map((item) => ({ ...item, id: item.id || crypto.randomUUID(), product: item.product || "" }))
+            : []
         };
       } catch { return { history: [], profiles: [] }; }
     })();
@@ -16914,9 +16919,12 @@
     }
 
     function hydrateCostProfilesFromTeam() {
-      const teamProfiles = Array.isArray(state?.costProfiles) ? state.costProfiles : [];
+      const teamProfiles = Array.isArray(state?.costProfiles)
+        ? state.costProfiles.filter((profile) => !legacyCostProfileIds.has(String(profile?.id || "")))
+        : [];
       if (!teamProfiles.length) return;
-      const localProfiles = [...(costingState.profiles || [])];
+      const localProfiles = (costingState.profiles || [])
+        .filter((profile) => !legacyCostProfileIds.has(String(profile?.id || "")));
       let pendingImageCount = 0;
       teamProfiles.forEach((teamProfile) => {
         const identity = costProfileIdentity(teamProfile);
@@ -16940,6 +16948,7 @@
       costingState.profiles = uniqueCostProfiles(localProfiles);
       saveCostingState();
       renderCostProfiles();
+      activateLatestCostProfileIfNeeded();
       const cloudImageCount = teamProfiles.filter((profile) => cloudCostImageReference(profile?.image)).length;
       setCostCloudSyncStatus(
         pendingImageCount
@@ -16988,6 +16997,7 @@
     async function syncLocalCostProfilesToCloud() {
       const button = document.getElementById("syncCostProfilesCloud");
       const localProfiles = uniqueCostProfiles(costingState.profiles)
+        .filter((profile) => !legacyCostProfileIds.has(String(profile?.id || "")))
         .map((profile) => costProfileForTeam(profile, { includeInlineImage: true }));
       if (!localProfiles.length) {
         showToast("当前没有可同步的 SKU 成本档案");
@@ -17076,7 +17086,8 @@
     }
 
     function renderCostProfiles() {
-      const profiles = costingState.profiles || [];
+      const profiles = (costingState.profiles || [])
+        .filter((profile) => !legacyCostProfileIds.has(String(profile?.id || "")));
       document.getElementById("costProfileCount").textContent = `${profiles.length} 个 SKU`;
       document.getElementById("costProfileList").innerHTML = profiles.length
         ? `<div class="table-wrap"><table class="cost-table"><thead><tr><th>SKU</th><th>售价</th><th>基础成本</th><th>平台固定费率</th><th>操作</th></tr></thead><tbody>${profiles.map((item) => {
@@ -17088,8 +17099,17 @@
         : '<div class="cost-empty">还没有 SKU 基础档案。<br>先在左侧录入一个 SKU，之后快速测算即可自动带出成本。</div>';
       const select = document.getElementById("costProfileSelect");
       const selected = select.value;
-      select.innerHTML = `<option value="">不使用基础档案 / 手动填写</option>${profiles.map((item) => `<option value="${escapeHtml(item.id || "")}">${escapeHtml(profileDisplayName(item))}</option>`).join("")}`;
+      select.innerHTML = `<option value="">请选择云端 SKU</option>${profiles.map((item) => `<option value="${escapeHtml(item.id || "")}">${escapeHtml(profileDisplayName(item))}</option>`).join("")}`;
       if (profiles.some((item) => item.id === selected)) select.value = selected;
+    }
+
+    function activateLatestCostProfileIfNeeded() {
+      const select = document.getElementById("costProfileSelect");
+      if (select?.value) return;
+      const latest = (costingState.profiles || [])
+        .filter((profile) => !legacyCostProfileIds.has(String(profile?.id || "")))
+        .sort((a, b) => new Date(b?.updatedAt || 0) - new Date(a?.updatedAt || 0))[0];
+      if (latest?.id) applyCostProfile(latest.id);
     }
 
     function profileFormValues() {
@@ -17212,6 +17232,14 @@
       renderCostCalculator();
     }
 
+    function clearCostCalculatorSelection() {
+      loadCostValues(costDefaultValues);
+      document.getElementById("costProfileSelect").value = "";
+      document.getElementById("costSelectedSkuImage").textContent = "暂无图";
+      document.getElementById("costProfileStatus").textContent = "请选择云端 SKU";
+      document.getElementById("costOverrideHint").textContent = "选择后自动带出真实成本";
+    }
+
     function setCostPane(name) {
       document.querySelectorAll(".cost-subtab").forEach((button) => button.classList.toggle("active", button.dataset.costPane === name));
       document.querySelectorAll("[data-cost-pane-content]").forEach((pane) => pane.classList.toggle("active", pane.dataset.costPaneContent === name));
@@ -17234,7 +17262,7 @@
       renderCostHistory();
       showToast("测算方案已保存到本地");
     });
-    document.getElementById("resetCostCalculator").addEventListener("click", () => loadCostValues(costDefaultValues));
+    document.getElementById("resetCostCalculator").addEventListener("click", clearCostCalculatorSelection);
     document.getElementById("costProfileForm").addEventListener("submit", (event) => {
       event.preventDefault();
       if (!validateCostProfileForm()) return;
@@ -17336,11 +17364,7 @@
     });
     document.getElementById("costProfileSelect").addEventListener("change", (event) => {
       if (event.target.value) applyCostProfile(event.target.value);
-      else {
-        document.getElementById("costSelectedSkuImage").textContent = "暂无图";
-        document.getElementById("costProfileStatus").textContent = "当前手动填写，不关联基础档案";
-        document.getElementById("costOverrideHint").textContent = "未选择时可使用示例数据";
-      }
+      else clearCostCalculatorSelection();
     });
     document.querySelectorAll(".cost-subtab").forEach((button) => button.addEventListener("click", () => setCostPane(button.dataset.costPane)));
     window.addEventListener("storage", (event) => {
@@ -17378,7 +17402,7 @@
       input.min = "0";
     });
     resetCostProfileForm();
-    renderCostCalculator();
+    loadCostValues(costDefaultValues);
     renderCostHistory();
 
     document.querySelectorAll(".tab").forEach((tab) => {
