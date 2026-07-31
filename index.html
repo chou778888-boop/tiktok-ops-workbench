@@ -2696,44 +2696,113 @@
       font-size: 17px;
     }
 
+    .weekly-insights-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
     .insight-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
     .insight-card {
-      min-height: 176px;
-      padding: 17px;
-      border: 1px solid var(--line);
+      --insight-color: #68707c;
+      --insight-tint: rgba(104, 112, 124, 0.08);
+      position: relative;
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr);
+      gap: 14px;
+      min-height: 142px;
+      padding: 18px;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--insight-color) 18%, transparent);
       border-radius: 18px;
-      background: #fff;
+      background:
+        radial-gradient(circle at 100% 0%, var(--insight-tint), transparent 38%),
+        rgba(255, 255, 255, 0.82);
     }
 
-    .insight-card.high { border-top: 3px solid var(--red); }
-    .insight-card.medium { border-top: 3px solid var(--amber); }
-    .insight-card.good { border-top: 3px solid var(--green); }
-    .insight-card.info { border-top: 3px solid var(--blue); }
+    .insight-card.high {
+      --insight-color: #b83d3d;
+      --insight-tint: rgba(184, 61, 61, 0.105);
+    }
+
+    .insight-card.medium {
+      --insight-color: #a66d16;
+      --insight-tint: rgba(166, 109, 22, 0.11);
+    }
+
+    .insight-card.good {
+      --insight-color: #187b53;
+      --insight-tint: rgba(24, 123, 83, 0.095);
+    }
+
+    .insight-card.info {
+      --insight-color: #3d6fbd;
+      --insight-tint: rgba(61, 111, 189, 0.095);
+    }
+
+    .insight-index {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid color-mix(in srgb, var(--insight-color) 20%, transparent);
+      border-radius: 14px;
+      background: var(--insight-tint);
+      color: var(--insight-color);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .insight-copy {
+      min-width: 0;
+    }
+
+    .insight-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
 
     .insight-card .insight-label {
       display: inline-flex;
-      margin-bottom: 11px;
-      color: var(--muted);
+      color: #626976;
       font-size: 11px;
       font-weight: 850;
     }
 
+    .insight-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 0 9px;
+      background: var(--insight-tint);
+      color: var(--insight-color);
+      font-size: 10px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .insight-card h4 {
-      margin: 0 0 8px;
+      margin: 0 0 7px;
       font-size: 15px;
-      line-height: 1.45;
+      line-height: 1.42;
     }
 
     .insight-card p {
       margin: 0;
       color: #5c6470;
       font-size: 12px;
-      line-height: 1.65;
+      line-height: 1.62;
     }
 
     .insight-card strong { color: #262c35; }
@@ -8485,6 +8554,444 @@
       .field.half { grid-column: span 1; }
       .top-actions { flex-wrap: wrap; }
     }
+
+    /* Internal workspace visual system */
+    body.workbench-entered {
+      background:
+        radial-gradient(ellipse 72% 42% at 72% 0%, rgba(255, 255, 255, 0.96), transparent 68%),
+        linear-gradient(180deg, #f7f7f5 0%, #efefec 52%, #eaeae7 100%);
+    }
+
+    body.workbench-entered .app {
+      position: relative;
+      isolation: isolate;
+    }
+
+    body.workbench-entered .app::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      opacity: 0.56;
+      background-image:
+        linear-gradient(rgba(11, 13, 16, 0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(11, 13, 16, 0.018) 1px, transparent 1px);
+      background-size: 54px 54px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.9), transparent 76%);
+    }
+
+    body.workbench-entered .topbar {
+      grid-template-columns: 248px minmax(0, 1fr) auto;
+      gap: 12px;
+      padding: 8px 9px 8px 16px;
+      border-color: rgba(11, 13, 16, 0.075);
+      background: rgba(253, 253, 251, 0.82);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.86) inset,
+        0 18px 50px rgba(18, 22, 30, 0.065);
+    }
+
+    body.workbench-entered .tabs {
+      gap: 2px;
+    }
+
+    body.workbench-entered .tab {
+      height: 40px;
+      padding-inline: 12px;
+      color: #636873;
+      transition: color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+    }
+
+    body.workbench-entered .tab:hover {
+      color: #15181d;
+      background: rgba(11, 13, 16, 0.045);
+    }
+
+    body.workbench-entered .tab:focus,
+    body.workbench-entered .tab:focus-visible {
+      outline: 2px solid rgba(17, 19, 22, 0.14);
+      outline-offset: 2px;
+    }
+
+    body.workbench-entered .tab.active {
+      color: #fff;
+      background: #111316;
+      box-shadow: 0 8px 18px rgba(11, 13, 16, 0.16);
+    }
+
+    body.workbench-entered .top-actions {
+      gap: 7px;
+      flex-wrap: nowrap;
+    }
+
+    body.workbench-entered .top-actions > .primary {
+      min-width: 92px;
+      box-shadow: 0 10px 24px rgba(11, 13, 16, 0.16);
+    }
+
+    body.workbench-entered .sync-pill {
+      width: 40px;
+      padding: 0;
+      overflow: hidden;
+      color: transparent;
+      font-size: 0;
+    }
+
+    body.workbench-entered .sync-pill::before {
+      color: #18885a;
+    }
+
+    body.workbench-entered .sync-pill.local::before {
+      color: #6b7280;
+    }
+
+    body.workbench-entered .sync-pill.saving::before {
+      color: #b45309;
+    }
+
+    body.workbench-entered .sync-pill.error::before {
+      color: #dc2626;
+    }
+
+    .data-menu {
+      position: relative;
+      flex: none;
+    }
+
+    .data-menu-trigger::after {
+      content: "⌄";
+      margin-left: 6px;
+      font-size: 11px;
+    }
+
+    .data-menu-panel {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      z-index: 90;
+      display: none;
+      width: 156px;
+      padding: 8px;
+      border: 1px solid rgba(11, 13, 16, 0.09);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 20px 50px rgba(18, 22, 30, 0.15);
+      backdrop-filter: blur(22px);
+    }
+
+    .data-menu:hover .data-menu-panel,
+    .data-menu:focus-within .data-menu-panel {
+      display: grid;
+      gap: 5px;
+    }
+
+    .data-menu-panel .ghost {
+      width: 100%;
+      height: 36px;
+      border: 0;
+      border-radius: 11px;
+      justify-content: flex-start;
+      background: transparent;
+      text-align: left;
+      box-shadow: none;
+    }
+
+    .data-menu-panel .ghost:hover {
+      background: #f1f2f3;
+      color: #111316;
+    }
+
+    body.workbench-entered .hero {
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    body.workbench-entered .hero-card {
+      min-height: 244px;
+      padding: 30px 32px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 30px;
+      background:
+        radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.095), transparent 28%),
+        linear-gradient(145deg, #0b0d10 0%, #111316 56%, #17191d 100%);
+      box-shadow: 0 30px 70px rgba(11, 13, 16, 0.15);
+    }
+
+    body.workbench-entered .hero-card h1 {
+      max-width: 1120px;
+      font-size: clamp(34px, 3.35vw, 50px);
+      line-height: 1.06;
+      letter-spacing: -0.035em;
+    }
+
+    body.workbench-entered .hero-card p {
+      max-width: 760px;
+      margin-top: 13px;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    body.workbench-entered .hero-data-health,
+    body.workbench-entered .hero-stats {
+      margin-top: 15px;
+    }
+
+    body.workbench-entered .mini {
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.065);
+    }
+
+    body.workbench-entered .panel {
+      border-color: rgba(11, 13, 16, 0.075);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 18px 52px rgba(18, 22, 30, 0.055);
+    }
+
+    body.workbench-entered .panel-head {
+      padding: 22px 24px 15px;
+    }
+
+    body.workbench-entered .panel-head::after {
+      left: 24px;
+      right: 24px;
+    }
+
+    body.workbench-entered .analysis-grid,
+    body.workbench-entered .dashboard-grid {
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    body.workbench-entered .chart-box,
+    body.workbench-entered .digest-box {
+      border-color: rgba(11, 13, 16, 0.06);
+      background: rgba(248, 248, 246, 0.88);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.88) inset;
+    }
+
+    body.workbench-entered .report-overview-grid {
+      grid-template-columns: minmax(0, 1.28fr) minmax(360px, 0.72fr);
+      gap: 16px;
+    }
+
+    body.workbench-entered .report-summary {
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.1), transparent 26%),
+        linear-gradient(145deg, #0b0d10, #17191d);
+      box-shadow: 0 26px 62px rgba(11, 13, 16, 0.14);
+    }
+
+    body.workbench-entered .report-summary-card {
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.065);
+    }
+
+    body.workbench-entered .daily-management-board {
+      gap: 12px;
+    }
+
+    body.workbench-entered .daily-management-lane {
+      border-color: rgba(11, 13, 16, 0.07);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 14px 34px rgba(18, 22, 30, 0.045);
+    }
+
+    /* Compact read-only store tables inside daily report records */
+    body.workbench-entered .report-card .report-matrix {
+      border-radius: 14px;
+      background: rgba(250, 250, 248, 0.92);
+    }
+
+    body.workbench-entered .report-card .report-matrix table {
+      width: 100%;
+      min-width: 560px;
+      table-layout: auto;
+    }
+
+    body.workbench-entered .report-card .report-matrix th,
+    body.workbench-entered .report-card .report-matrix td {
+      height: 34px;
+      padding: 6px 5px;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    body.workbench-entered .report-card .report-matrix th {
+      white-space: normal;
+      text-wrap: balance;
+    }
+
+    body.workbench-entered .report-card .report-matrix th:first-child,
+    body.workbench-entered .report-card .report-matrix td:first-child {
+      width: 102px;
+      min-width: 102px;
+      max-width: 102px;
+      padding-inline: 9px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    body.workbench-entered .report-card .report-matrix th:not(:first-child),
+    body.workbench-entered .report-card .report-matrix td:not(:first-child) {
+      min-width: 62px;
+    }
+
+    /* Chinese typography: keep headings and short UI labels from leaving orphan characters */
+    body.workbench-entered h1,
+    body.workbench-entered h2,
+    body.workbench-entered h3,
+    body.workbench-entered .panel-head p,
+    body.workbench-entered .sub,
+    body.workbench-entered .weekly-head p,
+    body.workbench-entered .blanket-overview-title p {
+      line-break: strict;
+      word-break: normal;
+      word-break: auto-phrase;
+    }
+
+    body.workbench-entered h1,
+    body.workbench-entered h2,
+    body.workbench-entered h3 {
+      text-wrap: balance;
+    }
+
+    body.workbench-entered .panel-head p,
+    body.workbench-entered .sub,
+    body.workbench-entered .weekly-head p,
+    body.workbench-entered .blanket-overview-title p {
+      text-wrap: pretty;
+    }
+
+    body.workbench-entered button,
+    body.workbench-entered .badge,
+    body.workbench-entered .tab {
+      word-break: keep-all;
+    }
+
+    @media (max-width: 1320px) {
+      body.workbench-entered .topbar {
+        grid-template-columns: 190px minmax(0, 1fr) auto;
+      }
+
+      body.workbench-entered .brand span {
+        display: none;
+      }
+
+      body.workbench-entered .tab {
+        padding-inline: 9px;
+        font-size: 12px;
+      }
+
+      body.workbench-entered .data-menu-trigger {
+        width: 40px;
+        overflow: hidden;
+        padding: 0;
+        font-size: 0;
+      }
+
+      body.workbench-entered .data-menu-trigger::before {
+        content: "•••";
+        font-size: 13px;
+        letter-spacing: 0.06em;
+      }
+
+      body.workbench-entered .data-menu-trigger::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      body.workbench-entered .topbar {
+        grid-template-columns: 1fr auto;
+        border-radius: 24px;
+      }
+
+      body.workbench-entered .tabs {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-top: 4px;
+      }
+
+      body.workbench-entered .top-actions {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      body.workbench-entered .report-overview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body.workbench-entered .app {
+        padding-inline: 12px;
+      }
+
+      body.workbench-entered .topbar {
+        top: 8px;
+        margin-bottom: 18px;
+        padding: 10px 11px;
+      }
+
+      body.workbench-entered .brand b {
+        font-size: 13px;
+      }
+
+      body.workbench-entered .top-actions > .primary {
+        min-width: 78px;
+        padding-inline: 12px;
+        font-size: 12px;
+      }
+
+      body.workbench-entered .hero-card {
+        padding: 24px;
+        border-radius: 24px;
+      }
+
+      body.workbench-entered .hero-card h1 {
+        font-size: clamp(30px, 8.5vw, 34px);
+        line-height: 1.12;
+        letter-spacing: -0.045em;
+      }
+
+      body.workbench-entered .panel {
+        border-radius: 20px;
+      }
+
+      body.workbench-entered .weekly-panel > .panel-head {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      body.workbench-entered .weekly-controls {
+        width: 100%;
+      }
+
+      body.workbench-entered #creators > .panel > .panel-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+      }
+
+      body.workbench-entered #creators > .panel > .panel-head h2 {
+        white-space: nowrap;
+      }
+
+      body.workbench-entered .creator-page-actions .badge {
+        display: none;
+      }
+    }
+
   </style>
 </head>
 <body class="cover-active">
@@ -8591,10 +9098,15 @@
       </nav>
       <div class="top-actions">
         <span class="sync-pill local" id="syncStatus">本地模式</span>
-        <button class="ghost" id="exportJson" type="button">导出JSON</button>
-        <button class="ghost" id="exportCsv" type="button">导出CSV</button>
-        <button class="ghost" id="importJson" type="button">导入</button>
-        <input id="importFile" type="file" accept="application/json,.json" hidden />
+        <div class="data-menu">
+          <button class="ghost data-menu-trigger" type="button">数据管理</button>
+          <div class="data-menu-panel">
+            <button class="ghost" id="exportJson" type="button">导出 JSON</button>
+            <button class="ghost" id="exportCsv" type="button">导出 CSV</button>
+            <button class="ghost" id="importJson" type="button">导入备份</button>
+            <input id="importFile" type="file" accept="application/json,.json" hidden />
+          </div>
+        </div>
         <button class="primary" data-jump="reports" type="button">填写日报</button>
       </div>
     </header>
@@ -9277,7 +9789,10 @@
           </div>
           <div class="weekly-insights">
             <div class="weekly-insights-head">
-              <h3>数据规则诊断</h3>
+              <div>
+                <h3>数据规则诊断</h3>
+                <p>根据已提交日报自动识别风险、缺口与闭环状态，结论用于确定下一步动作。</p>
+              </div>
               <span class="badge blue" id="weeklyConfidence">等待数据</span>
             </div>
             <div class="insight-grid" id="weeklyInsights"></div>
@@ -14645,12 +15160,12 @@
       }
 
       if (role === "售后组") {
-        const consultations = aggregateTotal(aggregates, "consultations");
-        const lateReplies = aggregateTotal(aggregates, "lateReplies");
         const returns = aggregateTotal(aggregates, "returns");
+        const returnAmount = aggregateTotal(aggregates, "returnAmount");
         const badReviews = aggregateTotal(aggregates, "badReviews");
+        const reviewsResolved = aggregateTotal(aggregates, "reviewsResolved");
         const unfinished = aggregateTotal(aggregates, "unfinished");
-        const lateRate = consultations ? lateReplies / consultations : 0;
+        const pendingReviews = Math.max(0, badReviews - reviewsResolved);
         const reportedSps = REPORT_STORES.map((store) => ({
           store: store.name,
           value: Number(aggregates[store.name]?.values?.sps || 0)
@@ -14660,11 +15175,11 @@
         push(lowSps.length ? "high" : reportedSps.length ? "good" : "info", "店铺健康",
           lowSps.length ? `${lowSps.map((item) => `${item.store} ${item.value.toFixed(1)}`).join("｜")} 低于3.5` : reportedSps.length ? "已填店铺 SPS 均不低于3.5" : "本周尚未填写分店 SPS",
           lowSps.length ? "低于3.5的店铺需要优先拆解商品满意度、履约与客服维度，并关注联盟能力受限带来的流量风险。" : "SPS按店铺持续记录；分数正常时仍需观察单项指标和变化趋势。");
-        push(lateRate > 0.03 ? "high" : lateRate > 0.01 ? "medium" : "good", "响应护栏", `未及时回复占比 ${(lateRate * 100).toFixed(2)}%`,
-          `咨询 ${consultations} 单，未及时回复 ${lateReplies} 单。先按时段和店铺定位积压，再检查排班、标准答复和升级机制。`);
-        push(badReviews || returns ? "medium" : "good", "VOC信号", `退货 / 退款 ${returns} 单｜新增差评 ${badReviews} 条`,
-          "不要只按订单处理售后。应把原因归并为产品、链接表达、达人话术、物流和客服五类，连续出现的问题必须回流到商品与内容。");
-        push(unfinished ? "high" : "good", "闭环质量", `未完成索赔 ${unfinished} 单`,
+        push(returns ? "medium" : "good", "退货 / 退款", `${returns} 单｜${money(returnAmount)}`,
+          returns ? "按店铺和问题产品归并退款原因，区分产品、链接表达、达人话术、物流与客服问题，连续出现的原因必须回流到运营动作。" : "本周未记录退货 / 退款，继续关注店铺与问题SKU变化。");
+        push(pendingReviews ? "medium" : "good", "差评处理", `新增 ${badReviews} 条｜已处理 ${reviewsResolved} 条`,
+          pendingReviews ? `仍有 ${pendingReviews} 条差评需要处理或复盘；处理结果应同步到产品、链接或内容优化。` : "本周新增差评均已处理或复盘，继续观察同类问题是否重复出现。");
+        push(unfinished ? "high" : "good", "索赔闭环", `未完成索赔 ${unfinished} 单`,
           unfinished ? "未闭环订单会继续累积体验风险。每单必须有负责人、承诺时间和复查节点。" : "本周退货 / 退款与索赔事项已完成闭环。");
       }
 
@@ -14701,11 +15216,27 @@
       confidenceEl.title = "按周一至周五工作日计算；历史日期补交计入所属日期";
       confidenceEl.className = `badge ${confidence >= 80 ? "green" : confidence >= 50 ? "amber" : "red"}`;
       const insights = operationalInsights(role, range, reports, aggregates);
-      document.getElementById("weeklyInsights").innerHTML = insights.map((item) => `
+      document.getElementById("weeklyInsights").innerHTML = renderInsightCards(insights);
+    }
+
+    function renderInsightCards(insights) {
+      const statusLabels = {
+        high: "需处理",
+        medium: "需关注",
+        good: "状态正常",
+        info: "待补数据"
+      };
+      return insights.map((item, index) => `
         <article class="insight-card ${item.level}">
-          <span class="insight-label">${escapeHtml(item.label)}</span>
-          <h4>${escapeHtml(item.title)}</h4>
-          <p>${escapeHtml(item.body)}</p>
+          <span class="insight-index">${String(index + 1).padStart(2, "0")}</span>
+          <div class="insight-copy">
+            <div class="insight-meta">
+              <span class="insight-label">${escapeHtml(item.label)}</span>
+              <span class="insight-status">${statusLabels[item.level] || "观察"}</span>
+            </div>
+            <h4>${escapeHtml(item.title)}</h4>
+            <p>${escapeHtml(item.body)}</p>
+          </div>
         </article>
       `).join("");
     }
@@ -15174,13 +15705,7 @@
         { level: lowSps.length || unfinishedClaims ? "high" : "good", label: "店铺健康", title: `低SPS店铺 ${lowSps.length} 家｜未完成索赔 ${unfinishedClaims} 单`, body: "将SPS、退货退款、差评和问题SKU放在一起判断，不用新增订单掩盖售后风险。" },
         { level: overdue || pendingReview ? "medium" : "good", label: "任务闭环", title: `待复查 ${pendingReview} 项｜逾期 ${overdue} 项`, body: "执行结果必须带证据进入后续日报复查，关闭后才能计入闭环率。" }
       ];
-      document.getElementById("weeklyInsights").innerHTML = overallInsights.map((item) => `
-        <article class="insight-card ${item.level}">
-          <span class="insight-label">${escapeHtml(item.label)}</span>
-          <h4>${escapeHtml(item.title)}</h4>
-          <p>${escapeHtml(item.body)}</p>
-        </article>
-      `).join("");
+      document.getElementById("weeklyInsights").innerHTML = renderInsightCards(overallInsights);
       const confidenceEl = document.getElementById("weeklyConfidence");
       confidenceEl.textContent = confidence >= 80 ? `数据完整度 ${confidence.toFixed(0)}%` : confidence >= 50 ? `数据参考度 ${confidence.toFixed(0)}%` : `数据不足 ${confidence.toFixed(0)}%`;
       confidenceEl.className = `badge ${confidence >= 80 ? "green" : confidence >= 50 ? "amber" : "red"}`;
