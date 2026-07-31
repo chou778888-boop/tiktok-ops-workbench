@@ -9048,6 +9048,590 @@
       }
     }
 
+    /* Cross-device layout hardening: Windows laptops + touch/mobile */
+    html {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    .view,
+    .panel,
+    .panel-head,
+    .hero,
+    .dashboard-grid,
+    .analysis-grid,
+    .report-layout,
+    .report-overview-grid,
+    .report-cards,
+    .task-board,
+    .cost-shell,
+    .cost-workspace,
+    .creator-hub,
+    .blanket-creator-shell {
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    img,
+    svg,
+    canvas {
+      max-width: 100%;
+    }
+
+    .table-wrap {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .windows-performance body {
+      text-rendering: optimizeSpeed;
+    }
+
+    .windows-performance .app {
+      padding-inline: clamp(14px, 1.8vw, 24px);
+    }
+
+    .windows-performance .topbar {
+      max-width: 1560px;
+      backdrop-filter: none;
+    }
+
+    .windows-performance .panel,
+    .windows-performance .cost-card,
+    .windows-performance .report-card,
+    .windows-performance .task-card {
+      backdrop-filter: none;
+      box-shadow: 0 12px 34px rgba(18, 22, 30, 0.055);
+    }
+
+    .windows-performance .tabs {
+      justify-content: flex-start;
+      min-width: 0;
+      overflow-x: auto;
+      overscroll-behavior-inline: contain;
+    }
+
+    .windows-performance .tab {
+      flex: 0 0 auto;
+    }
+
+    .windows-performance .table-wrap {
+      scrollbar-color: #b9bec5 #eef0f2;
+      scrollbar-width: thin;
+    }
+
+    @media (min-width: 1181px) and (max-width: 1440px) {
+      body.workbench-entered .topbar {
+        grid-template-columns: 180px minmax(0, 1fr) auto;
+      }
+
+      body.workbench-entered .tab {
+        padding-inline: 8px;
+        font-size: 12px;
+      }
+
+      body.workbench-entered .sync-pill {
+        min-width: 104px;
+        padding-inline: 9px;
+      }
+
+      .report-overview-grid,
+      body.workbench-entered .report-overview-grid {
+        grid-template-columns: minmax(0, 1.15fr) minmax(330px, 0.85fr);
+      }
+
+      .cost-workspace {
+        grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      body.workbench-entered .topbar {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+      }
+
+      body.workbench-entered .tabs {
+        width: 100%;
+        max-width: 100%;
+        padding: 4px 0 1px;
+      }
+
+      body.workbench-entered .tab {
+        flex: 0 0 auto;
+      }
+
+      .cost-hero h1 {
+        max-width: 720px;
+        white-space: normal;
+        text-wrap: balance;
+      }
+
+      .weekly-controls,
+      .creator-toolbar,
+      .creator-top-search {
+        min-width: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body {
+        overflow-x: hidden;
+      }
+
+      .entry-cover-main,
+      .entry-cover-story,
+      .entry-login-stage,
+      .entry-login-card {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      body.workbench-entered {
+        background: linear-gradient(180deg, #f7f7f5, #ecece9);
+      }
+
+      body.workbench-entered .app {
+        padding: 8px 8px 28px;
+      }
+
+      body.workbench-entered .topbar {
+        top: 6px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        margin-bottom: 14px;
+        padding: 8px;
+        border-radius: 20px;
+      }
+
+      body.workbench-entered .brand {
+        gap: 8px;
+      }
+
+      body.workbench-entered .brand .mark {
+        width: 30px;
+        height: 30px;
+      }
+
+      body.workbench-entered .brand span {
+        display: none;
+      }
+
+      body.workbench-entered .top-actions {
+        gap: 5px;
+        flex-wrap: nowrap;
+      }
+
+      body.workbench-entered .sync-pill {
+        width: 34px;
+        min-width: 34px;
+        height: 34px;
+        overflow: hidden;
+        padding: 0;
+        font-size: 0;
+      }
+
+      body.workbench-entered .sync-pill::before {
+        margin: 0;
+        font-size: 14px;
+      }
+
+      body.workbench-entered .top-actions > .primary,
+      body.workbench-entered .data-menu-trigger {
+        min-width: 0;
+        height: 36px;
+        padding-inline: 11px;
+        font-size: 11px;
+      }
+
+      body.workbench-entered .tabs {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        width: calc(100vw - 34px);
+        gap: 3px;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+      }
+
+      body.workbench-entered .tab {
+        min-height: 42px;
+        padding-inline: 13px;
+        scroll-snap-align: start;
+      }
+
+      .tab-dropdown {
+        position: fixed;
+        top: 112px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        transform: none;
+        border-radius: 20px;
+      }
+
+      .tab-dropdown button {
+        min-height: 44px;
+      }
+
+      .data-menu-panel {
+        right: 0;
+        width: min(76vw, 210px);
+      }
+
+      body.workbench-entered .hero-card {
+        min-height: 0;
+        padding: 20px;
+        border-radius: 22px;
+      }
+
+      body.workbench-entered .hero-card h1 {
+        max-width: 100%;
+        font-size: clamp(27px, 8vw, 34px);
+        line-height: 1.14;
+        text-wrap: balance;
+      }
+
+      body.workbench-entered .hero-card p {
+        font-size: 13px;
+        line-height: 1.65;
+      }
+
+      body.workbench-entered .panel,
+      .report-card,
+      .cost-card {
+        border-radius: 18px;
+      }
+
+      body.workbench-entered .panel-head,
+      .report-card-head,
+      .cost-section-head,
+      .cost-result-head,
+      .weekly-head,
+      .blanket-list-head,
+      .blanket-project-head {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+
+      body.workbench-entered .panel-head {
+        padding: 18px 16px 13px;
+      }
+
+      body.workbench-entered .panel-head::after {
+        right: 16px;
+        left: 16px;
+      }
+
+      .panel-head > div,
+      .report-card-head > div,
+      .cost-section-head > div,
+      .weekly-head > div {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .panel-head h2,
+      .panel-head h3,
+      .report-card-head b,
+      .cost-section-head b {
+        overflow-wrap: anywhere;
+        text-wrap: balance;
+      }
+
+      .metrics,
+      .hero-stats,
+      .report-summary-grid,
+      .weekly-metrics,
+      .role-result-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .report-overview-grid > .report-summary,
+      .report-overview-grid > .panel {
+        height: auto;
+        min-height: 0;
+      }
+
+      .report-summary,
+      .report-card {
+        padding: 16px;
+      }
+
+      .report-card-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .report-card-actions {
+        justify-content: flex-start;
+      }
+
+      .report-detail-grid,
+      #reportForm,
+      .form-grid,
+      .report-save-receipt {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      #reportForm,
+      .report-save-receipt {
+        padding-inline: 14px;
+      }
+
+      .report-section {
+        min-height: 0;
+        padding: 13px;
+      }
+
+      .report-card .report-matrix {
+        overflow-x: auto;
+      }
+
+      .report-card .report-matrix table,
+      body.workbench-entered .report-card .report-matrix table {
+        min-width: 560px;
+      }
+
+      .report-card .report-matrix th:first-child,
+      .report-card .report-matrix td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #fafaf8;
+      }
+
+      .task-board {
+        padding: 0 12px 16px;
+      }
+
+      .lane {
+        min-height: 0;
+        padding: 11px;
+      }
+
+      .task-card {
+        padding: 14px;
+      }
+
+      .task-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .task-actions .small-btn {
+        width: 100%;
+        min-height: 36px;
+      }
+
+      .cost-shell {
+        gap: 12px;
+      }
+
+      .cost-hero,
+      .cost-card {
+        padding: 16px;
+      }
+
+      .cost-hero h1 {
+        max-width: 100%;
+        font-size: clamp(22px, 7vw, 30px);
+        line-height: 1.18;
+        white-space: normal;
+      }
+
+      .cost-hero p,
+      .cost-sync-copy {
+        font-size: 11px;
+      }
+
+      .cost-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        border-radius: 18px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .cost-subtab {
+        flex: 0 0 auto;
+        min-height: 42px;
+      }
+
+      .cost-grid,
+      .cost-grid.two {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .cost-field input,
+      .cost-field select,
+      .cost-field textarea,
+      .field input,
+      .field select,
+      .field textarea,
+      .creator-search,
+      .creator-tag-filter,
+      .weekly-controls input,
+      .weekly-controls select {
+        font-size: 16px;
+      }
+
+      .cost-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 9px;
+      }
+
+      .cost-actions .primary,
+      .cost-actions .ghost {
+        width: 100%;
+      }
+
+      .cost-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .cost-bar-row {
+        grid-template-columns: 72px minmax(48px, 1fr) 76px;
+        gap: 6px;
+      }
+
+      .cost-bar-row strong {
+        white-space: normal;
+      }
+
+      .cost-profit-line {
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .cost-table {
+        min-width: 620px;
+      }
+
+      .blanket-creator-shell,
+      .creator-hub,
+      .weekly {
+        padding: 0 12px 16px;
+      }
+
+      .blanket-funnel,
+      .blanket-metrics,
+      .blanket-record-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .creator-toolbar,
+      .creator-top-search {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        align-items: stretch;
+        padding-inline: 14px;
+      }
+
+      .creator-search,
+      .creator-tag-filter {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .creator-head-table {
+        min-width: 1180px;
+      }
+
+      .creator-head-table th:first-child,
+      .creator-head-table td:first-child {
+        position: sticky;
+        left: 0;
+        z-index: 2;
+        background: #fff;
+      }
+
+      .creator-page-actions {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .modal-backdrop {
+        align-items: end;
+        padding: 8px;
+        backdrop-filter: none;
+      }
+
+      .creator-modal {
+        width: 100%;
+        max-height: calc(100dvh - 16px);
+        border-radius: 24px 24px 14px 14px;
+      }
+
+      .creator-modal-head {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        padding: 18px 16px 12px;
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .creator-modal-head h3 {
+        font-size: 23px;
+      }
+
+      .creator-modal-form {
+        padding: 16px;
+      }
+
+      .history-summary {
+        grid-template-columns: 56px minmax(0, 1fr);
+        margin-inline: 14px;
+      }
+
+      .toast {
+        width: calc(100vw - 28px);
+        max-width: 480px;
+        text-align: center;
+        line-height: 1.45;
+      }
+    }
+
+    @media (max-width: 420px) {
+      body.workbench-entered .brand b {
+        max-width: 118px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      body.workbench-entered .top-actions > .primary {
+        padding-inline: 9px;
+      }
+
+      .metrics,
+      .hero-stats,
+      .report-summary-grid,
+      .weekly-metrics,
+      .role-result-grid,
+      .blanket-funnel,
+      .blanket-metrics,
+      .blanket-record-grid,
+      .cost-kpis {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .entry-story-metrics {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .cost-image-field {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .cost-image-preview {
+        width: 96px;
+        height: 96px;
+      }
+    }
+
   </style>
 </head>
 <body class="cover-active">
