@@ -3014,6 +3014,19 @@
     .cost-nowrap { white-space: nowrap; }
     .cost-kicker { color: #7effc4; font-size: 12px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
     .cost-local-badge { padding: 8px 11px; border: 1px solid rgba(126,255,196,.28); border-radius: 999px; color: #baffdc; background: rgba(126,255,196,.08); font-size: 12px; font-weight: 750; }
+    .cost-profile-head-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .cost-cloud-sync-btn {
+      min-height: 34px;
+      padding: 7px 11px;
+      border: 0;
+      border-radius: 999px;
+      color: #fff;
+      background: #111820;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .cost-cloud-sync-btn:disabled { cursor: wait; opacity: .55; }
     .cost-tabs { display: flex; flex-wrap: wrap; gap: 7px; padding: 6px; width: 100%; max-width: 100%; overflow: visible; border: 1px solid var(--soft); border-radius: 22px; background: rgba(255,255,255,.76); box-sizing: border-box; }
     .cost-subtab { border: 0; border-radius: 999px; padding: 10px 17px; color: var(--muted); background: transparent; white-space: nowrap; font-weight: 750; }
     .cost-subtab.active { color: #fff; background: var(--ink); }
@@ -3046,7 +3059,21 @@
     }
     .cost-field select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #737983 50%), linear-gradient(135deg, #737983 50%, transparent 50%); background-position: calc(100% - 16px) 18px, calc(100% - 11px) 18px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 32px; }
     .cost-field input:focus, .cost-field select:focus { border-color: #111820; box-shadow: 0 0 0 3px rgba(17,24,32,.07); }
+    .cost-field input[aria-invalid="true"] {
+      border-color: #dc5050;
+      box-shadow: 0 0 0 3px rgba(220,80,80,.09);
+    }
     .cost-input-note { margin-top: 6px; color: #8a9098; font-size: 11px; line-height: 1.45; }
+    .cost-form-error {
+      display: none;
+      flex: 1 1 280px;
+      min-width: 0;
+      color: #b42318;
+      font-size: 12px;
+      font-weight: 720;
+      line-height: 1.5;
+    }
+    .cost-form-error.show { display: block; }
     .cost-result { position: sticky; top: 16px; overflow: hidden; padding: 20px; color: #fff; background: linear-gradient(145deg, #151a1f 0%, #20272a 100%); box-shadow: 0 24px 60px rgba(16, 22, 24, .18); }
     .cost-result-column { display: grid; gap: 18px; min-width: 0; }
     .cost-result-column > .cost-card { width: 100%; max-width: 100%; box-sizing: border-box; }
@@ -9499,7 +9526,7 @@
                 <h1>先算清楚，再决定卖多少钱、投多少、佣金开多少。</h1>
                 <p>面向 TikTok 多店铺运营的单 SKU 利润决策工具。把采购、物流、平台、达人、广告和退货成本放进<span class="cost-nowrap">同一套口径。</span></p>
               </div>
-              <span class="cost-local-badge">仅保存在本地</span>
+              <span class="cost-local-badge">成本档案团队同步 · 图片仅本地</span>
             </div>
           </div>
 
@@ -9511,7 +9538,7 @@
 
           <div class="cost-pane" data-cost-pane-content="profiles">
             <div class="cost-workspace">
-              <form class="cost-card" id="costProfileForm">
+              <form class="cost-card" id="costProfileForm" novalidate>
                 <div class="cost-section-head">
                   <div><h2>SKU 基础成本录入</h2><p class="sub">每个 SKU 只需维护一次；快速测算会自动带出这些默认值。</p></div>
                   <span class="badge blue" id="costProfileMode">新建档案</span>
@@ -9569,12 +9596,19 @@
                   </div>
                 </div>
                 <div class="cost-actions">
+                  <div class="cost-form-error" id="costProfileError" role="alert" aria-live="polite"></div>
                   <button class="ghost" id="resetCostProfile" type="button">新建空白档案</button>
                   <button class="primary" type="submit">保存基础成本</button>
                 </div>
               </form>
               <div class="cost-card">
-                <div class="cost-section-head"><div><h2>已录入 SKU</h2><p class="sub">点击编辑可更新基础数据；历史测算仍保留原快照。</p></div><span class="badge blue" id="costProfileCount">0 个 SKU</span></div>
+                <div class="cost-section-head">
+                  <div><h2>已录入 SKU</h2><p class="sub">成本文字与数值同步团队云端；SKU 图片只保留在当前设备。</p></div>
+                  <div class="cost-profile-head-actions">
+                    <span class="badge blue" id="costProfileCount">0 个 SKU</span>
+                    <button class="cost-cloud-sync-btn" id="syncCostProfilesCloud" type="button">同步到团队云端</button>
+                  </div>
+                </div>
                 <div id="costProfileList"></div>
               </div>
             </div>
@@ -11377,7 +11411,8 @@
       blanketRemovedCreators: [],
       headRemovedCreators: [],
       creatorEdits: {},
-      creatorHistory: []
+      creatorHistory: [],
+      costProfiles: []
     };
 
     const sampleData = {
@@ -11965,7 +12000,8 @@
         blanketRemovedCreators: structuredClone(state?.blanketRemovedCreators || []),
         headRemovedCreators: structuredClone(state?.headRemovedCreators || []),
         creatorEdits: structuredClone(state?.creatorEdits || {}),
-        creatorHistory: structuredClone(state?.creatorHistory || [])
+        creatorHistory: structuredClone(state?.creatorHistory || []),
+        costProfiles: structuredClone(state?.costProfiles || [])
       };
     }
 
@@ -12015,7 +12051,8 @@
         blanketRemovedCreators: Array.isArray(data?.blanketRemovedCreators) ? data.blanketRemovedCreators : [],
         headRemovedCreators: Array.isArray(data?.headRemovedCreators) ? data.headRemovedCreators : [],
         creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
-        creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
+        creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : [],
+        costProfiles: Array.isArray(data?.costProfiles) ? data.costProfiles : []
       };
     }
 
@@ -12051,7 +12088,8 @@
       deletedCreators: "id",
       blanketRemovedCreators: "id",
       headRemovedCreators: "id",
-      creatorHistory: "id"
+      creatorHistory: "id",
+      costProfiles: "id"
     };
 
     function cloudRecordMap(records, keyField) {
@@ -12146,6 +12184,7 @@
           state = applyCloudPatch(remoteState, changesMadeWhileLoading);
           cloudBaseline = remoteState;
           localStorage.setItem(storeKey, JSON.stringify(state));
+          hydrateCostProfilesFromTeam();
           setSyncStatus(cloudPatchIsEmpty(changesMadeWhileLoading) ? "已同步" : "正在同步新内容", cloudPatchIsEmpty(changesMadeWhileLoading) ? "" : "saving");
           return true;
         }
@@ -12217,6 +12256,7 @@
           }
         }
         localStorage.setItem(storeKey, JSON.stringify(state));
+        hydrateCostProfilesFromTeam();
         saved = true;
         cloudSaveRetryCount = 0;
         if (pendingCloudGuard === cloudGuard) pendingCloudGuard = null;
@@ -17070,7 +17110,161 @@
     }
 
     function saveCostingState() {
-      localStorage.setItem(costingStoreKey, JSON.stringify(costingState));
+      try {
+        const persisted = JSON.parse(localStorage.getItem(costingStoreKey) || "{}");
+        const mergeById = (storedItems, currentItems, timeKey) => {
+          const merged = new Map();
+          [...(Array.isArray(storedItems) ? storedItems : []), ...(Array.isArray(currentItems) ? currentItems : [])].forEach((item) => {
+            if (!item?.id) return;
+            const previous = merged.get(item.id);
+            const previousTime = new Date(previous?.[timeKey] || 0).getTime();
+            const itemTime = new Date(item?.[timeKey] || 0).getTime();
+            if (!previous || itemTime >= previousTime) merged.set(item.id, item);
+          });
+          return [...merged.values()].sort((a, b) => new Date(b?.[timeKey] || 0) - new Date(a?.[timeKey] || 0));
+        };
+        const nextState = {
+          history: mergeById(persisted?.history, costingState.history, "savedAt"),
+          profiles: mergeById(persisted?.profiles, costingState.profiles, "updatedAt")
+        };
+        localStorage.setItem(costingStoreKey, JSON.stringify(nextState));
+        costingState = nextState;
+        return true;
+      } catch (error) {
+        console.warn("Costing state save failed", error);
+        showToast("本地存储空间不足。请重新选择图片，系统会压缩后再保存");
+        return false;
+      }
+    }
+
+    const costProfileNumericKeys = [
+      "price", "targetMargin", "purchase", "packaging", "firstMile", "warehouse",
+      "lastMile", "fulfillmentOther", "platformRate", "smartPromotionRate",
+      "campaignPeriodRate", "refundRate", "returnLoss", "discount", "creatorRate",
+      "adCommissionRate", "adCost"
+    ];
+
+    function costProfileIdentity(profile) {
+      return `${String(profile?.product || "").trim().toLowerCase()}::${String(profile?.sku || "").trim().toLowerCase()}`;
+    }
+
+    function costProfileForTeam(profile) {
+      const clean = {
+        id: String(profile?.id || crypto.randomUUID()),
+        product: String(profile?.product || "").trim(),
+        sku: String(profile?.sku || "").trim(),
+        effectiveDate: String(profile?.effectiveDate || ""),
+        note: String(profile?.note || "").trim(),
+        channel: String(profile?.channel || "affiliate"),
+        updatedAt: String(profile?.updatedAt || new Date().toISOString())
+      };
+      costProfileNumericKeys.forEach((key) => { clean[key] = costNumber(profile?.[key]); });
+      return clean;
+    }
+
+    function uniqueCostProfiles(records) {
+      const byIdentity = new Map();
+      (records || []).forEach((profile) => {
+        const identity = costProfileIdentity(profile);
+        if (identity === "::") return;
+        const previous = byIdentity.get(identity);
+        if (!previous || new Date(profile?.updatedAt || 0) >= new Date(previous?.updatedAt || 0)) {
+          byIdentity.set(identity, profile);
+        }
+      });
+      return [...byIdentity.values()];
+    }
+
+    function upsertCostProfileToState(profile) {
+      const teamProfile = costProfileForTeam(profile);
+      const identity = costProfileIdentity(teamProfile);
+      const existingIndex = (state.costProfiles || []).findIndex((item) =>
+        item.id === teamProfile.id || costProfileIdentity(item) === identity
+      );
+      if (existingIndex >= 0) {
+        teamProfile.id = state.costProfiles[existingIndex].id || teamProfile.id;
+        state.costProfiles[existingIndex] = teamProfile;
+      } else {
+        state.costProfiles.unshift(teamProfile);
+      }
+      saveState();
+    }
+
+    function hydrateCostProfilesFromTeam() {
+      const teamProfiles = Array.isArray(state?.costProfiles) ? state.costProfiles : [];
+      if (!teamProfiles.length) return;
+      const localProfiles = [...(costingState.profiles || [])];
+      teamProfiles.forEach((teamProfile) => {
+        const identity = costProfileIdentity(teamProfile);
+        const index = localProfiles.findIndex((item) =>
+          item.id === teamProfile.id || costProfileIdentity(item) === identity
+        );
+        if (index >= 0) {
+          const local = localProfiles[index];
+          const teamIsNewer = new Date(teamProfile.updatedAt || 0) >= new Date(local.updatedAt || 0);
+          localProfiles[index] = teamIsNewer
+            ? { ...local, ...teamProfile, image: local.image || "" }
+            : local;
+        } else {
+          localProfiles.push({ ...teamProfile, image: "" });
+        }
+      });
+      costingState.profiles = uniqueCostProfiles(localProfiles);
+      saveCostingState();
+      renderCostProfiles();
+    }
+
+    function costTeamEndpoint() {
+      return ["localhost", "127.0.0.1", "::1"].includes(location.hostname)
+        ? "https://tiktok-ops-workbench.pages.dev/api/state"
+        : cloudEndpoint;
+    }
+
+    async function syncLocalCostProfilesToCloud() {
+      const button = document.getElementById("syncCostProfilesCloud");
+      const localProfiles = uniqueCostProfiles(costingState.profiles).map(costProfileForTeam);
+      if (!localProfiles.length) {
+        showToast("当前没有可同步的 SKU 成本档案");
+        return;
+      }
+      button.disabled = true;
+      button.textContent = `正在核对 ${localProfiles.length} 个 SKU`;
+      try {
+        const endpoint = costTeamEndpoint();
+        const currentResponse = await fetch(endpoint, { headers: { "accept": "application/json" } });
+        if (!currentResponse.ok) throw new Error(`云端读取失败（${currentResponse.status}）`);
+        const currentPayload = await currentResponse.json();
+        const remoteProfiles = Array.isArray(currentPayload?.data?.costProfiles) ? currentPayload.data.costProfiles : [];
+        const remoteById = new Map(remoteProfiles.map((item) => [String(item.id), item]));
+        const remoteByIdentity = new Map(remoteProfiles.map((item) => [costProfileIdentity(item), item]));
+        const upserts = localProfiles.map((profile) => {
+          const existing = remoteById.get(String(profile.id)) || remoteByIdentity.get(costProfileIdentity(profile));
+          return existing ? { ...existing, ...profile, id: existing.id } : profile;
+        });
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            version: "v2",
+            patch: { collections: { costProfiles: { upserts, deletes: [] } } }
+          })
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload?.error || `云端保存失败（${response.status}）`);
+        const remoteState = normalizeState(payload.data);
+        state.costProfiles = remoteState.costProfiles;
+        cloudBaseline.costProfiles = structuredClone(remoteState.costProfiles);
+        localStorage.setItem(storeKey, JSON.stringify(state));
+        hydrateCostProfilesFromTeam();
+        button.textContent = `已同步 ${upserts.length} 个 SKU`;
+        showToast(`已将 ${upserts.length} 个 SKU 成本同步到团队云端`);
+      } catch (error) {
+        console.warn("Cost profile cloud sync failed", error);
+        button.textContent = "同步失败，点击重试";
+        showToast(error?.message || "成本档案同步失败，请重试");
+      } finally {
+        button.disabled = false;
+      }
     }
 
     function renderCostHistory() {
@@ -17112,6 +17306,40 @@
       return Object.fromEntries(Object.entries(raw).map(([key, value]) => [key, textKeys.has(key) ? String(value).trim() : costNumber(value)]));
     }
 
+    function clearCostProfileError() {
+      const form = document.getElementById("costProfileForm");
+      const error = document.getElementById("costProfileError");
+      error.textContent = "";
+      error.classList.remove("show");
+      form.querySelectorAll('[aria-invalid="true"]').forEach((field) => field.removeAttribute("aria-invalid"));
+    }
+
+    function validateCostProfileForm() {
+      const form = document.getElementById("costProfileForm");
+      const requiredFields = [
+        { name: "product", label: "产品名称", type: "text" },
+        { name: "sku", label: "SKU / 规格", type: "text" },
+        { name: "price", label: "当前售价", type: "number" },
+        { name: "purchase", label: "采购成本", type: "number" }
+      ];
+      clearCostProfileError();
+      const invalid = requiredFields.find(({ name, type }) => {
+        const field = form.elements[name];
+        const value = String(field.value || "").trim();
+        return !value || (type === "number" && (!Number.isFinite(Number(value)) || Number(value) < 0));
+      });
+      if (!invalid) return true;
+      const field = form.elements[invalid.name];
+      field.setAttribute("aria-invalid", "true");
+      const error = document.getElementById("costProfileError");
+      error.textContent = `还差「${invalid.label}」，填写后即可保存。`;
+      error.classList.add("show");
+      field.focus({ preventScroll: true });
+      field.scrollIntoView({ behavior: "smooth", block: "center" });
+      showToast(error.textContent);
+      return false;
+    }
+
     function resetCostProfileForm() {
       const form = document.getElementById("costProfileForm");
       form.reset();
@@ -17129,6 +17357,7 @@
       form.elements.adCost.value = 0;
       form.elements.effectiveDate.value = today;
       document.getElementById("costProfileMode").textContent = "新建档案";
+      clearCostProfileError();
       renderCostProfileImage("");
     }
 
@@ -17203,43 +17432,101 @@
       const values = costFormValues();
       const result = calculateCost(values);
       const savedAt = new Date().toISOString();
-      costingState.history.unshift({ id: crypto.randomUUID(), savedAt, values, result });
-      saveCostingState();
+      const record = { id: crypto.randomUUID(), savedAt, values, result };
+      costingState.history.unshift(record);
+      if (!saveCostingState()) {
+        costingState.history = costingState.history.filter((item) => item.id !== record.id);
+        return;
+      }
       renderCostHistory();
       showToast("测算方案已保存到本地");
     });
     document.getElementById("resetCostCalculator").addEventListener("click", () => loadCostValues(costDefaultValues));
     document.getElementById("costProfileForm").addEventListener("submit", (event) => {
       event.preventDefault();
+      if (!validateCostProfileForm()) return;
       const values = profileFormValues();
       const existingId = values.profileId;
       const previous = costingState.profiles.find((item) => item.id === existingId) || {};
       const profile = { ...previous, ...values, id: existingId || crypto.randomUUID(), updatedAt: new Date().toISOString() };
       delete profile.profileId;
+      const profilesBeforeSave = [...costingState.profiles];
       const index = costingState.profiles.findIndex((item) => item.id === profile.id);
       if (index >= 0) costingState.profiles[index] = profile;
       else costingState.profiles.unshift(profile);
-      saveCostingState();
+      if (!saveCostingState()) {
+        costingState.profiles = profilesBeforeSave;
+        return;
+      }
+      upsertCostProfileToState(profile);
       renderCostProfiles();
       resetCostProfileForm();
       showToast(existingId ? "SKU 基础成本已更新" : "SKU 基础成本已保存");
     });
+    document.getElementById("syncCostProfilesCloud").addEventListener("click", syncLocalCostProfilesToCloud);
+    document.getElementById("costProfileForm").addEventListener("input", (event) => {
+      if (event.target.matches('[aria-invalid="true"]')) clearCostProfileError();
+    });
     document.getElementById("resetCostProfile").addEventListener("click", resetCostProfileForm);
-    document.getElementById("costProfileImageFile").addEventListener("change", (event) => {
+    function readCostImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("图片读取失败"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadCostImage(source) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("图片格式无法识别"));
+        image.src = source;
+      });
+    }
+
+    async function compressCostImage(file) {
+      const original = await readCostImage(file);
+      const image = await loadCostImage(original);
+      let maxSide = 560;
+      let smallest = original;
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        const ratio = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * ratio));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * ratio));
+        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+        for (const quality of [.78, .64, .5]) {
+          const candidate = canvas.toDataURL("image/webp", quality);
+          if (candidate.length < smallest.length) smallest = candidate;
+          if (candidate.length <= 120000) return candidate;
+        }
+        maxSide = Math.round(maxSide * .78);
+      }
+      if (smallest.length > 220000) throw new Error("图片压缩后仍然过大");
+      return smallest;
+    }
+
+    document.getElementById("costProfileImageFile").addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
-      if (file.size > 1500000) {
+      if (file.size > 10000000) {
         event.target.value = "";
-        showToast("图片请控制在 1.5MB 以内");
+        showToast("原图请控制在 10MB 以内");
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        const source = String(reader.result || "");
+      try {
+        const source = await compressCostImage(file);
         document.querySelector("#costProfileForm [name='image']").value = source;
         renderCostProfileImage(source);
+        showToast(`图片已优化，可正常保存（约 ${Math.max(1, Math.round(source.length * .75 / 1024))}KB）`);
+      } catch (error) {
+        event.target.value = "";
+        document.querySelector("#costProfileForm [name='image']").value = "";
+        renderCostProfileImage("");
+        showToast(error?.message || "图片处理失败，请重新选择");
       };
-      reader.readAsDataURL(file);
     });
     document.querySelectorAll("#costProfileForm input[type='number'], #costCalculatorForm input[type='number']").forEach((input) => {
       input.addEventListener("focus", () => {
@@ -17262,6 +17549,19 @@
       }
     });
     document.querySelectorAll(".cost-subtab").forEach((button) => button.addEventListener("click", () => setCostPane(button.dataset.costPane)));
+    window.addEventListener("storage", (event) => {
+      if (event.key !== costingStoreKey || !event.newValue) return;
+      try {
+        const latest = JSON.parse(event.newValue);
+        costingState = {
+          history: Array.isArray(latest?.history) ? latest.history : [],
+          profiles: Array.isArray(latest?.profiles) ? latest.profiles : []
+        };
+        renderCostHistory();
+      } catch {
+        // Ignore malformed storage events and keep the current in-memory state.
+      }
+    });
     document.addEventListener("click", (event) => {
       const copy = event.target.closest("[data-cost-copy]");
       const editProfile = event.target.closest("[data-cost-profile-edit]");

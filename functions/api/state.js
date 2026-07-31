@@ -1,7 +1,13 @@
-const headers = {
+const baseHeaders = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store"
 };
+
+const allowedOrigins = new Set([
+  "https://tiktok-ops-workbench.pages.dev",
+  "http://127.0.0.1:8792",
+  "http://localhost:8792"
+]);
 
 const arrayKeys = {
   entries: "id",
@@ -13,11 +19,24 @@ const arrayKeys = {
   deletedCreators: "id",
   blanketRemovedCreators: "id",
   headRemovedCreators: "id",
-  creatorHistory: "id"
+  creatorHistory: "id",
+  costProfiles: "id"
 };
 
-function json(status, body) {
-  return new Response(JSON.stringify(body), { status, headers });
+function responseHeaders(request) {
+  const headers = { ...baseHeaders };
+  const origin = request?.headers?.get("origin") || "";
+  if (allowedOrigins.has(origin)) {
+    headers["access-control-allow-origin"] = origin;
+    headers["access-control-allow-methods"] = "GET, POST, OPTIONS";
+    headers["access-control-allow-headers"] = "accept, content-type";
+    headers.vary = "Origin";
+  }
+  return headers;
+}
+
+function json(status, body, request) {
+  return new Response(JSON.stringify(body), { status, headers: responseHeaders(request) });
 }
 
 function normalizeData(data) {
@@ -32,7 +51,8 @@ function normalizeData(data) {
     blanketRemovedCreators: Array.isArray(data?.blanketRemovedCreators) ? data.blanketRemovedCreators : [],
     headRemovedCreators: Array.isArray(data?.headRemovedCreators) ? data.headRemovedCreators : [],
     creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
-    creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : []
+    creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : [],
+    costProfiles: Array.isArray(data?.costProfiles) ? data.costProfiles : []
   };
 }
 
@@ -143,10 +163,10 @@ async function readState(db) {
   };
 }
 
-async function handleGet(env) {
+async function handleGet(request, env) {
   const state = await readState(env.DB);
-  if (!state) return json(200, { version: "v2", updatedAt: null, revision: 0, data: null });
-  return json(200, state);
+  if (!state) return json(200, { version: "v2", updatedAt: null, revision: 0, data: null }, request);
+  return json(200, state, request);
 }
 
 async function handlePost(request, env) {
@@ -154,7 +174,7 @@ async function handlePost(request, env) {
   try {
     payload = await request.json();
   } catch {
-    return json(400, { error: "Invalid JSON payload" });
+    return json(400, { error: "Invalid JSON payload" }, request);
   }
 
   const patch = normalizePatch(payload);
@@ -167,7 +187,7 @@ async function handlePost(request, env) {
         error: guardError,
         retryable: false,
         data: normalizeData(current?.data || null)
-      });
+      }, request);
     }
     const nextData = applyPatch(current?.data || null, patch);
     const updatedAt = new Date().toISOString();
@@ -177,7 +197,7 @@ async function handlePost(request, env) {
         "INSERT OR IGNORE INTO workbench_state (id, version, updated_at, revision, data) VALUES (?, ?, ?, ?, ?)"
       ).bind("main", "v2", updatedAt, 1, JSON.stringify(nextData)).run();
       if (inserted.meta?.changes === 1) {
-        return json(200, { version: "v2", updatedAt, revision: 1, data: nextData });
+        return json(200, { version: "v2", updatedAt, revision: 1, data: nextData }, request);
       }
       await new Promise((resolve) => setTimeout(resolve, Math.min(5 + attempt * 2, 35)));
       continue;
@@ -194,7 +214,7 @@ async function handlePost(request, env) {
         updatedAt,
         revision: nextRevision,
         data: nextData
-      });
+      }, request);
     }
 
     await new Promise((resolve) => setTimeout(resolve, Math.min(5 + attempt * 2, 35)));
@@ -203,11 +223,14 @@ async function handlePost(request, env) {
   return json(409, {
     error: "Concurrent update conflict. Please retry.",
     retryable: true
-  });
+  }, request);
 }
 
 export async function onRequest({ request, env }) {
-  if (request.method === "GET") return handleGet(env);
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: responseHeaders(request) });
+  }
+  if (request.method === "GET") return handleGet(request, env);
   if (request.method === "POST") return handlePost(request, env);
-  return json(405, { error: "Method not allowed" });
+  return json(405, { error: "Method not allowed" }, request);
 }
