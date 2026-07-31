@@ -43,7 +43,9 @@ function normalizePatch(payload) {
     const operations = source?.collections?.[name] || {};
     collections[name] = {
       upserts: Array.isArray(operations.upserts) ? operations.upserts : [],
-      deletes: Array.isArray(operations.deletes) ? operations.deletes.map(String) : []
+      deletes: name === "tasks"
+        ? []
+        : Array.isArray(operations.deletes) ? operations.deletes.map(String) : []
     };
   });
   return {
@@ -89,6 +91,45 @@ function applyPatch(currentData, patch) {
   return next;
 }
 
+function normalizedAuthor(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function reportSlotAuthor(role, author) {
+  return ["售后组", "店铺维护"].includes(role) ? "团队汇总" : normalizedAuthor(author);
+}
+
+function validateGuard(currentData, rawGuard) {
+  const guard = rawGuard && typeof rawGuard === "object" ? rawGuard : null;
+  if (!guard?.type) return "";
+  const current = normalizeData(currentData);
+
+  if (guard.type === "new-report") {
+    const slot = guard.slot || {};
+    const duplicate = current.reports.some((report) =>
+      report.date === slot.date
+      && report.role === slot.role
+      && reportSlotAuthor(report.role, report.author) === reportSlotAuthor(slot.role, slot.author)
+    );
+    return duplicate ? "云端已经存在这份日报，请刷新后编辑" : "";
+  }
+
+  if (guard.type === "edit-report") {
+    const report = current.reports.find((item) => item.id === guard.reportId);
+    if (!report) return "云端未找到原日报，请刷新后重新操作";
+    if (String(report.updatedAt || "") !== String(guard.expectedUpdatedAt || "")) {
+      return "云端日报已经更新，旧页面不能覆盖新内容";
+    }
+    const expectedTasks = new Map((guard.taskSnapshots || []).map((item) => [String(item.id), String(item.snapshot || "")]));
+    const currentTasks = current.tasks.filter((task) => task.sourceReport === guard.reportId);
+    if (currentTasks.length !== expectedTasks.size) return "关联任务数量已经变化，旧页面不能覆盖新状态";
+    const changedTask = currentTasks.some((task) => expectedTasks.get(String(task.id)) !== JSON.stringify(task));
+    return changedTask ? "关联任务已经更新，旧页面不能覆盖新状态" : "";
+  }
+
+  return "不支持的保存校验类型";
+}
+
 async function readState(db) {
   const row = await db.prepare(
     "SELECT version, updated_at, revision, data FROM workbench_state WHERE id = ?"
@@ -120,6 +161,14 @@ async function handlePost(request, env) {
   const maxAttempts = 24;
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const current = await readState(env.DB);
+    const guardError = validateGuard(current?.data || null, payload?.guard);
+    if (guardError) {
+      return json(409, {
+        error: guardError,
+        retryable: false,
+        data: normalizeData(current?.data || null)
+      });
+    }
     const nextData = applyPatch(current?.data || null, patch);
     const updatedAt = new Date().toISOString();
 
