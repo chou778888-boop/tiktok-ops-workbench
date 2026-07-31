@@ -25,10 +25,13 @@ const arrayKeys = {
 
 const maxCostImageLength = 220000;
 const costImagePattern = /^data:image\/(?:png|jpe?g|webp);base64,/i;
+const costImageUrlPattern = /^(?:https:\/\/tiktok-ops-workbench\.pages\.dev)?\/api\/cost-image\?id=[a-f0-9]{64}$/i;
 
 function validCostImage(value) {
   const image = String(value || "");
-  return !image || (image.length <= maxCostImageLength && costImagePattern.test(image));
+  return !image
+    || costImageUrlPattern.test(image)
+    || (image.length <= maxCostImageLength && costImagePattern.test(image));
 }
 
 function responseHeaders(request) {

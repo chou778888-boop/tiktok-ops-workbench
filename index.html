@@ -16852,13 +16852,20 @@
       return `${String(profile?.product || "").trim().toLowerCase()}::${String(profile?.sku || "").trim().toLowerCase()}`;
     }
 
-    function cloudCostImage(source) {
+    function inlineCostImage(source) {
       const image = String(source || "");
       if (!/^data:image\/(?:png|jpe?g|webp);base64,/i.test(image)) return "";
       return image.length <= 220000 ? image : "";
     }
 
-    function costProfileForTeam(profile) {
+    function cloudCostImageReference(source) {
+      const image = String(source || "");
+      return /^(?:https:\/\/tiktok-ops-workbench\.pages\.dev)?\/api\/cost-image\?id=[a-f0-9]{64}$/i.test(image)
+        ? image
+        : "";
+    }
+
+    function costProfileForTeam(profile, { includeInlineImage = false } = {}) {
       const clean = {
         id: String(profile?.id || crypto.randomUUID()),
         product: String(profile?.product || "").trim(),
@@ -16866,7 +16873,8 @@
         effectiveDate: String(profile?.effectiveDate || ""),
         note: String(profile?.note || "").trim(),
         channel: String(profile?.channel || "affiliate"),
-        image: cloudCostImage(profile?.image),
+        image: cloudCostImageReference(profile?.image)
+          || (includeInlineImage ? inlineCostImage(profile?.image) : ""),
         updatedAt: String(profile?.updatedAt || new Date().toISOString())
       };
       costProfileNumericKeys.forEach((key) => { clean[key] = costNumber(profile?.[key]); });
@@ -16893,7 +16901,11 @@
         item.id === teamProfile.id || costProfileIdentity(item) === identity
       );
       if (existingIndex >= 0) {
+        const previousImage = state.costProfiles[existingIndex]?.image || "";
         teamProfile.id = state.costProfiles[existingIndex].id || teamProfile.id;
+        teamProfile.image = cloudCostImageReference(teamProfile.image)
+          || cloudCostImageReference(previousImage)
+          || "";
         state.costProfiles[existingIndex] = teamProfile;
       } else {
         state.costProfiles.unshift(teamProfile);
@@ -16918,9 +16930,8 @@
           localProfiles[index] = teamIsNewer
             ? { ...local, ...teamProfile, image }
             : { ...local, image };
-          if (!teamProfile.image && local.image) {
-            teamProfile.image = cloudCostImage(local.image);
-            if (teamProfile.image) pendingImageCount += 1;
+          if (!cloudCostImageReference(teamProfile.image) && inlineCostImage(local.image)) {
+            pendingImageCount += 1;
           }
         } else {
           localProfiles.push({ ...teamProfile, image: teamProfile.image || "" });
@@ -16928,15 +16939,11 @@
       });
       costingState.profiles = uniqueCostProfiles(localProfiles);
       saveCostingState();
-      if (pendingImageCount) {
-        localStorage.setItem(storeKey, JSON.stringify(state));
-        scheduleCloudSave();
-      }
       renderCostProfiles();
-      const cloudImageCount = teamProfiles.filter((profile) => cloudCostImage(profile?.image)).length;
+      const cloudImageCount = teamProfiles.filter((profile) => cloudCostImageReference(profile?.image)).length;
       setCostCloudSyncStatus(
         pendingImageCount
-          ? `正在补同步 ${pendingImageCount} 张图片…`
+          ? `本地有 ${pendingImageCount} 个 SKU 图片待同步`
           : `云端 ${teamProfiles.length} 个 SKU · ${cloudImageCount} 张图片`,
         pendingImageCount ? "saving" : "success"
       );
@@ -16948,6 +16955,29 @@
         : cloudEndpoint;
     }
 
+    function costImageEndpoint() {
+      return costTeamEndpoint().replace(/\/state$/, "/cost-image");
+    }
+
+    async function costImageHash(source) {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(source));
+      return [...new Uint8Array(digest)]
+        .map((value) => value.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    async function uploadCostImage(source) {
+      const id = await costImageHash(source);
+      const response = await fetch(costImageEndpoint(), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id, image: source })
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload?.error || `图片上传失败（${response.status}）`);
+      return payload.url;
+    }
+
     function setCostCloudSyncStatus(text, mode = "") {
       const status = document.getElementById("costCloudSyncStatus");
       if (!status) return;
@@ -16957,7 +16987,8 @@
 
     async function syncLocalCostProfilesToCloud() {
       const button = document.getElementById("syncCostProfilesCloud");
-      const localProfiles = uniqueCostProfiles(costingState.profiles).map(costProfileForTeam);
+      const localProfiles = uniqueCostProfiles(costingState.profiles)
+        .map((profile) => costProfileForTeam(profile, { includeInlineImage: true }));
       if (!localProfiles.length) {
         showToast("当前没有可同步的 SKU 成本档案");
         return;
@@ -16966,6 +16997,19 @@
       setCostCloudSyncStatus(`正在同步 ${localProfiles.length} 个 SKU…`, "saving");
       try {
         const endpoint = costTeamEndpoint();
+        const inlineImages = [...new Set(
+          localProfiles.map((profile) => inlineCostImage(profile.image)).filter(Boolean)
+        )];
+        const uploadedImages = new Map();
+        for (let index = 0; index < inlineImages.length; index += 1) {
+          setCostCloudSyncStatus(`正在上传图片 ${index + 1}/${inlineImages.length}…`, "saving");
+          uploadedImages.set(inlineImages[index], await uploadCostImage(inlineImages[index]));
+        }
+        localProfiles.forEach((profile) => {
+          const inlineImage = inlineCostImage(profile.image);
+          if (inlineImage) profile.image = uploadedImages.get(inlineImage) || "";
+        });
+        setCostCloudSyncStatus(`正在同步 ${localProfiles.length} 个 SKU 成本…`, "saving");
         const currentResponse = await fetch(endpoint, { headers: { "accept": "application/json" } });
         if (!currentResponse.ok) throw new Error(`云端读取失败（${currentResponse.status}）`);
         const currentPayload = await currentResponse.json();
@@ -16993,7 +17037,7 @@
           upserts.filter((profile) => profile.image).map((profile) => String(profile.id))
         );
         const confirmedImageCount = remoteState.costProfiles.filter((profile) =>
-          expectedImageIds.has(String(profile.id)) && cloudCostImage(profile.image)
+          expectedImageIds.has(String(profile.id)) && cloudCostImageReference(profile.image)
         ).length;
         if (confirmedImageCount !== expectedImageIds.size) {
           throw new Error("云端未完整收到 SKU 图片，请重新同步");
@@ -17004,8 +17048,9 @@
         localStorage.setItem(storeKey, JSON.stringify(state));
         hydrateCostProfilesFromTeam();
         const imageCount = upserts.filter((profile) => profile.image).length;
-        setCostCloudSyncStatus(`已同步 ${upserts.length} 个 SKU${imageCount ? ` · ${imageCount} 张图片` : ""}`, "success");
-        showToast(`已将 ${upserts.length} 个 SKU 成本${imageCount ? `和 ${imageCount} 张图片` : ""}同步到团队云端`);
+        const uniqueImageCount = new Set(upserts.map((profile) => profile.image).filter(Boolean)).size;
+        setCostCloudSyncStatus(`已同步 ${upserts.length} 个 SKU${uniqueImageCount ? ` · ${uniqueImageCount} 张图片` : ""}`, "success");
+        showToast(`已同步 ${upserts.length} 个 SKU${uniqueImageCount ? ` · ${uniqueImageCount} 张图片覆盖 ${imageCount} 个规格` : ""}`);
       } catch (error) {
         console.warn("Cost profile cloud sync failed", error);
         setCostCloudSyncStatus("同步失败，请重试", "error");
