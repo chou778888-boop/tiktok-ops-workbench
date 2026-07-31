@@ -3009,12 +3009,18 @@
       justify-content: space-between;
       gap: 14px;
     }
-    .cost-hero h1 { margin: 8px 0 7px; max-width: 760px; font-size: clamp(27px, 3vw, 43px); letter-spacing: -.035em; }
+    .cost-hero h1 { margin: 8px 0 7px; max-width: none; font-size: clamp(22px, 2.55vw, 40px); letter-spacing: -.035em; white-space: nowrap; }
     .cost-hero p { margin: 0; max-width: 980px; color: rgba(255,255,255,.65); line-height: 1.7; text-wrap: pretty; }
     .cost-nowrap { white-space: nowrap; }
     .cost-kicker { color: #7effc4; font-size: 12px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
     .cost-local-badge { padding: 8px 11px; border: 1px solid rgba(126,255,196,.28); border-radius: 999px; color: #baffdc; background: rgba(126,255,196,.08); font-size: 12px; font-weight: 750; }
+    .cost-sync-copy { flex: 0 0 auto; color: rgba(255,255,255,.62); font-size: 12px; font-weight: 700; white-space: nowrap; }
     .cost-profile-head-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+    .cost-cloud-sync-status { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .cost-cloud-sync-status::before { content: " · "; color: #a9afb6; }
+    .cost-cloud-sync-status.success { color: #16825a; }
+    .cost-cloud-sync-status.error { color: #c74444; }
+    .cost-cloud-sync-status.saving { color: #a56505; }
     .cost-cloud-sync-btn {
       min-height: 34px;
       padding: 7px 11px;
@@ -3183,7 +3189,8 @@
     }
     @media (max-width: 680px) {
       .cost-hero, .cost-card { padding: 18px; border-radius: 20px; }
-      .cost-hero-top { align-items: flex-start; }
+      .cost-hero-top { align-items: flex-start; flex-direction: column; }
+      .cost-hero h1 { font-size: clamp(16px, 4.35vw, 22px); }
       .cost-grid, .cost-grid.two, .cost-scenario-grid { grid-template-columns: 1fr; }
       .cost-profit { font-size: 36px; }
       .cost-kpis { grid-template-columns: repeat(2, 1fr); }
@@ -8658,11 +8665,12 @@
     }
 
     body.workbench-entered .sync-pill {
-      width: 40px;
-      padding: 0;
-      overflow: hidden;
-      color: transparent;
-      font-size: 0;
+      width: auto;
+      min-width: 118px;
+      padding: 0 12px;
+      overflow: visible;
+      color: #18885a;
+      font-size: 11px;
     }
 
     body.workbench-entered .sync-pill::before {
@@ -9124,7 +9132,7 @@
         <button class="tab" data-view="sop" type="button">运营学院</button>
       </nav>
       <div class="top-actions">
-        <span class="sync-pill local" id="syncStatus">本地模式</span>
+        <span class="sync-pill local" id="syncStatus" role="status" aria-live="polite">本地预览</span>
         <div class="data-menu">
           <button class="ghost data-menu-trigger" type="button">数据管理</button>
           <div class="data-menu-panel">
@@ -9526,7 +9534,7 @@
                 <h1>先算清楚，再决定卖多少钱、投多少、佣金开多少。</h1>
                 <p>面向 TikTok 多店铺运营的单 SKU 利润决策工具。把采购、物流、平台、达人、广告和退货成本放进<span class="cost-nowrap">同一套口径。</span></p>
               </div>
-              <span class="cost-local-badge">成本档案团队同步 · 图片仅本地</span>
+              <span class="cost-sync-copy">团队云端已启用</span>
             </div>
           </div>
 
@@ -9559,7 +9567,7 @@
                       <label>SKU 图片</label>
                       <input id="costProfileImageFile" type="file" accept="image/png,image/jpeg,image/webp" />
                       <input name="image" type="hidden" />
-                      <p>支持 JPG、PNG、WebP。图片仅随本地 SKU 档案保存，不上传到团队云端。</p>
+                      <p>支持 JPG、PNG、WebP。保存时自动压缩，成本档案同步时一并上传团队云端。</p>
                     </div>
                   </div>
                 </div>
@@ -9603,10 +9611,13 @@
               </form>
               <div class="cost-card">
                 <div class="cost-section-head">
-                  <div><h2>已录入 SKU</h2><p class="sub">成本文字与数值同步团队云端；SKU 图片只保留在当前设备。</p></div>
+                  <div>
+                    <h2>已录入 SKU</h2>
+                    <p class="sub">成本文字、数值和压缩后的 SKU 图片均同步到团队云端。<span class="cost-cloud-sync-status" id="costCloudSyncStatus" aria-live="polite">等待同步</span></p>
+                  </div>
                   <div class="cost-profile-head-actions">
                     <span class="badge blue" id="costProfileCount">0 个 SKU</span>
-                    <button class="cost-cloud-sync-btn" id="syncCostProfilesCloud" type="button">同步到团队云端</button>
+                    <button class="cost-cloud-sync-btn" id="syncCostProfilesCloud" type="button">同步到云端</button>
                   </div>
                 </div>
                 <div id="costProfileList"></div>
@@ -12064,12 +12075,20 @@
     function setSyncStatus(text, mode = "") {
       const el = document.getElementById("syncStatus");
       if (!el) return;
-      el.textContent = text;
+      const explicitText = text === "已同步"
+        ? "团队云端已同步"
+        : text === "保存中"
+          ? "正在同步团队云端"
+          : text === "连接云端"
+            ? "正在连接团队云端"
+            : text;
+      el.textContent = explicitText;
+      el.setAttribute("aria-label", explicitText);
       el.className = `sync-pill ${mode}`.trim();
       if (lastReportReceipt) {
         lastReportReceipt.cloudStatus = mode === "error"
           ? "云端同步失败，请重试"
-          : mode === "saving" ? text : text === "已同步" ? "云端已同步" : text;
+          : mode === "saving" ? explicitText : text === "已同步" ? "云端已同步" : explicitText;
         renderReportSaveReceipt();
       }
     }
@@ -17148,6 +17167,12 @@
       return `${String(profile?.product || "").trim().toLowerCase()}::${String(profile?.sku || "").trim().toLowerCase()}`;
     }
 
+    function cloudCostImage(source) {
+      const image = String(source || "");
+      if (!/^data:image\/(?:png|jpe?g|webp);base64,/i.test(image)) return "";
+      return image.length <= 180000 ? image : "";
+    }
+
     function costProfileForTeam(profile) {
       const clean = {
         id: String(profile?.id || crypto.randomUUID()),
@@ -17156,6 +17181,7 @@
         effectiveDate: String(profile?.effectiveDate || ""),
         note: String(profile?.note || "").trim(),
         channel: String(profile?.channel || "affiliate"),
+        image: cloudCostImage(profile?.image),
         updatedAt: String(profile?.updatedAt || new Date().toISOString())
       };
       costProfileNumericKeys.forEach((key) => { clean[key] = costNumber(profile?.[key]); });
@@ -17203,21 +17229,29 @@
           const local = localProfiles[index];
           const teamIsNewer = new Date(teamProfile.updatedAt || 0) >= new Date(local.updatedAt || 0);
           localProfiles[index] = teamIsNewer
-            ? { ...local, ...teamProfile, image: local.image || "" }
+            ? { ...local, ...teamProfile, image: local.image || teamProfile.image || "" }
             : local;
         } else {
-          localProfiles.push({ ...teamProfile, image: "" });
+          localProfiles.push({ ...teamProfile, image: teamProfile.image || "" });
         }
       });
       costingState.profiles = uniqueCostProfiles(localProfiles);
       saveCostingState();
       renderCostProfiles();
+      setCostCloudSyncStatus(`云端已有 ${teamProfiles.length} 个 SKU`, "success");
     }
 
     function costTeamEndpoint() {
       return ["localhost", "127.0.0.1", "::1"].includes(location.hostname)
         ? "https://tiktok-ops-workbench.pages.dev/api/state"
         : cloudEndpoint;
+    }
+
+    function setCostCloudSyncStatus(text, mode = "") {
+      const status = document.getElementById("costCloudSyncStatus");
+      if (!status) return;
+      status.textContent = text;
+      status.className = `cost-cloud-sync-status ${mode}`.trim();
     }
 
     async function syncLocalCostProfilesToCloud() {
@@ -17228,7 +17262,7 @@
         return;
       }
       button.disabled = true;
-      button.textContent = `正在核对 ${localProfiles.length} 个 SKU`;
+      setCostCloudSyncStatus(`正在同步 ${localProfiles.length} 个 SKU…`, "saving");
       try {
         const endpoint = costTeamEndpoint();
         const currentResponse = await fetch(endpoint, { headers: { "accept": "application/json" } });
@@ -17256,11 +17290,12 @@
         cloudBaseline.costProfiles = structuredClone(remoteState.costProfiles);
         localStorage.setItem(storeKey, JSON.stringify(state));
         hydrateCostProfilesFromTeam();
-        button.textContent = `已同步 ${upserts.length} 个 SKU`;
-        showToast(`已将 ${upserts.length} 个 SKU 成本同步到团队云端`);
+        const imageCount = upserts.filter((profile) => profile.image).length;
+        setCostCloudSyncStatus(`已同步 ${upserts.length} 个 SKU${imageCount ? ` · ${imageCount} 张图片` : ""}`, "success");
+        showToast(`已将 ${upserts.length} 个 SKU 成本${imageCount ? `和 ${imageCount} 张图片` : ""}同步到团队云端`);
       } catch (error) {
         console.warn("Cost profile cloud sync failed", error);
-        button.textContent = "同步失败，点击重试";
+        setCostCloudSyncStatus("同步失败，请重试", "error");
         showToast(error?.message || "成本档案同步失败，请重试");
       } finally {
         button.disabled = false;
