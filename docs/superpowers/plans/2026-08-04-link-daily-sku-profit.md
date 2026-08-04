@@ -10,6 +10,10 @@
 
 ## Global Constraints
 
+- 所有设计先从整个工作台的信息架构、业务闭环和长期影响做客观分析，不机械照搬局部话术。
+- 所有交互以团队实际使用方便、减少步骤和提高效率为前提；排版精美整齐，不出现孤字、缺字或不合理换行，表格上下左右正确对齐。
+- 所有代码保持模块边界清晰、命名一致、纯函数可测试并方便持续调整优化。
+- 用户意图、业务口径或全局影响存在会改变方案的歧义时，先逐个确认关键问题，真正理解后再实施。
 - 本轮是演示模板：不调用 `saveState()`、`fetch()`、`localStorage`、`sessionStorage` 或 D1。
 - 不导入《利润 new.xlsx》数据；只复用其业务结构和计算口径。
 - 示例链接固定覆盖 JZZ、JDZ、NHZ、YG、ZG、YT，并生成最近 30 天虚拟数据。
@@ -26,7 +30,7 @@
 
 - `src/app/workbench/65-profit-template.js`：演示数据工厂、日期工具、利润计算、运营信号、页面状态、HTML 渲染和事件绑定。
 - `src/styles/modules/18-profit-template.css`：链接日报、7 天矩阵、结算条、全链接一览、管理抽屉和移动端卡片样式。
-- `index.html`：保留利润模板挂载点和两个表单，给 SKU 表单补充可选寄样成本字段。
+- `index.html`：将顶部“成本测算”命名为“利润与成本”，把“链接利润”设为该模块首个默认页签，保留利润模板挂载点和两个表单，并给 SKU 表单补充可选寄样成本字段。
 - `scripts/test-profit-template.mjs`：纯函数、隔离约束、HTML 契约、CSS 响应式和模块清单测试。
 
 ### Task 1: 建立链接日报数据模型与利润计算
@@ -279,11 +283,15 @@ Expected: FAIL on the missing all-list summary and management markup.
 
 Aggregate the selected date into top totals and one row per active link with `units`, `gmv`, `grossProfit`, `sampleCost`, `marketingSpend`, `netProfit`, and `margin`. Clicking a row sets `activeListingId`, switches `view` to `daily`, and rerenders.
 
-- [ ] **Step 4: Implement the management drawer**
+- [ ] **Step 4: Promote profit entry to the first view in the combined module**
+
+Rename the top navigation label from “成本测算” to “利润与成本”. In the module header use “利润与成本工作台”, order the subtabs as “链接利润 / 成本档案 / 新 SKU 测算 / 测算历史”, and make `profit-template` the initial active pane when the user enters this module. Keep all existing costing pane IDs and behavior unchanged.
+
+- [ ] **Step 5: Implement the management drawer**
 
 Render a right-side drawer listing the active link metadata, sample types and all SKUs. Keep “新增商品链接” and “新增 SKU” connected to the existing dialogs. Move stop/restore controls into this drawer and preserve historical daily records when toggling a SKU.
 
-- [ ] **Step 5: Extend SKU creation for sample cost**
+- [ ] **Step 6: Extend SKU creation for sample cost**
 
 Add the field:
 
@@ -293,13 +301,13 @@ Add the field:
 
 When `sampleUnitCost > 0`, add a sample type `{ id, name: values.name, unitCost }` linked to the new SKU. New links begin with an empty SKU and sample-type list.
 
-- [ ] **Step 6: Run the focused test**
+- [ ] **Step 7: Run the focused test**
 
 Run: `node scripts/test-profit-template.mjs`
 
 Expected: all-link aggregation, dialog validation, management and no-persistence assertions PASS.
 
-- [ ] **Step 7: Commit overview and management**
+- [ ] **Step 8: Commit overview and management**
 
 ```bash
 git add index.html scripts/test-profit-template.mjs src/app/workbench/65-profit-template.js
@@ -414,4 +422,3 @@ Open `http://127.0.0.1:8797/`, enter 成本测算 → 利润中心, and verify:
 Run: `git diff -- index.html scripts/test-profit-template.mjs src/app/workbench/65-profit-template.js src/styles/modules/18-profit-template.css`
 
 Expected: diff contains only the approved profit-template redesign and the SKU form field; unrelated pre-existing dirty files remain untouched.
-
