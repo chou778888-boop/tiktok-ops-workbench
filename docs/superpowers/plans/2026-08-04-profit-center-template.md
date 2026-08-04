@@ -104,26 +104,39 @@ git commit -m "test: define profit center template shell"
 
 **Interfaces:**
 - Consumes: `escapeHtml()`, `showToast()`, and Costing subtab switching from earlier workbench modules; DOM hooks from Task 1.
-- Produces: `createProfitTemplateData()`, `calculateProfitTemplateSku(sku)`, `profitTemplateSummary(listings)`, `renderProfitTemplate()`, and event handlers scoped to `#profitTemplateRoot` and the two template dialogs.
+- Produces: `createProfitTemplateData()`, `calculateProfitTemplateSku(sku)`, `profitTemplateSummary(listings)`, `validateProfitTemplateLink(values)`, `validateProfitTemplateSku(values)`, `toggleProfitTemplateSku(listings, skuId)`, `renderProfitTemplate()`, and event handlers scoped to `#profitTemplateRoot` and the two template dialogs.
 
-- [ ] **Step 1: Extend the contract test for isolation and behavior**
+- [ ] **Step 1: Extend the test to execute the real model behavior**
 
-Read `src/app/workbench/65-profit-template.js` and `scripts/app-sources.mjs`. Assert that:
+Load `src/app/workbench/65-profit-template.js` through `node:vm` without a DOM so the real pure functions run without starting browser rendering. Use hand-derived fixtures:
 
 ```js
-assert.match(appManifest, /src\/app\/workbench\/65-profit-template\.js/);
-for (const name of [
-  "createProfitTemplateData",
-  "calculateProfitTemplateSku",
-  "profitTemplateSummary",
-  "renderProfitTemplate",
-  "toggleProfitTemplateSku"
-]) assert.match(source, new RegExp(`function ${name}\\(`));
-assert.doesNotMatch(source, /\bsaveState\s*\(|\blocalStorage\b|\bsessionStorage\b|\bfetch\s*\(/);
-assert.match(source, /\.showModal\(\)/);
-assert.match(source, /data-profit-add-sku/);
-assert.match(source, /data-profit-toggle-sku/);
+const sku = { units: 10, price: 20, cost: 12, commissionRate: 20, sampleCost: 5, adSpend: 10, active: true };
+assert.deepEqual(plain(calculateProfitTemplateSku(sku)), {
+  gmv: 200,
+  unitProfit: 4,
+  actualProfit: 25,
+  margin: 0.125
+});
+
+const listings = [{ id: "listing-a", skus: [
+  { id: "active", units: 10, price: 20, cost: 12, commissionRate: 20, sampleCost: 5, adSpend: 10, active: true },
+  { id: "inactive", units: 99, price: 99, cost: 0, commissionRate: 0, sampleCost: 0, adSpend: 0, active: false }
+] }];
+assert.deepEqual(plain(profitTemplateSummary(listings)), {
+  units: 10,
+  gmv: 200,
+  sampleCost: 5,
+  adSpend: 10,
+  actualProfit: 25,
+  margin: 0.125
+});
+assert.equal(toggleProfitTemplateSku(listings, "active"), false);
+assert.equal(listings[0].skus.length, 2);
+assert.equal(toggleProfitTemplateSku(listings, "active"), true);
 ```
+
+Test validation with literal outcomes: empty store/product, `ftp:` URL, negative price/cost, and commission rates below 0 or above 100 must produce an error; a complete `https:` link and a non-negative SKU must return an empty string. Also assert the app manifest includes `65-profit-template.js` and the module source does not contain persistence calls.
 
 - [ ] **Step 2: Run the extended test to verify it fails**
 
@@ -133,7 +146,7 @@ Expected: FAIL because `65-profit-template.js` and its functions do not exist.
 
 - [ ] **Step 3: Create deterministic example data and pure calculations**
 
-Implement `createProfitTemplateData()` returning three listings for DreamWeave/JZZ, Dreamdaily/JDZ, and Himood Smile/牙贴. Each listing has:
+Implement the functions at top level and guard browser initialization with `if (typeof document !== "undefined")`, allowing the same production code to run inside the Node test. `createProfitTemplateData()` returns three listings for DreamWeave/JZZ, Dreamdaily/JDZ, and Himood Smile/牙贴. Each listing has:
 
 ```js
 {
@@ -153,7 +166,7 @@ function calculateProfitTemplateSku(sku) {
 }
 ```
 
-`profitTemplateSummary()` flattens active SKUs and returns units, GMV, sample cost, ad spend, actual profit, and margin.
+`profitTemplateSummary()` flattens active SKUs and returns units, GMV, sample cost, ad spend, actual profit, and margin. `toggleProfitTemplateSku()` toggles a matching record in place, returns the new active state, and never removes the SKU. The two validation functions return an empty string for valid input or one user-facing error message for the first invalid field.
 
 - [ ] **Step 4: Render the four visual layers**
 
