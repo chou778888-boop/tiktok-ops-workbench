@@ -1027,6 +1027,81 @@ body.workbench-entered #overview .overview-attribution-panel {
   background: rgba(255, 255, 255, 0.88);
 }
 
+body.workbench-entered #overview .overview-analysis-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(420px, 0.96fr);
+  align-items: stretch;
+  gap: 12px;
+  padding: 12px;
+}
+
+body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-analysis-switch {
+  display: none;
+}
+
+body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-analysis-mode-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(18, 32, 27, 0.08);
+  border-radius: 16px;
+  background: rgba(250, 252, 250, 0.86);
+}
+
+body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-attribution-grid {
+  grid-template-columns: 1fr;
+  height: 100%;
+  padding: 0;
+}
+
+body.workbench-entered #overview .overview-dimension-meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  color: var(--color-brand-ink);
+  text-align: right;
+}
+
+body.workbench-entered #overview .overview-dimension-meta > strong {
+  min-width: 0;
+  color: var(--color-brand-ink);
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 720;
+  overflow-wrap: anywhere;
+}
+
+body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-source-panel,
+body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-profit-focus {
+  min-height: 0;
+  border-top: 1px solid rgba(18, 32, 27, 0.08);
+  border-left: 0;
+}
+
+@media (min-width: 1180px) {
+  body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension #gmvTrendChart {
+    height: 228px;
+  }
+
+  body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension #overviewPulseChart {
+    height: 190px;
+  }
+
+  body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension #sourceLegend {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-link-ledger {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-pulse-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 body.workbench-entered #overview .overview-attribution-head {
   align-items: center;
 }
@@ -1421,6 +1496,25 @@ body.workbench-entered #overview .empty {
   body.workbench-entered #overview .overview-trend-panel { padding: 4px 4px 14px; }
   body.workbench-entered #overview .overview-source-panel { border-top: 1px solid rgba(18, 32, 27, 0.08); border-left: 0; }
   body.workbench-entered #overview #sourceLegend { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1179px) {
+  body.workbench-entered #overview .overview-analysis-panels {
+    grid-template-columns: 1fr;
+    padding: 0;
+  }
+
+  body.workbench-entered #overview .overview-analysis-mode-panel {
+    min-width: 0;
+  }
+
+  body.workbench-entered #overview .overview-link-analysis .overview-attribution-grid {
+    grid-template-columns: 1fr;
+  }
+
+  body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-analysis-switch {
+    display: inline-grid;
+  }
 }
 
 @media (max-width: 760px) {
