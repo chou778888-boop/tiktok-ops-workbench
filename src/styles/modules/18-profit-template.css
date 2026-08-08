@@ -9,19 +9,28 @@
 }
 
 .profit-template-shell {
-  --profit-ink: #171a1f;
-  --profit-muted: #727983;
-  --profit-line: #e3e6e8;
-  --profit-soft: #f6f7f7;
-  --profit-green: #167651;
-  --profit-green-soft: #edf8f2;
-  --profit-red: #bd4444;
-  --profit-red-soft: #fff2f1;
-  --profit-amber: #9a6518;
-  --profit-amber-soft: #fff7e9;
+  --profit-ink: #14231d;
+  --profit-ink-green: #12372b;
+  --profit-muted: #66736d;
+  --profit-line: #dce4df;
+  --profit-line-strong: #c8d5ce;
+  --profit-soft: #f2f5f3;
+  --profit-surface: #ffffff;
+  --profit-surface-raised: #f7faf8;
+  --profit-green: #0b6b45;
+  --profit-green-soft: #e7f3ed;
+  --profit-red: #b83f46;
+  --profit-red-soft: #fff0f0;
+  --profit-amber: #93601b;
+  --profit-amber-soft: #fff5e3;
+  --profit-shadow-sm: 0 10px 28px rgba(25, 49, 39, .07);
+  --profit-shadow-md: 0 22px 55px rgba(19, 48, 36, .13);
   display: grid;
   gap: 16px;
+  padding: 18px;
+  border-radius: 24px;
   color: var(--profit-ink);
+  background: #eef1ef;
   font-variant-numeric: tabular-nums;
 }
 
@@ -32,18 +41,19 @@
   gap: 24px;
   min-width: 0;
   padding: 22px 24px;
-  border: 1px solid var(--profit-line);
-  border-radius: 22px;
-  background: rgba(255, 255, 255, .9);
-  box-shadow: 0 12px 34px rgba(18, 22, 30, .045);
+  border: 0;
+  border-radius: 18px;
+  color: #f7fbf9;
+  background: var(--profit-ink-green);
+  box-shadow: var(--profit-shadow-md);
 }
 
 .profit-workspace-title { min-width: 240px; }
 .profit-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
-.profit-eyebrow span { color: #356856; font-size: 10px; font-weight: 850; letter-spacing: .1em; }
-.profit-eyebrow em { padding-left: 10px; border-left: 1px solid #dfe4e1; color: #8b918e; font-size: 9px; font-style: normal; font-weight: 720; white-space: nowrap; }
+.profit-eyebrow span { color: #b8d8c8; font-size: 10px; font-weight: 820; letter-spacing: .06em; }
+.profit-eyebrow em { padding-left: 10px; border-left: 1px solid rgba(220, 238, 229, .24); color: #95b2a4; font-size: 9px; font-style: normal; font-weight: 700; white-space: nowrap; }
 .profit-workspace-title h2 { margin: 0; font-size: clamp(20px, 2vw, 28px); letter-spacing: -.03em; line-height: 1.2; }
-.profit-workspace-title p { max-width: 680px; margin: 7px 0 0; color: var(--profit-muted); font-size: 12px; line-height: 1.6; text-wrap: pretty; }
+.profit-workspace-title p { max-width: 680px; margin: 7px 0 0; color: #b9cbc2; font-size: 12px; line-height: 1.6; text-wrap: pretty; }
 
 .profit-head-controls {
   display: flex;
@@ -54,7 +64,7 @@
 }
 
 .profit-head-controls label { display: grid; gap: 5px; min-width: 130px; }
-.profit-head-controls label > span { color: #727983; font-size: 9px; font-weight: 760; white-space: nowrap; }
+.profit-head-controls label > span { color: #bad0c5; font-size: 9px; font-weight: 760; white-space: nowrap; }
 .profit-head-controls input,
 .profit-head-controls select {
   width: 100%;
@@ -91,7 +101,34 @@
   white-space: nowrap;
 }
 
-.profit-primary-action { min-height: 38px; padding-inline: 14px; }
+.profit-primary-action { min-height: 38px; padding-inline: 14px; border-color: #f5faf7 !important; color: var(--profit-ink-green) !important; background: #f5faf7 !important; box-shadow: 0 8px 22px rgba(2, 19, 12, .18); }
+
+.profit-sync-card {
+  display: grid;
+  grid-template-columns: 42px minmax(240px, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 14px 18px;
+  border: 1px solid #dce5e0;
+  border-radius: 16px;
+  background: #f8fbf9;
+}
+
+.profit-sync-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; background: #e4f3eb; }
+.profit-sync-icon i { position: relative; width: 16px; height: 16px; border: 2px solid #2d7957; border-left-color: transparent; border-radius: 50%; }
+.profit-sync-icon i::after { position: absolute; right: -3px; bottom: -2px; width: 5px; height: 5px; border-radius: 50%; background: #35a875; content: ""; }
+.profit-sync-copy { min-width: 0; }
+.profit-sync-copy span,
+.profit-sync-copy b,
+.profit-sync-copy small { display: block; }
+.profit-sync-copy span { color: #5d7469; font-size: 9px; font-weight: 820; letter-spacing: .05em; }
+.profit-sync-copy b { margin-top: 3px; overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.profit-sync-copy small { margin-top: 4px; color: #7e8883; font-size: 8px; white-space: nowrap; }
+.profit-sync-times { display: grid; gap: 5px; padding-inline: 14px; border-inline: 1px solid #dfe6e2; }
+.profit-sync-times span { display: flex; justify-content: space-between; gap: 14px; color: #818a85; font-size: 8px; white-space: nowrap; }
+.profit-sync-times b { color: #46554e; font-size: 9px; }
+.profit-sync-card > button { min-height: 34px; padding: 7px 11px; border: 1px solid #cbdad2; border-radius: 9px; color: #2d654b; background: #fff; font-size: 9px; font-weight: 780; white-space: nowrap; }
 
 .profit-overview-layout {
   display: grid;
@@ -107,9 +144,10 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   overflow: hidden;
-  border: 1px solid var(--profit-line);
-  border-radius: 18px;
-  background: #fff;
+  border: 0;
+  border-radius: 16px;
+  background: var(--profit-surface);
+  box-shadow: var(--profit-shadow-sm);
 }
 
 .profit-metric {
@@ -126,10 +164,13 @@
 .profit-metric > span { color: var(--profit-muted); font-size: 10px; font-weight: 720; white-space: nowrap; }
 .profit-metric > b { margin-top: 7px; font-size: clamp(19px, 2vw, 27px); letter-spacing: -.035em; line-height: 1.1; white-space: nowrap; }
 .profit-metric > small { margin-top: 7px; overflow: hidden; color: #8c9299; font-size: 9px; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
-.profit-metric.featured { background: #f0f8f4; }
-.profit-metric.featured::before { position: absolute; inset: 0 auto 0 0; width: 3px; background: #29a471; content: ""; }
+.profit-metric.featured { color: #f6fbf8; background: var(--profit-ink-green); }
+.profit-metric.featured::before { display: none; }
+.profit-metric.featured > span,
+.profit-metric.featured > small { color: #b7d1c4; }
 .profit-metric.featured > b,
 .positive { color: var(--profit-green) !important; }
+.profit-metric.featured > b { color: #ffffff !important; }
 .profit-metric.negative { background: var(--profit-red-soft); }
 .profit-metric.negative > b,
 .negative { color: var(--profit-red) !important; }
@@ -138,12 +179,16 @@
 .profit-product-section,
 .profit-listing-section,
 .profit-entry-section,
-.profit-expense-section {
+.profit-expense-section,
+.profit-seven-day-section,
+.profit-profit-breakdown,
+.profit-settlement-panel {
   min-width: 0;
   padding: 20px;
-  border: 1px solid var(--profit-line);
-  border-radius: 20px;
-  background: #fff;
+  border: 0;
+  border-radius: 16px;
+  background: var(--profit-surface);
+  box-shadow: var(--profit-shadow-sm);
 }
 
 .profit-block-title {
@@ -156,8 +201,8 @@
 }
 
 .profit-block-title > div { min-width: 0; }
-.profit-block-title > div > span { display: block; margin-bottom: 4px; color: #74817b; font-size: 9px; font-weight: 850; letter-spacing: .08em; }
-.profit-block-title h3 { margin: 0; font-size: 16px; line-height: 1.25; }
+.profit-block-title > div > span { display: none; }
+.profit-block-title h3 { margin: 0; font-size: 18px; letter-spacing: -.02em; line-height: 1.25; }
 .profit-block-title p { margin: 5px 0 0; color: #838a92; font-size: 10px; line-height: 1.5; text-wrap: pretty; }
 .profit-block-title > b { flex: 0 0 auto; min-width: 32px; padding: 7px 9px; border-radius: 9px; color: #5f6864; background: #f0f3f1; font-size: 10px; text-align: center; white-space: nowrap; }
 
@@ -170,11 +215,11 @@
   overscroll-behavior-inline: contain;
 }
 
-.profit-product-table { width: 100%; min-width: 1040px; border-collapse: collapse; }
+.profit-product-table { width: 100%; min-width: 1180px; border-collapse: collapse; }
 .profit-product-table th,
 .profit-product-table td { height: 68px; padding: 10px 11px; border-bottom: 1px solid #eceeef; vertical-align: middle; }
 .profit-product-table th { height: 42px; color: #7b828b; background: #f7f8f8; font-size: 9px; font-weight: 760; text-align: left; white-space: nowrap; }
-.profit-product-table th:nth-child(n+3):nth-child(-n+6) { text-align: right; }
+.profit-product-table th:nth-child(n+3):nth-child(-n+7) { text-align: right; }
 .profit-product-table tbody tr { cursor: pointer; transition: background var(--motion-fast) ease; }
 .profit-product-table tbody tr:last-child td { border-bottom: 0; }
 .profit-product-table tbody tr:hover,
@@ -230,6 +275,17 @@
 .profit-health.pending i { background: #d58b20; }
 .profit-health.critical { color: #993939; background: #ffeded; }
 .profit-health.critical i { background: #d55454; }
+.profit-health.processing { color: #4f648a; background: #edf2fb; }
+.profit-health.processing i { background: #7089bf; }
+
+.profit-settlement-status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 999px; font-size: 8px; font-weight: 780; white-space: nowrap; }
+.profit-settlement-status i { width: 5px; height: 5px; border-radius: 50%; }
+.profit-settlement-status.settled { color: #246347; background: #e8f6ef; }
+.profit-settlement-status.settled i { background: #2fa873; }
+.profit-settlement-status.estimated { color: #5a6590; background: #eef1fb; }
+.profit-settlement-status.estimated i { background: #7585c4; }
+.profit-settlement-count { display: inline-flex; align-items: baseline; justify-content: center; min-width: 48px; padding: 5px 8px; border-radius: 9px; color: #305f4b; background: #edf6f1; font-size: 10px; font-weight: 800; white-space: nowrap; }
+.profit-settlement-count small { margin-left: 2px; color: #7f8a84; font-size: 8px; }
 
 .profit-row-action { display: inline-flex; align-items: center; gap: 7px; padding: 7px 9px; border: 0; border-radius: 8px; color: #2a5f49; background: #eef6f2; font-size: 9px; font-weight: 780; }
 .profit-row-action span { font-size: 12px; }
@@ -291,6 +347,16 @@
 .profit-product-hero p,
 .profit-listing-context p { margin: 6px 0 0; color: #7f868e; font-size: 10px; line-height: 1.5; text-wrap: pretty; }
 
+.profit-product-cost-control { display: flex; flex: 0 0 auto; align-items: center; gap: 12px; }
+.profit-product-cost-control label { display: grid; gap: 4px; min-width: 210px; padding: 10px 12px; border: 1px solid #dbe5df; border-radius: 12px; background: #f8fbf9; }
+.profit-product-cost-control label > span { color: #557064; font-size: 8px; font-weight: 800; white-space: nowrap; }
+.profit-product-cost-control label > div { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; overflow: hidden; border: 1px solid #cedbd4; border-radius: 8px; background: #fff; }
+.profit-product-cost-control label > div > span { padding-left: 9px; color: #64736c; font-size: 9px; }
+.profit-product-cost-control input { width: 100%; min-width: 0; height: 32px; padding: 6px 8px 6px 3px; border: 0; background: transparent; outline: 0; font-size: 12px; font-weight: 800; text-align: right; }
+.profit-product-cost-control [data-profit-apply-product-cost] { align-self: stretch; padding: 0 10px; border: 0; border-left: 1px solid #dbe5df; color: #fff; background: var(--profit-ink-green); font-size: 8px; font-weight: 800; white-space: nowrap; }
+.profit-product-cost-control [data-profit-apply-product-cost]:hover { background: #0a5c3d; }
+.profit-product-cost-control small { color: #818b86; font-size: 7px; white-space: nowrap; }
+
 .profit-summary-band.product-detail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .profit-summary-band.listing-summary { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 
@@ -338,11 +404,11 @@
   overscroll-behavior-inline: contain;
 }
 
-.profit-entry-table { width: 100%; min-width: 1120px; border-collapse: collapse; }
+.profit-entry-table { width: 100%; min-width: 980px; border-collapse: collapse; }
 .profit-entry-table th,
 .profit-entry-table td { padding: 11px 10px; border-bottom: 1px solid #eceeef; vertical-align: middle; }
 .profit-entry-table th { height: 42px; color: #7d848c; background: #f7f8f8; font-size: 9px; font-weight: 760; text-align: left; white-space: nowrap; }
-.profit-entry-table th:nth-child(n+4):nth-child(-n+5) { text-align: right; }
+.profit-entry-table th:nth-child(n+2):nth-child(-n+6) { text-align: right; }
 .profit-entry-table tbody tr:last-child td { border-bottom: 0; }
 .profit-sku-entry-row:hover { background: #fbfcfc; }
 .profit-sku-name { min-width: 160px; }
@@ -390,6 +456,85 @@
 .profit-trend-points small { color: #6d757c; font-size: 8px; }
 .profit-trend-points em { color: #3b7758; font-size: 8px; font-style: normal; }
 .profit-mobile-entry-list { display: none; }
+
+.profit-history-collapsed { flex: 0 0 auto; padding: 6px 8px; border-radius: 8px; color: #737d78; background: #f1f3f2; font-size: 8px; font-weight: 720; white-space: nowrap; }
+.profit-decision-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+.profit-decision-grid > section { min-width: 0; height: 100%; }
+.profit-trend-chart { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 16px 18px 13px; border: 1px solid #dce6e1; border-radius: 14px; background: #f8fbf9; }
+.profit-trend-chart figcaption { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; min-width: 0; }
+.profit-trend-chart figcaption > div:first-child { min-width: 0; }
+.profit-trend-chart figcaption b,
+.profit-trend-chart figcaption span { display: block; }
+.profit-trend-chart figcaption b { color: #17372b; font-size: 12px; letter-spacing: -.01em; }
+.profit-trend-chart figcaption > div:first-child span { margin-top: 4px; color: #6d7b74; font-size: 9px; }
+.profit-trend-legend { display: flex; flex: 0 0 auto; align-items: center; gap: 12px; }
+.profit-trend-legend span { display: flex !important; align-items: center; gap: 6px; color: #617069; font-size: 8px; font-weight: 720; white-space: nowrap; }
+.profit-trend-legend i { display: block; width: 10px; height: 3px; border-radius: 3px; background: #16714c; }
+.profit-trend-legend .units i { height: 8px; border-radius: 3px 3px 1px 1px; background: #9fcdb8; }
+.profit-trend-plot { position: relative; min-width: 0; overflow: hidden; border: 1px solid #e1e8e4; border-radius: 12px; background: #fff; }
+.profit-trend-plot svg { display: block; width: 100%; height: auto; aspect-ratio: 700 / 230; }
+.profit-trend-grid-line,
+.profit-trend-baseline { stroke: #e5ebe7; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.profit-trend-baseline { stroke: #cedbd4; }
+.profit-trend-bar { fill: #c9e2d6; opacity: .86; transition: fill .18s ease, opacity .18s ease; }
+.profit-trend-bar.profit-trend-current { fill: #6eb28f; opacity: 1; }
+.profit-trend-bar.pending { fill: #e5e9e7; }
+.profit-trend-line { fill: none; stroke: #0b6b45; stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; vector-effect: non-scaling-stroke; }
+.profit-trend-point { fill: #fff; stroke: #0b6b45; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.profit-trend-point.profit-trend-current { fill: #0b6b45; stroke: #d9eee4; stroke-width: 4; }
+.profit-trend-axis { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.profit-trend-axis > span { display: grid; gap: 3px; min-width: 0; color: #77847e; font-size: 8px; text-align: center; white-space: nowrap; }
+.profit-trend-axis > span small { overflow: hidden; color: #9aa39f; font-size: 7px; text-overflow: ellipsis; }
+.profit-trend-axis > span.current { color: #0b6b45; font-weight: 820; }
+.profit-trend-axis > span.current small { color: #4f8068; }
+.profit-trend-chart.compact { gap: 9px; padding: 12px 14px 10px; }
+.profit-trend-chart.compact figcaption b { font-size: 10px; }
+.profit-trend-chart.compact .profit-trend-plot svg { max-height: 178px; }
+.profit-trend-observation { width: fit-content; margin: 0 0 8px auto; padding: 5px 8px; border-radius: 999px; color: #7d591f; background: #fff1d4; font-size: 8px; font-weight: 740; }
+.profit-mobile-chart { padding: 11px; border-top: 1px solid #e4e9e6; background: #f6f9f7; }
+
+.profit-profit-breakdown { display: flex; flex-direction: column; }
+.profit-breakdown-head { align-items: flex-start; }
+.profit-breakdown-ledger { display: grid; border-block: 1px solid #dce4df; }
+.profit-breakdown-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 32px; padding: 7px 2px; border-bottom: 1px solid #edf0ee; }
+.profit-breakdown-row:last-child { border-bottom: 0; }
+.profit-breakdown-row span { display: grid; min-width: 0; gap: 2px; color: #66736d; font-size: 9px; font-weight: 680; white-space: nowrap; }
+.profit-breakdown-row span small { color: #98a19d; font-size: 7px; font-weight: 620; }
+.profit-breakdown-row b { flex: 0 0 auto; color: #26322d; font-size: 11px; font-weight: 790; white-space: nowrap; }
+.profit-breakdown-row.deduction b { color: #737e78; }
+.profit-breakdown-row.subtotal { margin-inline: -8px; padding-inline: 10px; border-bottom: 0; border-radius: 9px; background: #eef5f1; }
+.profit-breakdown-row.subtotal span { color: #315c49; font-weight: 790; }
+.profit-breakdown-row.subtotal b { color: #174f39; font-size: 13px; }
+.profit-breakdown-row.reconciliation { margin-inline: -6px; padding-inline: 8px; border-radius: 8px; background: #fff8e8; }
+.profit-breakdown-row.reconciliation span,
+.profit-breakdown-row.reconciliation b,
+.profit-breakdown-row.pending b { color: #95651b; }
+.profit-breakdown-result { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 11px; padding: 12px 14px; border-radius: 12px; color: #fff; background: var(--profit-ink-green); }
+.profit-breakdown-result > span { display: grid; gap: 3px; font-size: 9px; font-weight: 760; }
+.profit-breakdown-result small { color: #b9d2c5; font-size: 8px; font-weight: 650; }
+.profit-breakdown-result > b { font-size: 20px; letter-spacing: -.025em; white-space: nowrap; }
+.profit-breakdown-result.loss { background: #8f3339; }
+.profit-profit-breakdown > footer { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 9px; color: #7c8581; font-size: 7px; line-height: 1.4; }
+.profit-profit-breakdown > footer span { white-space: nowrap; }
+.profit-profit-breakdown > footer em { width: 100%; color: #9a6518; font-style: normal; font-weight: 720; }
+
+.profit-settlement-panel { background: #fbfcfc; }
+.profit-settlement-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid #e0e5e2; border-radius: 13px; background: #fff; }
+.profit-settlement-grid > div { display: grid; gap: 6px; min-width: 0; padding: 14px; border-right: 1px solid #e5e8e6; }
+.profit-settlement-grid > div:last-child { border-right: 0; }
+.profit-settlement-grid span { color: #7b8580; font-size: 8px; white-space: nowrap; }
+.profit-settlement-grid b { font-size: 14px; white-space: nowrap; }
+.profit-settlement-grid .profit-settlement-primary { background: #eef7f2; }
+.profit-settlement-grid .profit-settlement-primary b { color: #1f6d4b; font-size: 18px; }
+.profit-settlement-panel > footer { display: flex; flex-wrap: wrap; gap: 7px 16px; margin-top: 10px; color: #7c8581; font-size: 8px; }
+.profit-settlement-panel > footer span { white-space: nowrap; }
+.profit-settlement-panel > footer em { color: #9a6518; font-style: normal; font-weight: 720; }
+
+.profit-mobile-entry-list dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+.profit-mobile-entry-list dl > div { padding: 10px 12px; border-right: 1px solid #eceeef; border-bottom: 1px solid #eceeef; }
+.profit-mobile-entry-list dl > div:nth-child(2n) { border-right: 0; }
+.profit-mobile-entry-list dt { color: #818991; font-size: 8px; }
+.profit-mobile-entry-list dd { margin: 4px 0 0; font-size: 10px; font-weight: 760; white-space: nowrap; }
 
 .profit-expense-grid { display: grid; grid-template-columns: repeat(4, minmax(135px, 1fr)); gap: 10px; align-items: stretch; }
 .profit-expense-grid > label { display: grid; align-content: start; gap: 6px; min-width: 0; padding: 12px; border: 1px solid #e7e9ea; border-radius: 12px; background: #fafbfb; }
@@ -448,6 +593,9 @@
 .profit-dialog-grid label > span { color: #5f676e; font-size: 9px; font-weight: 740; white-space: nowrap; }
 .profit-dialog-grid label > small { color: #8b9298; font-size: 8px; line-height: 1.45; }
 .profit-dialog-wide { grid-column: 1 / -1; }
+.profit-dialog-note { display: grid; gap: 5px; padding: 12px; border: 1px solid #dce6e1; border-radius: 11px; color: #395a4b; background: #f2f8f5; }
+.profit-dialog-note b { font-size: 10px; }
+.profit-dialog-note span { color: #748079; font-size: 8px; line-height: 1.5; }
 .profit-dialog input,
 .profit-dialog select { width: 100%; min-width: 0; height: 40px; padding: 8px 10px; border: 1px solid #d9dddf; border-radius: 10px; color: #272c31; background: #fff; outline: none; font-size: 10px; }
 .profit-dialog-error { min-height: 17px; margin-top: 8px; color: var(--profit-red); font-size: 9px; font-weight: 720; }
@@ -467,6 +615,116 @@
 
 .profit-empty-state { padding: 48px 20px; border: 1px dashed #d6dbd8; border-radius: 18px; color: #7f878d; background: #fff; font-size: 11px; text-align: center; }
 
+/* Professional operations cockpit refinement. */
+.profit-template-shell ::selection { color: #fff; background: #276e52; }
+.profit-template-shell :where(button, a, input, select):focus-visible { outline: 2px solid #44a77b; outline-offset: 2px; }
+.profit-template-shell :where(button, a) { transition: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease; }
+.profit-template-shell :where(button, a):active { transform: translateY(1px); }
+.profit-template-shell * { scrollbar-color: #a8beb3 transparent; scrollbar-width: thin; }
+
+.profit-sync-card { border: 0; background: var(--profit-surface); box-shadow: var(--profit-shadow-sm); }
+.profit-sync-icon { color: #0d6946; background: #dcefe5; }
+.profit-sync-copy span { color: #44695a; }
+.profit-sync-card > button { border-color: #b9cec3; color: #174d38; background: #f7fbf9; }
+.profit-sync-card > button:hover { border-color: #7ea890; background: #edf6f1; }
+
+.profit-product-table-wrap,
+.profit-entry-table-wrap { border-color: var(--profit-line-strong); background: var(--profit-surface); }
+.profit-product-table th,
+.profit-entry-table th { color: #53635b; background: #eef3f0; }
+.profit-product-table tbody tr:hover,
+.profit-product-table tbody tr:focus-visible,
+.profit-sku-entry-row:hover { background: #f2f7f4; }
+
+.profit-attention-panel { border: 0; color: #f6faf8; background: var(--profit-ink-green); box-shadow: var(--profit-shadow-md); }
+.profit-attention-panel .profit-block-title h3 { color: #fff; }
+.profit-attention-panel .profit-block-title > b { color: #174d38; background: #dcefe5; }
+.profit-attention-list > button { border-color: rgba(224, 240, 232, .12); color: #f4f8f6; background: rgba(255, 255, 255, .07); }
+.profit-attention-list > button:hover { border-color: rgba(224, 240, 232, .3); background: rgba(255, 255, 255, .12); }
+.profit-attention-list > button small { color: #a8beb3; }
+.profit-attention-list > button em { color: #c6dfd2; }
+
+.profit-product-hero,
+.profit-listing-context { border-color: #cbd9d2; border-radius: 16px; background: #e7f1ec; }
+.profit-product-name > span,
+.profit-code-mark { border-color: #bad0c4; color: #f4faf7; background: var(--profit-ink-green); }
+.profit-product-cost-control label { border-color: #bfd2c8; background: rgba(255, 255, 255, .72); }
+
+.profit-listing-card { border-color: #d1ddd7; background: var(--profit-surface); }
+.profit-listing-card:hover { border-color: #a9c0b5; box-shadow: var(--profit-shadow-sm); }
+.profit-listing-main { border-color: #dbe4df; background: #f3f7f5; }
+.profit-listing-card > footer button { background: var(--profit-ink-green); }
+.profit-listing-card > footer button:hover { background: #0a5c3d; box-shadow: 0 7px 18px rgba(17, 62, 44, .2); }
+.profit-row-action { color: #174f39; background: #e5f1eb; }
+.profit-row-action:hover { color: #fff; background: #176447; }
+
+.profit-settlement-panel { background: #f9fbfa; }
+.profit-settlement-grid { border-color: #d3dfd8; }
+.profit-settlement-grid .profit-settlement-primary { color: #f7fbf9; background: var(--profit-ink-green); }
+.profit-settlement-grid .profit-settlement-primary span { color: #b9d2c5; }
+.profit-settlement-grid .profit-settlement-primary b { color: #fff; }
+
+.profit-expense-grid > label { border-color: #d8e1dc; background: #f5f8f6; }
+.profit-contribution-result { border: 0; color: #f7fbf9; background: var(--profit-ink-green); box-shadow: 0 12px 25px rgba(19, 55, 42, .16); }
+.profit-contribution-result > span,
+.profit-contribution-result > small { color: #b9d2c5; }
+.profit-contribution-result > b.positive { color: #fff !important; }
+
+.profit-dialog { border: 0; border-radius: 16px; box-shadow: var(--profit-shadow-md); }
+.profit-dialog-actions .primary { color: #fff; background: var(--profit-ink-green); }
+
+/* Desktop operations density: keep the decision path inside one working viewport. */
+@media (min-width: 901px) {
+  .profit-detail-page { gap: 12px; }
+  .profit-detail-page .profit-breadcrumb { font-size: 9px; }
+
+  .profit-detail-page .profit-listing-context {
+    gap: 16px;
+    padding: 14px 16px;
+  }
+
+  .profit-detail-page .profit-listing-context .profit-code-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+
+  .profit-detail-page .profit-listing-context h2 { font-size: 18px; }
+  .profit-detail-page .profit-listing-context p { margin-top: 3px; }
+
+  .profit-summary-band.listing-summary .profit-metric {
+    min-height: 78px;
+    padding: 11px 14px;
+  }
+
+  .profit-summary-band.listing-summary .profit-metric > b {
+    margin-top: 4px;
+    font-size: clamp(18px, 1.65vw, 24px);
+  }
+
+  .profit-summary-band.listing-summary .profit-metric > small { margin-top: 4px; }
+
+  .profit-detail-page :is(
+    .profit-seven-day-section,
+    .profit-profit-breakdown,
+    .profit-settlement-panel,
+    .profit-entry-section,
+    .profit-expense-section
+  ) { padding: 15px; }
+
+  .profit-detail-page .profit-block-title { margin-bottom: 10px; }
+  .profit-detail-page .profit-block-title h3 { font-size: 16px; }
+  .profit-detail-page .profit-block-title p { margin-top: 3px; }
+
+  .profit-detail-page .profit-trend-chart {
+    gap: 8px;
+    padding: 11px 13px 9px;
+  }
+
+  .profit-detail-page .profit-trend-axis > span { gap: 2px; }
+  .profit-detail-page .profit-settlement-grid > div { padding: 10px 12px; }
+}
+
 @media (max-width: 1180px) {
   .profit-workspace-head { align-items: flex-start; flex-direction: column; }
   .profit-head-controls { width: 100%; justify-content: flex-start; }
@@ -476,9 +734,13 @@
   .profit-summary-band.listing-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .profit-summary-band.listing-summary .profit-metric:nth-child(3) { border-right: 0; }
   .profit-summary-band.listing-summary .profit-metric:nth-child(n+4) { border-top: 1px solid var(--profit-line); }
+  .profit-sync-card { grid-template-columns: 42px minmax(0, 1fr) auto; }
+  .profit-sync-times { grid-column: 2 / 4; padding: 10px 0 0; border: 0; border-top: 1px solid #dfe6e2; }
+  .profit-sync-times span { justify-content: flex-start; }
 }
 
 @media (max-width: 900px) {
+  .profit-decision-grid { grid-template-columns: 1fr; }
   .profit-head-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .profit-head-controls label { min-width: 0; }
   .profit-primary-action { align-self: end; }
@@ -496,15 +758,22 @@
   .profit-context-actions { width: 100%; flex-wrap: wrap; }
   .profit-expense-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .profit-contribution-result { min-height: 104px; }
+  .profit-settlement-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .profit-settlement-grid > div:nth-child(2) { border-right: 0; }
+  .profit-settlement-grid > div:nth-child(n+3) { border-top: 1px solid #e5e8e6; }
+  .profit-product-cost-control { flex-wrap: wrap; justify-content: flex-start; }
 }
 
 @media (max-width: 640px) {
-  .profit-template-shell { gap: 12px; }
+  .profit-template-shell { gap: 12px; padding: 11px; border-radius: 18px; }
   .profit-workspace-head,
   .profit-product-section,
   .profit-listing-section,
   .profit-entry-section,
-  .profit-expense-section { padding: 15px; border-radius: 17px; }
+  .profit-expense-section,
+  .profit-seven-day-section,
+  .profit-profit-breakdown,
+  .profit-settlement-panel { padding: 15px; border-radius: 17px; }
   .profit-eyebrow { align-items: flex-start; flex-direction: column; gap: 5px; }
   .profit-eyebrow em { padding: 0; border: 0; }
   .profit-workspace-title h2 { font-size: 20px; }
@@ -529,6 +798,10 @@
   .profit-product-cards dd { margin: 4px 0 0; font-size: 11px; font-weight: 760; white-space: nowrap; }
   .profit-product-cards footer { display: flex; justify-content: space-between; margin-top: 11px; color: #456251; font-size: 9px; font-weight: 740; }
   .profit-attention-list { grid-template-columns: 1fr; }
+  .profit-sync-card { grid-template-columns: 42px minmax(0, 1fr); padding: 13px; }
+  .profit-sync-card > button { grid-column: 2; justify-self: start; }
+  .profit-sync-times { grid-column: 2; width: 100%; }
+  .profit-sync-times span { justify-content: space-between; }
   .profit-product-hero,
   .profit-listing-context { padding: 16px; border-radius: 16px; }
   .profit-product-hero > div:first-child,
@@ -563,6 +836,10 @@
   .profit-mobile-trend b { font-size: 8px; }
   .profit-expense-grid { grid-template-columns: 1fr; }
   .profit-contribution-result { min-height: 92px; }
+  .profit-trend-chart { padding: 13px 12px 10px; }
+  .profit-trend-chart figcaption { align-items: flex-start; flex-direction: column; gap: 9px; }
+  .profit-trend-legend { width: 100%; flex-wrap: wrap; }
+  .profit-trend-plot svg { min-height: 150px; }
   .profit-inactive-strip { align-items: flex-start; flex-direction: column; }
   .profit-dialog-grid { grid-template-columns: 1fr; }
   .profit-dialog-wide { grid-column: auto; }
@@ -570,6 +847,7 @@
 }
 
 @media (max-width: 420px) {
+  .profit-template-shell { padding: 8px; }
   .profit-head-controls { grid-template-columns: 1fr; }
   .profit-head-controls .profit-primary-action { grid-column: auto; }
   .profit-summary-band,
@@ -581,6 +859,22 @@
   .profit-metric:first-child { border-top: 0; }
   .profit-block-title { align-items: flex-start; flex-direction: column; gap: 9px; }
   .profit-block-title > b { align-self: flex-start; }
+  .profit-sync-card { grid-template-columns: 1fr; }
+  .profit-sync-icon { display: none; }
+  .profit-sync-card > button,
+  .profit-sync-times { grid-column: 1; }
+  .profit-sync-copy b,
+  .profit-sync-copy small { white-space: normal; }
+  .profit-sync-times span { align-items: flex-start; flex-direction: column; gap: 2px; white-space: normal; }
+  .profit-settlement-grid { grid-template-columns: 1fr; text-align: center; }
+  .profit-settlement-grid > div { border-right: 0; border-top: 1px solid #e5e8e6; }
+  .profit-settlement-grid > div:first-child { border-top: 0; }
+  .profit-product-cost-control { align-items: stretch; flex-direction: column; }
+  .profit-product-cost-control .profit-number-input { width: 100%; max-width: none; }
+  .profit-trend-chart { padding: 11px 9px 9px; }
+  .profit-trend-chart figcaption > div:first-child span { line-height: 1.5; }
+  .profit-trend-axis > span { font-size: 7px; }
+  .profit-trend-axis > span small { display: none; }
   .profit-product-cards header { grid-template-columns: 36px minmax(0, 1fr); }
   .profit-product-cards header .profit-health { grid-column: 1 / -1; width: fit-content; }
   .profit-product-cards dl { grid-template-columns: 1fr; }

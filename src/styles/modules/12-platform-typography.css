@@ -1,0 +1,86 @@
+    /* Platform typography: calm on macOS, clearer on Windows, compact and touch-safe on mobile. */
+    html.mac-client body {
+      font-family: "SF Pro Text", "PingFang SC", -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    html.windows-performance body {
+      font-family: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+      -webkit-font-smoothing: auto;
+      text-rendering: optimizeLegibility;
+    }
+
+    body.workbench-entered .app {
+      padding-top: 6px;
+    }
+
+    body.workbench-entered .topbar {
+      top: 6px;
+      min-height: 62px;
+    }
+
+    body.workbench-entered .tabs {
+      justify-content: center;
+      gap: 3px;
+      min-width: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    body.workbench-entered .tab {
+      position: relative;
+      flex: 0 0 auto;
+      border: 1px solid transparent;
+      transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    body.workbench-entered .tab:hover {
+      border-color: rgba(11, 13, 16, 0.055);
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 4px 12px rgba(11, 13, 16, 0.045);
+    }
+
+    body.workbench-entered .tab.active,
+    body.workbench-entered .tab.active:hover {
+      border-color: rgba(11, 13, 16, 0.92);
+      background: #111316;
+      box-shadow: 0 7px 16px rgba(11, 13, 16, 0.16), 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+      transform: translateY(-1px);
+    }
+
+    body.workbench-entered .tab-dropdown {
+      padding: 7px;
+      border-radius: 16px;
+      box-shadow: 0 20px 48px rgba(20, 28, 40, 0.14);
+    }
+
+    body.workbench-entered .tab-dropdown button {
+      min-height: 40px;
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    html.mac-client body.workbench-entered .tab {
+      min-height: 42px;
+      padding-inline: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    html.windows-performance body.workbench-entered .tab {
+      min-height: 44px;
+      padding-inline: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }

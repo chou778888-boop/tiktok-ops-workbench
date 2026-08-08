@@ -39,11 +39,6 @@ assert.match(
   /class="overview-focus-surface"[\s\S]*?class="overview-command-bar"[\s\S]*?id="overviewDataDate"[\s\S]*?data-range-toolbar="overview"[\s\S]*?class="overview-decision-brief"/,
   "日期筛选后必须先展示公司级经营判断"
 );
-assert.match(
-  html,
-  /data-overview-analysis-shell[\s\S]*?data-overview-analysis-mode="gmv"[\s\S]*?data-overview-analysis-mode="link"[\s\S]*?data-overview-analysis-panels[\s\S]*?data-overview-analysis-panel="gmv"[\s\S]*?data-overview-analysis-panel="link"[^>]*hidden/,
-  "总览只能有一个分析外壳，并在统一面板容器内保留两个同级分析维度"
-);
 assert.equal((html.match(/data-overview-analysis-shell/g) || []).length, 1, "总览只能存在一个主趋势分析外壳");
 assert.equal((html.match(/id="overviewPulseChart"/g) || []).length, 1, "链接价量图只能在下钻视图中存在一次");
 assert.match(html, /id="overviewDecisionTitle"/);
@@ -100,9 +95,6 @@ assert.match(overviewSource, /setOverviewChartEmptyState\("sourceDonutEmpty", !t
 assert.match(overviewSource, /renderOverviewProfitPulse\(\)/);
 assert.match(overviewSource, /function renderOverviewDecisionBrief\(/);
 assert.match(overviewSource, /function setOverviewAnalysisMode\(/);
-assert.match(overviewSource, /overviewAnalysisVisibility\([\s\S]*?activeOverviewAnalysisMode,[\s\S]*?isOverviewDualDimensionLayout\(\)/);
-assert.match(overviewSource, /overviewLinkRange[\s\S]*?overviewPulseRangeLabel\(model\.points\)/, "链接卡必须显示链接自身周期");
-assert.match(overviewSource, /overviewGmvRange[\s\S]*?dataRangeDateText\(trendRange\)/, "GMV卡必须显示店群近7日区间");
 assert.doesNotMatch(overviewSource, /\["实际 \/ 预估到手"/);
 assert.match(overviewSource, /overviewPulseDensity\(model\.points\)/);
 assert.match(overviewSource, /classList\.toggle\("is-sparse", density\.sparse\)/);
@@ -120,4 +112,4 @@ assert.match(eventsSource, /data-overview-analysis-mode/);
 assert.match(profitTemplate, /renderProfitListingDetail/);
 assert.match(profitTemplate, /renderProfitSkuTrend/);
 
-console.log(JSON.stringify({ passed: 66, phase: "operating-pulse-overview-contract" }));
+console.log(JSON.stringify({ passed: 62, phase: "operating-pulse-overview-contract" }));

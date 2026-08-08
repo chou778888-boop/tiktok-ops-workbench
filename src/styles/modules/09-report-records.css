@@ -1,0 +1,40 @@
+    /* Compact read-only store tables inside daily report records */
+    body.workbench-entered .report-card .report-matrix {
+      border-radius: 14px;
+      background: rgba(250, 250, 248, 0.92);
+    }
+
+    body.workbench-entered .report-card .report-matrix table {
+      width: 100%;
+      min-width: 560px;
+      table-layout: auto;
+    }
+
+    body.workbench-entered .report-card .report-matrix th,
+    body.workbench-entered .report-card .report-matrix td {
+      height: 34px;
+      padding: 6px 5px;
+      font-size: 11px;
+      line-height: 1.25;
+    }
+
+    body.workbench-entered .report-card .report-matrix th {
+      white-space: normal;
+      text-wrap: balance;
+    }
+
+    body.workbench-entered .report-card .report-matrix th:first-child,
+    body.workbench-entered .report-card .report-matrix td:first-child {
+      width: 102px;
+      min-width: 102px;
+      max-width: 102px;
+      padding-inline: 9px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    body.workbench-entered .report-card .report-matrix th:not(:first-child),
+    body.workbench-entered .report-card .report-matrix td:not(:first-child) {
+      min-width: 62px;
+    }

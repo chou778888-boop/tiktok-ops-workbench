@@ -1,152 +1,150 @@
-    function createProfitRepository(anchorDate = "2026-08-05") {
-      const stores = [
-        { id: "store-dreamweave", name: "DreamWeave" },
-        { id: "store-dreamdaily", name: "Dreamdaily" },
-        { id: "store-dreamland", name: "Dreamland" },
-        { id: "store-moondream", name: "MoonDream" },
-        { id: "store-sweet-dream", name: "sweet dream" },
-        { id: "store-himood", name: "Himood Smile" }
-      ];
-      const definitions = [
-        {
-          code: "JZZ", name: "针织毯", category: "家居纺织",
-          skus: [["white", "白色", 12, 16.99, 72], ["grey", "灰色", 12, 17.49, 164], ["sage", "灰绿色", 12, 21.49, 18], ["purple", "紫色", 12, 18.99, 36], ["grey-4", "灰色 4PCS", 20, 39.99, 6]],
-          listings: [
-            ["jzz-main", "store-dreamweave", "JZZ 主链接", 1, 238, 0, "active"],
-            ["jzz-alt", "store-dreamdaily", "JZZ 动销链接", 0.92, 86, 0.7, "active"]
-          ]
-        },
-        {
-          code: "JDZ", name: "酒店枕套", category: "家居纺织",
-          skus: [["standard", "标准款", 12, 9.95, 286], ["bk-q", "BK-Q", 15, 11.99, 32], ["bk-k", "BK-K", 15, 18.62, 24], ["four-pack", "4PCS", 20, 23.85, 8]],
-          listings: [["jdz-main", "store-dreamdaily", "JDZ 核心链接", 1, 112, 0, "active"]]
-        },
-        {
-          code: "NHZ", name: "绒面毯", category: "家居纺织",
-          skus: [["grey", "Grey", 12, 19.99, 26], ["white", "White", 12, 17.99, 23], ["grey-4", "Grey 4PCS", 22, 35.99, 4]],
-          listings: [["nhz-main", "store-dreamland", "NHZ 常规链接", 1, 46, 0, "active"]]
-        },
-        {
-          code: "YG", name: "银管套装", category: "个护",
-          skus: [["one", "银管-1", 5.6, 8.49, 8], ["two", "银管-2", 6.5, 13.99, 4], ["set", "银管套装", 7.4, 15.11, 9]],
-          listings: [["yg-main", "store-moondream", "YG 主链接", 1, 34, 0, "active"]]
-        },
-        {
-          code: "ZG", name: "紫管套装", category: "个护",
-          skus: [["one", "紫管-1", 5.5, 6.89, 4], ["two", "紫管-2", 6.2, 11.99, 2], ["set", "紫管套装", 7.1, 14.77, 3]],
-          listings: [["zg-main", "store-sweet-dream", "ZG 主链接", 1, 29, 0, "paused"]]
-        },
-        {
-          code: "YT", name: "牙贴", category: "个护",
-          skus: [["one", "牙贴-1", 6.3, 7.22, 9], ["two", "牙贴-2", 7.6, 11.99, 3], ["three", "牙贴-3", 8.9, 14.99, 2]],
-          listings: [["yt-main", "store-himood", "YT 测款链接", 1, 38, 0, "active"]]
-        }
-      ];
+    const PROFIT_WORKSPACE_COLLECTIONS = {
+      stores: "profitStores",
+      products: "profitProducts",
+      skuMasters: "profitSkuMasters",
+      listings: "profitListings",
+      listingSkus: "profitListingSkus",
+      dailyFacts: "profitDailyFacts",
+      dailyExpenses: "profitDailyExpenses",
+      dailySettlements: "profitDailySettlements",
+      productCostHistory: "profitProductCostHistory",
+      priceObservations: "profitPriceObservations"
+    };
 
-      const state = {
-        anchorDate,
-        stores,
-        products: [],
-        skuMasters: [],
-        listings: [],
-        listingSkus: [],
-        dailyFacts: [],
-        dailyExpenses: [],
-        priceObservations: []
+    function profitRepositoryClone(value) {
+      return value === undefined ? undefined : JSON.parse(JSON.stringify(value));
+    }
+
+    function defaultProfitSyncStatus() {
+      return {
+        id: "main",
+        state: "synced",
+        lastSyncedAt: "2026-08-04T08:00:00+08:00",
+        nextScheduledAt: "2026-08-04T17:00:00+08:00",
+        scheduleTimezone: "Asia/Shanghai",
+        storeTimezone: "America/Los_Angeles",
+        source: "站斧 · TikTok Shop",
+        message: "8 月 3 日经营与结算数据已核对"
       };
-      const dates = profitDateWindow(anchorDate, 30);
+    }
 
-      definitions.forEach((definition, productIndex) => {
-        const productId = `product-${definition.code.toLowerCase()}`;
-        state.products.push({ id: productId, code: definition.code, name: definition.name, category: definition.category, status: "active" });
-        const masters = definition.skus.map(([code, name, standardCost]) => {
-          const master = { id: `${productId}-sku-${code}`, productId, code: `${definition.code}-${code}`.toUpperCase(), name, specification: name, standardCost, currency: "USD", status: "active" };
-          state.skuMasters.push(master);
-          return master;
-        });
+    function serializeProfitRepositoryState(repositoryState = {}) {
+      const serialized = {};
+      Object.entries(PROFIT_WORKSPACE_COLLECTIONS).forEach(([internalKey, workspaceKey]) => {
+        serialized[workspaceKey] = profitRepositoryClone(Array.isArray(repositoryState[internalKey]) ? repositoryState[internalKey] : []);
+      });
+      serialized.profitSyncRecords = [profitRepositoryClone({ ...defaultProfitSyncStatus(), ...(repositoryState.syncStatus || {}), id: "main" })];
+      return serialized;
+    }
 
-        definition.listings.forEach(([slug, storeId, displayName, priceFactor, marketingBase, unitFactorOffset, lifecycleStatus], listingIndex) => {
-          const listingId = `listing-${slug}`;
-          const sampleTypes = [{ id: `${listingId}-sample`, name: "标准寄样", unitCost: definition.skus[0][2] }];
-          state.listings.push({
-            id: listingId,
-            productId,
-            storeId,
-            platformListingId: `TT-${definition.code}-${listingIndex + 1}`,
-            url: `https://www.tiktok.com/shop/pdp/${slug}`,
-            displayName,
-            ownerId: `operator-${(productIndex % 3) + 1}`,
-            ownerName: ["小林", "Annie", "Mia"][productIndex % 3],
-            currency: "USD",
-            timezone: "America/Los_Angeles",
-            predecessorListingId: null,
-            lifecycleStatus,
-            launchedAt: profitShiftDate(anchorDate, -(46 + productIndex * 8 + listingIndex * 12)),
-            delistedAt: null,
-            sampleTypes
-          });
+    function normalizeProfitRepositoryState(initialState, anchorDate) {
+      const source = initialState && typeof initialState === "object" ? initialState : {};
+      const normalized = { anchorDate };
+      Object.entries(PROFIT_WORKSPACE_COLLECTIONS).forEach(([internalKey, workspaceKey]) => {
+        const records = Array.isArray(source[workspaceKey]) ? source[workspaceKey] : source[internalKey];
+        normalized[internalKey] = profitRepositoryClone(Array.isArray(records) ? records : []);
+      });
+      const syncRecord = Array.isArray(source.profitSyncRecords)
+        ? source.profitSyncRecords.find((item) => item?.id === "main") || source.profitSyncRecords[0]
+        : source.syncStatus;
+      normalized.syncStatus = { ...defaultProfitSyncStatus(), ...(profitRepositoryClone(syncRecord) || {}), id: "main" };
+      return normalized;
+    }
 
-          masters.forEach((master, skuIndex) => {
-            const definitionSku = definition.skus[skuIndex];
-            const listingSkuId = `${listingId}-sku-${definitionSku[0]}`;
-            state.listingSkus.push({
-              id: listingSkuId,
-              listingId,
-              skuId: master.id,
-              active: true,
-              storeCostOverride: definitionSku[2],
-              commissionRateOverride: productIndex < 3 ? 20.5 : 25,
-              activatedAt: profitShiftDate(anchorDate, -45),
-              deactivatedAt: null
-            });
-            dates.forEach((dateKey, dayIndex) => {
-              const weekdayFactor = [0.82, 0.91, 0.97, 1.02, 1.08, 1.16, 1.1][dayIndex % 7];
-              const variation = ((dayIndex + skuIndex * 2 + listingIndex) % 5 - 2) * 0.035;
-              const basePrice = definitionSku[3] * priceFactor + (listingIndex ? skuIndex * 0.12 : 0);
-              const units = Math.max(0, Math.round(definitionSku[4] * (weekdayFactor + variation + unitFactorOffset * 0.08)));
-              const isPendingToday = definition.code === "YT" && dateKey === anchorDate;
-              state.dailyFacts.push({
-                id: `${listingSkuId}-${dateKey}`,
-                listingId,
-                listingSkuId,
-                dateKey,
-                price: Number(Math.max(definitionSku[2], basePrice + ((dayIndex + skuIndex) % 5 - 2) * 0.14).toFixed(2)),
-                units: isPendingToday ? null : units,
-                costSnapshot: definitionSku[2],
-                commissionSnapshot: productIndex < 3 ? 20.5 : 25,
-                entryStatus: isPendingToday ? "pending" : "completed"
-              });
-            });
-          });
+    function createProfitRepository(anchorDate = "2026-08-03", options = {}) {
+      const state = normalizeProfitRepositoryState(options.initialState, anchorDate);
+      const commit = () => {
+        options.onChange?.(serializeProfitRepositoryState(state));
+        return state;
+      };
 
-          dates.forEach((dateKey, dayIndex) => {
-            const sampleQuantities = {};
-            sampleQuantities[sampleTypes[0].id] = (dayIndex + productIndex + listingIndex) % 7 === 0 ? 2 : 0;
-            state.dailyExpenses.push({
-              id: `${listingId}-expense-${dateKey}`,
-              listingId,
-              dateKey,
-              sampleQuantities,
-              marketingSpend: Number((marketingBase * (0.82 + (dayIndex % 5) * 0.08)).toFixed(2)),
-              adjustments: dayIndex % 13 === 0 ? 8 : 0,
-              entryStatus: "completed"
-            });
-          });
+      if (!state.products.length && options.seedDemo !== false) {
+      state.stores.push({ id: "store-dreamweave", name: "Ufist-DreamWeave", accountName: "宝立星（杭州）" });
+      const productId = "product-jzz";
+      const listingId = "listing-jzz-main";
+      const sampleTypeId = `${listingId}-sample`;
+      const actualSkuRows = [
+        ["grey", "灰色 2 件套", "1731777760711315985", 356.79, 21, 21],
+        ["white", "白色 2 件套", "1731777428039635473", 181.80, 11, 9],
+        ["purple", "紫色 2 件套", "1731777662919676433", 56.97, 3, 3],
+        ["dark-green", "深绿色 2 件套", "1732265156925624849", 41.98, 2, 2],
+        ["blue", "蓝色 2 件套", "1731777662919545361", 37.98, 2, 2],
+        ["pink", "粉色 2 件套", "1732265157400367633", 0, 0, 0]
+      ];
+      state.products.push({
+        id: productId,
+        code: "JZZ",
+        name: "UFIST 颈椎按摩枕 2 件套",
+        category: "寝具",
+        standardUnitCost: 12,
+        costEffectiveAt: "2026-08-03",
+        status: "active"
+      });
+      state.productCostHistory.push({ id: `${productId}-cost-2026-08-03`, productId, standardUnitCost: 12, effectiveAt: "2026-08-03" });
+      state.listings.push({
+        id: listingId,
+        productId,
+        storeId: "store-dreamweave",
+        platformListingId: "1731776510060368401",
+        url: "https://seller-us.tiktok.com/compass/product-analysis/detail?id=1731776510060368401&from=product-analysis",
+        displayName: "UFIST 2-Piece Cervical Massage Pillow Set",
+        ownerId: "operator-1",
+        ownerName: "小林",
+        currency: "USD",
+        timezone: "America/Los_Angeles",
+        predecessorListingId: null,
+        lifecycleStatus: "active",
+        launchedAt: "2026-08-03",
+        delistedAt: null,
+        sampleTypes: [{ id: sampleTypeId, name: "标准寄样", unitCost: 12 }]
+      });
+      actualSkuRows.forEach(([code, name, platformSkuId, gmv, itemsSold, orderCount]) => {
+        const skuId = `${productId}-sku-${code}`;
+        const listingSkuId = `${listingId}-sku-${code}`;
+        state.skuMasters.push({ id: skuId, productId, code: `JZZ-${code}`.toUpperCase(), name, specification: name, platformSkuId, standardCost: 12, currency: "USD", status: "active" });
+        state.listingSkus.push({ id: listingSkuId, listingId, skuId, platformSkuId, active: true, storeCostOverride: 12, commissionRateOverride: null, activatedAt: "2026-08-03", deactivatedAt: null });
+        state.dailyFacts.push({
+          id: `${listingSkuId}-2026-08-03`,
+          listingId,
+          listingSkuId,
+          dateKey: "2026-08-03",
+          price: itemsSold ? profitMoney(gmv / itemsSold) : null,
+          units: itemsSold,
+          gmv,
+          itemsSold,
+          orderCount,
+          grossSales: null,
+          estimatedShippingFee: 0,
+          estimatedPlatformFees: 0,
+          estimatedReceived: gmv,
+          productCostSnapshot: 12,
+          costSnapshot: 12,
+          commissionSnapshot: null,
+          entryStatus: "completed",
+          source: "TikTok Shop Product Analytics"
         });
       });
-
-      const jzzAltGrey = state.listingSkus.find((item) => item.id === "listing-jzz-alt-sku-grey");
-      if (jzzAltGrey) {
-        state.priceObservations.push(createPriceObservation({
-          id: "observation-jzz-grey",
-          productId: "product-jzz",
-          listingId: "listing-jzz-alt",
-          listingSkuId: jzzAltGrey.id,
-          oldPrice: 16.39,
-          newPrice: 15.89,
-          startedAt: profitShiftDate(anchorDate, -3),
-          changeKind: "planned"
-        }));
+      state.dailyExpenses.push({ id: `${listingId}-expense-2026-08-03`, listingId, dateKey: "2026-08-03", sampleQuantities: { [sampleTypeId]: null }, advertisingSpend: null, marketingSpend: null, adjustments: null, entryStatus: "pending" });
+      state.dailySettlements.push({
+        id: `${listingId}-settlement-2026-08-03`,
+        listingId,
+        dateKey: "2026-08-03",
+        listingGmv: 675.52,
+        sumSkuGmv: 675.52,
+        orderCount: 37,
+        itemsSold: 39,
+        netProductSales: 697.60,
+        platformDiscounts: 5.09,
+        shippingFee: 0,
+        platformFees: 66.13,
+        totalOrderCost: 66.13,
+        estimatedReceived: 631.47,
+        settlementAmount: 631.47,
+        settlementStatus: "settled",
+        statementDate: "2026-08-03",
+        source: "TikTok Shop Earnings Analytics",
+        sourceUpdatedAt: "2026-08-03T17:00:00-07:00"
+      });
       }
 
       function getStore(storeId) {
@@ -185,10 +183,40 @@
         const expense = state.dailyExpenses.find((item) => item.listingId === listingId && item.dateKey === dateKey);
         if (!expense) return null;
         const listing = getListing(listingId);
-        const sampleCost = (listing?.sampleTypes || []).reduce((sum, sample) => (
-          sum + profitNumber(expense.sampleQuantities?.[sample.id]) * profitNumber(sample.unitCost)
-        ), 0);
+        const sampleTypes = listing?.sampleTypes || [];
+        const sampleValues = sampleTypes.map((sample) => expense.sampleQuantities?.[sample.id]);
+        const samplesComplete = sampleValues.every((value) => value !== null && value !== undefined && value !== "");
+        const sampleCost = samplesComplete
+          ? profitMoney(sampleTypes.reduce((sum, sample) => sum + profitNumber(expense.sampleQuantities?.[sample.id]) * profitNumber(sample.unitCost), 0))
+          : null;
         return { ...expense, sampleCost };
+      }
+
+      function getDailySettlement(listingId, dateKey) {
+        return state.dailySettlements.find((item) => item.listingId === listingId && item.dateKey === dateKey) || null;
+      }
+
+      function updateProductCost(productId, standardUnitCost, effectiveAt = anchorDate) {
+        const product = getProduct(productId);
+        if (!product) return null;
+        product.standardUnitCost = Math.max(0, profitNumber(standardUnitCost));
+        product.costEffectiveAt = effectiveAt;
+        state.skuMasters.filter((sku) => sku.productId === productId).forEach((sku) => {
+          sku.standardCost = product.standardUnitCost;
+        });
+        const listingIds = new Set(getProductListings(productId).map((listing) => listing.id));
+        state.dailyFacts.forEach((fact) => {
+          if (!listingIds.has(fact.listingId) || fact.dateKey < effectiveAt) return;
+          fact.productCostSnapshot = product.standardUnitCost;
+          fact.costSnapshot = product.standardUnitCost;
+        });
+        const historyId = `${productId}-cost-${effectiveAt}`;
+        const historyIndex = state.productCostHistory.findIndex((item) => item.id === historyId);
+        const historyRecord = { id: historyId, productId, standardUnitCost: product.standardUnitCost, effectiveAt };
+        if (historyIndex >= 0) state.productCostHistory[historyIndex] = historyRecord;
+        else state.productCostHistory.push(historyRecord);
+        commit();
+        return product;
       }
 
       function updateDailyFact(listingSkuId, dateKey, changes = {}) {
@@ -204,7 +232,8 @@
             dateKey,
             price: prepared.price,
             units: prepared.units,
-            costSnapshot: listingSku.storeCostOverride,
+            productCostSnapshot: getProduct(getListing(listingSku.listingId)?.productId)?.standardUnitCost,
+            costSnapshot: getProduct(getListing(listingSku.listingId)?.productId)?.standardUnitCost,
             commissionSnapshot: listingSku.commissionRateOverride,
             entryStatus: "pending"
           };
@@ -212,20 +241,45 @@
         }
         if (Object.hasOwn(changes, "price")) fact.price = Math.max(0, profitNumber(changes.price));
         if (Object.hasOwn(changes, "units")) fact.units = changes.units === null || changes.units === "" ? null : Math.max(0, Math.round(profitNumber(changes.units)));
-        fact.entryStatus = fact.price !== null && fact.units !== null ? "completed" : "in_progress";
+        if (Object.hasOwn(changes, "gmv")) fact.gmv = changes.gmv === null || changes.gmv === "" ? null : Math.max(0, profitMoney(changes.gmv));
+        if (Object.hasOwn(changes, "itemsSold")) fact.itemsSold = changes.itemsSold === null || changes.itemsSold === "" ? null : Math.max(0, Math.round(profitNumber(changes.itemsSold)));
+        if (Object.hasOwn(changes, "units") && !Object.hasOwn(changes, "itemsSold")) fact.itemsSold = fact.units;
+        if ((Object.hasOwn(changes, "price") || Object.hasOwn(changes, "units")) && !Object.hasOwn(changes, "gmv")) {
+          fact.gmv = fact.price !== null && fact.units !== null ? profitMoney(fact.price * fact.units) : null;
+        }
+        fact.entryStatus = fact.gmv !== null && fact.itemsSold !== null ? "completed" : "in_progress";
+        commit();
         return fact;
       }
 
       function updateDailyExpense(listingId, dateKey, changes = {}) {
         let expense = state.dailyExpenses.find((item) => item.listingId === listingId && item.dateKey === dateKey);
         if (!expense) {
-          expense = { id: globalThis.crypto?.randomUUID?.(), listingId, dateKey, sampleQuantities: {}, marketingSpend: 0, adjustments: 0, entryStatus: "pending" };
+          expense = { id: globalThis.crypto?.randomUUID?.(), listingId, dateKey, sampleQuantities: {}, advertisingSpend: null, marketingSpend: null, adjustments: null, entryStatus: "pending" };
           state.dailyExpenses.push(expense);
         }
-        if (changes.sampleQuantities) expense.sampleQuantities = { ...expense.sampleQuantities, ...changes.sampleQuantities };
-        if (Object.hasOwn(changes, "marketingSpend")) expense.marketingSpend = Math.max(0, profitNumber(changes.marketingSpend));
-        if (Object.hasOwn(changes, "adjustments")) expense.adjustments = Math.max(0, profitNumber(changes.adjustments));
-        expense.entryStatus = "completed";
+        if (changes.sampleQuantities) {
+          expense.sampleQuantities = { ...expense.sampleQuantities };
+          Object.entries(changes.sampleQuantities).forEach(([sampleId, value]) => {
+            expense.sampleQuantities[sampleId] = value === null || value === "" ? null : Math.max(0, Math.round(profitNumber(value)));
+          });
+        }
+        if (Object.hasOwn(changes, "advertisingSpend")) {
+          expense.advertisingSpend = changes.advertisingSpend === null || changes.advertisingSpend === "" ? null : Math.max(0, profitMoney(changes.advertisingSpend));
+          expense.marketingSpend = expense.advertisingSpend;
+        }
+        if (Object.hasOwn(changes, "marketingSpend")) {
+          expense.marketingSpend = changes.marketingSpend === null || changes.marketingSpend === "" ? null : Math.max(0, profitMoney(changes.marketingSpend));
+          expense.advertisingSpend = expense.marketingSpend;
+        }
+        if (Object.hasOwn(changes, "adjustments")) expense.adjustments = changes.adjustments === null || changes.adjustments === "" ? null : Math.max(0, profitMoney(changes.adjustments));
+        const sampleTypes = getListing(listingId)?.sampleTypes || [];
+        const samplesComplete = sampleTypes.every((sample) => {
+          const value = expense.sampleQuantities?.[sample.id];
+          return value !== null && value !== undefined && value !== "";
+        });
+        expense.entryStatus = samplesComplete && expense.advertisingSpend !== null && expense.adjustments !== null ? "completed" : "in_progress";
+        commit();
         return getDailyExpense(listingId, dateKey);
       }
 
@@ -235,6 +289,7 @@
         if (!listing) return null;
         listing.lifecycleStatus = lifecycleStatus;
         listing.delistedAt = lifecycleStatus === "delisted" ? (dateKey || anchorDate) : null;
+        commit();
         return listing;
       }
 
@@ -243,6 +298,7 @@
         if (!listingSku) return null;
         listingSku.active = !listingSku.active;
         listingSku.deactivatedAt = listingSku.active ? null : anchorDate;
+        commit();
         return listingSku;
       }
 
@@ -265,6 +321,7 @@
           sampleTypes: []
         };
         state.listings.push(listing);
+        commit();
         return listing;
       }
 
@@ -274,20 +331,44 @@
           listingId: values.listingId,
           skuId: values.skuId,
           active: true,
-          storeCostOverride: Math.max(0, profitNumber(values.cost)),
+          storeCostOverride: getProduct(getListing(values.listingId)?.productId)?.standardUnitCost ?? Math.max(0, profitNumber(values.cost)),
           commissionRateOverride: Math.min(100, Math.max(0, profitNumber(values.commissionRate))),
           activatedAt: anchorDate,
           deactivatedAt: null
         };
         state.listingSkus.push(listingSku);
         if (values.price !== undefined) updateDailyFact(listingSku.id, anchorDate, { price: values.price, units: null });
+        else commit();
         return listingSku;
       }
 
       function addPriceObservation(values) {
         const observation = createPriceObservation(values);
-        if (observation) state.priceObservations.push(observation);
+        if (observation) {
+          state.priceObservations.push(observation);
+          commit();
+        }
         return observation;
+      }
+
+      function updateSyncStatus(changes = {}) {
+        state.syncStatus = { ...state.syncStatus, ...changes, id: "main" };
+        commit();
+        return state.syncStatus;
+      }
+
+      function hydrate(initialState) {
+        const profitInitialized = Array.isArray(initialState?.profitSyncRecords) && initialState.profitSyncRecords.length > 0;
+        if (!profitInitialized && state.products.length && options.seedDemo !== false) {
+          commit();
+          return state;
+        }
+        const hydrated = normalizeProfitRepositoryState(initialState, anchorDate);
+        Object.keys(PROFIT_WORKSPACE_COLLECTIONS).forEach((key) => {
+          state[key] = hydrated[key];
+        });
+        state.syncStatus = hydrated.syncStatus;
+        return state;
       }
 
       return {
@@ -301,12 +382,16 @@
         getDailyFact,
         getDailyFacts,
         getDailyExpense,
+        getDailySettlement,
+        updateProductCost,
         updateDailyFact,
         updateDailyExpense,
         setListingLifecycle,
         toggleListingSku,
         addListing,
         addListingSku,
-        addPriceObservation
+        addPriceObservation,
+        updateSyncStatus,
+        hydrate
       };
     }

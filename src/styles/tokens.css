@@ -1,0 +1,124 @@
+/*
+ * Workbench design foundation.
+ *
+ * Keep global visual decisions here. Page and component styles should consume
+ * these tokens instead of introducing new one-off colors, spacing or radii.
+ */
+@layer tokens, reset, base, layout, components, pages, responsive;
+
+@layer tokens {
+  :root {
+    /* Semantic colors */
+    --color-canvas: #f2f4f3;
+    --color-canvas-deep: #e9eeeb;
+    --color-ink: #101713;
+    --color-brand-ink: #12201b;
+    --color-brand-green: #176b4b;
+    --color-pulse-lime: #9df5ad;
+    --color-pulse-lime-strong: #4eda70;
+    --color-tech-blue: #2f6fed;
+    --color-muted: #68736d;
+    --color-line: rgba(18, 32, 27, 0.1);
+    --color-soft: rgba(18, 32, 27, 0.055);
+    --color-soft-surface: #f4f7f5;
+    --color-panel: rgba(255, 255, 255, 0.86);
+    --color-white: #fff;
+    --color-success: #176b4b;
+    --color-danger: #bf3f3f;
+    --color-warning: #ad7419;
+    --color-accent: var(--color-tech-blue);
+
+    /* Operating Pulse signature */
+    --color-pulse-ink: #111611;
+    --color-pulse-acid: #78f58f;
+    --color-pulse-canvas: #f5f7f2;
+    --color-pulse-muted: #747c75;
+    --color-pulse-instrument: #0d1712;
+    --color-pulse-instrument-soft: #14231b;
+
+    /* Compatibility aliases used by existing modules */
+    --bg: var(--color-canvas);
+    --ink: var(--color-ink);
+    --muted: var(--color-muted);
+    --line: var(--color-line);
+    --soft: var(--color-soft);
+    --soft-bg: var(--color-soft-surface);
+    --panel: var(--color-panel);
+    --white: var(--color-white);
+    --green: var(--color-success);
+    --red: var(--color-danger);
+    --amber: var(--color-warning);
+    --blue: var(--color-accent);
+
+    /* Typography */
+    --font-sans: "SF Pro Text", "PingFang SC", -apple-system, BlinkMacSystemFont,
+      "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    --text-xs: 12px;
+    --text-sm: 14px;
+    --text-md: 16px;
+    --text-lg: 18px;
+    --text-title: clamp(24px, 2vw, 36px);
+    --line-compact: 1.25;
+    --line-body: 1.55;
+
+    /* Spacing scale */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --page-gutter: clamp(16px, 3vw, 38px);
+    --section-gap: clamp(18px, 2vw, 28px);
+    --content-max: 1760px;
+
+    /* Surfaces and interaction */
+    --radius-sm: 12px;
+    --radius-md: 18px;
+    --radius-lg: 26px;
+    --radius-pill: 999px;
+    --radius: var(--radius-lg);
+    --surface-base: rgba(255, 255, 255, 0.78);
+    --surface-raised: rgba(255, 255, 255, 0.92);
+    --surface-focus: var(--color-brand-ink);
+    --shadow: 0 24px 68px rgba(20, 38, 30, 0.08);
+    --shadow-soft: 0 12px 34px rgba(20, 38, 30, 0.06);
+    --shadow-raised: 0 16px 44px rgba(26, 42, 35, 0.08);
+    --shadow-focus: 0 22px 58px rgba(15, 35, 27, 0.16);
+    --focus-ring: 0 0 0 3px rgba(47, 111, 237, 0.17);
+    --motion-fast: 160ms;
+    --motion-standard: 260ms;
+  }
+}
+
+@layer reset {
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, #fff 0%, var(--bg) 38%, #ececf0 100%);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+  }
+
+  :where(button, input, select, textarea) {
+    font: inherit;
+  }
+
+  :where(button) {
+    cursor: pointer;
+  }
+}

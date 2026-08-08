@@ -1,0 +1,15 @@
+    /* Short controls stay on one line; narrow screens scroll instead of breaking labels. */
+    body.workbench-entered .tabs,
+    body.workbench-entered .data-range-presets {
+      overscroll-behavior-inline: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    body.workbench-entered .tab,
+    body.workbench-entered .data-range-preset,
+    body.workbench-entered .data-range-custom {
+      word-break: keep-all;
+      overflow-wrap: normal;
+      white-space: nowrap;
+      text-wrap: nowrap;
+    }

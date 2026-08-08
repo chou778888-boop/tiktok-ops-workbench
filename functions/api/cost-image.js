@@ -1,24 +1,13 @@
-const allowedOrigins = new Set([
-  "https://tiktok-ops-workbench.pages.dev",
-  "http://127.0.0.1:8792",
-  "http://localhost:8792"
-]);
+import {
+  apiSecurityHeaders,
+  corsHeaders,
+  requestBodyWithinLimit,
+  trustedMutationRequest
+} from "../_shared/http.js";
 
 const imagePattern = /^data:(image\/(?:png|jpe?g|webp));base64,([a-z0-9+/=\s]+)$/i;
 const idPattern = /^[a-f0-9]{64}$/i;
 const maxImageLength = 220000;
-
-function corsHeaders(request) {
-  const headers = {};
-  const origin = request?.headers?.get("origin") || "";
-  if (allowedOrigins.has(origin)) {
-    headers["access-control-allow-origin"] = origin;
-    headers["access-control-allow-methods"] = "GET, POST, OPTIONS";
-    headers["access-control-allow-headers"] = "accept, content-type";
-    headers.vary = "Origin";
-  }
-  return headers;
-}
 
 function json(status, body, request) {
   return new Response(JSON.stringify(body), {
@@ -26,6 +15,7 @@ function json(status, body, request) {
     headers: {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
+      ...apiSecurityHeaders(),
       ...corsHeaders(request)
     }
   });
@@ -56,6 +46,12 @@ async function handleGet(request, env) {
 }
 
 async function handlePost(request, env) {
+  if (!trustedMutationRequest(request)) {
+    return json(403, { error: "Cross-site write request blocked" }, request);
+  }
+  if (!requestBodyWithinLimit(request, maxImageLength + 20_000)) {
+    return json(413, { error: "图片请求过大" }, request);
+  }
   let payload;
   try {
     payload = await request.json();

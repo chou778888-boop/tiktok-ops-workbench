@@ -1,0 +1,156 @@
+    /* Daily-center attention hierarchy: result → action → input → review. */
+    body.workbench-entered #reports .report-layout {
+      gap: 24px;
+    }
+
+    body.workbench-entered #reports .report-overview-grid {
+      margin-bottom: 2px;
+    }
+
+    body.workbench-entered #reports .daily-management-board {
+      position: relative;
+      gap: 10px;
+      padding: 16px 12px 12px;
+      border: 1px solid rgba(15, 23, 42, 0.055);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(241, 245, 249, 0.72));
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    }
+
+    body.workbench-entered #reports .daily-management-board::before {
+      content: "今日行动重点";
+      grid-column: 1 / -1;
+      padding: 0 5px 2px;
+      color: #344054;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    body.workbench-entered #reports .daily-management-lane {
+      min-height: 236px;
+      border-top-width: 3px;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.045);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.complete {
+      border-color: rgba(15, 118, 110, 0.18);
+      border-top-color: #0f9f8f;
+      background: linear-gradient(180deg, rgba(236, 253, 245, 0.78), rgba(255, 255, 255, 0.98) 34%);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.issue {
+      border-color: rgba(190, 24, 93, 0.17);
+      border-top-color: #e34864;
+      background: linear-gradient(180deg, rgba(255, 241, 242, 0.9), rgba(255, 255, 255, 0.98) 34%);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.follow {
+      border-color: rgba(37, 99, 235, 0.17);
+      border-top-color: #3b82f6;
+      background: linear-gradient(180deg, rgba(239, 246, 255, 0.92), rgba(255, 255, 255, 0.98) 34%);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.decision {
+      border-color: rgba(124, 58, 237, 0.16);
+      border-top-color: #8b5cf6;
+      background: linear-gradient(180deg, rgba(245, 243, 255, 0.92), rgba(255, 255, 255, 0.98) 34%);
+    }
+
+    body.workbench-entered #reports .daily-management-lane-head h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    body.workbench-entered #reports .daily-management-lane-head h3::before {
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    body.workbench-entered #reports .daily-management-lane.complete h3::before {
+      content: "✓";
+      color: #087d70;
+      background: rgba(15, 159, 143, 0.13);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.issue h3::before {
+      content: "!";
+      color: #b4233b;
+      background: rgba(227, 72, 100, 0.13);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.follow h3::before {
+      content: "→";
+      color: #1d4ed8;
+      background: rgba(59, 130, 246, 0.13);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.decision h3::before {
+      content: "◇";
+      color: #7c3aed;
+      background: rgba(139, 92, 246, 0.13);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.complete .daily-management-lane-head span {
+      color: #087d70;
+      background: rgba(15, 159, 143, 0.1);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.issue .daily-management-lane-head span {
+      color: #b4233b;
+      background: rgba(227, 72, 100, 0.1);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.follow .daily-management-lane-head span {
+      color: #1d4ed8;
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    body.workbench-entered #reports .daily-management-lane.decision .daily-management-lane-head span {
+      color: #7c3aed;
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    body.workbench-entered #reports .daily-management-board + .panel {
+      overflow: hidden;
+      border-color: rgba(44, 110, 232, 0.16);
+      border-top: 4px solid #2c6ee8;
+      box-shadow: 0 20px 52px rgba(44, 110, 232, 0.07);
+    }
+
+    body.workbench-entered #reports .daily-management-board + .panel > .panel-head {
+      background: linear-gradient(90deg, rgba(44, 110, 232, 0.07), rgba(255, 255, 255, 0) 58%);
+    }
+
+    body.workbench-entered #reports .report-work-guide {
+      border-color: rgba(44, 110, 232, 0.11);
+      background: linear-gradient(135deg, rgba(44, 110, 232, 0.045), rgba(255, 255, 255, 0.98) 54%);
+      box-shadow: none;
+    }
+
+    body.workbench-entered #reports .weekly-panel {
+      border-color: rgba(71, 84, 103, 0.14);
+      border-top: 4px solid #667085;
+      background: linear-gradient(180deg, rgba(246, 248, 251, 0.98), rgba(255, 255, 255, 0.98) 24%);
+      box-shadow: 0 14px 38px rgba(15, 23, 42, 0.045);
+    }
+
+    body.workbench-entered #reports .weekly-panel > .panel-head {
+      background: rgba(245, 247, 250, 0.74);
+    }
+
+    body.workbench-entered #reports button,
+    body.workbench-entered #reports .badge,
+    body.workbench-entered #reports .report-common-title,
+    body.workbench-entered #reports .template-section-head b,
+    body.workbench-entered #reports .report-card-head b {
+      word-break: keep-all;
+      white-space: nowrap;
+    }

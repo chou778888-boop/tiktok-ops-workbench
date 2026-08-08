@@ -1,13 +1,15 @@
+import {
+  apiSecurityHeaders,
+  corsHeaders,
+  requestBodyWithinLimit,
+  trustedMutationRequest
+} from "../_shared/http.js";
+
 const baseHeaders = {
   "content-type": "application/json; charset=utf-8",
-  "cache-control": "no-store"
+  "cache-control": "no-store",
+  ...apiSecurityHeaders()
 };
-
-const allowedOrigins = new Set([
-  "https://tiktok-ops-workbench.pages.dev",
-  "http://127.0.0.1:8792",
-  "http://localhost:8792"
-]);
 
 const arrayKeys = {
   entries: "id",
@@ -20,7 +22,18 @@ const arrayKeys = {
   blanketRemovedCreators: "id",
   headRemovedCreators: "id",
   creatorHistory: "id",
-  costProfiles: "id"
+  costProfiles: "id",
+  profitStores: "id",
+  profitProducts: "id",
+  profitSkuMasters: "id",
+  profitListings: "id",
+  profitListingSkus: "id",
+  profitDailyFacts: "id",
+  profitDailyExpenses: "id",
+  profitDailySettlements: "id",
+  profitProductCostHistory: "id",
+  profitSyncRecords: "id",
+  profitPriceObservations: "id"
 };
 
 const maxCostImageLength = 220000;
@@ -35,15 +48,7 @@ function validCostImage(value) {
 }
 
 function responseHeaders(request) {
-  const headers = { ...baseHeaders };
-  const origin = request?.headers?.get("origin") || "";
-  if (allowedOrigins.has(origin)) {
-    headers["access-control-allow-origin"] = origin;
-    headers["access-control-allow-methods"] = "GET, POST, OPTIONS";
-    headers["access-control-allow-headers"] = "accept, content-type";
-    headers.vary = "Origin";
-  }
-  return headers;
+  return { ...baseHeaders, ...corsHeaders(request) };
 }
 
 function json(status, body, request) {
@@ -54,7 +59,10 @@ function normalizeData(data) {
   return {
     entries: Array.isArray(data?.entries) ? data.entries : [],
     products: Array.isArray(data?.products) ? data.products : [],
-    tasks: Array.isArray(data?.tasks) ? data.tasks : [],
+    tasks: Array.isArray(data?.tasks) ? data.tasks.map((task) => ({
+      ...task,
+      syncVersion: Math.max(1, Number(task?.syncVersion || 0))
+    })) : [],
     reports: Array.isArray(data?.reports) ? data.reports : [],
     reportAnalyses: Array.isArray(data?.reportAnalyses) ? data.reportAnalyses : [],
     customCreators: Array.isArray(data?.customCreators) ? data.customCreators : [],
@@ -63,7 +71,18 @@ function normalizeData(data) {
     headRemovedCreators: Array.isArray(data?.headRemovedCreators) ? data.headRemovedCreators : [],
     creatorEdits: data?.creatorEdits && typeof data.creatorEdits === "object" ? data.creatorEdits : {},
     creatorHistory: Array.isArray(data?.creatorHistory) ? data.creatorHistory : [],
-    costProfiles: Array.isArray(data?.costProfiles) ? data.costProfiles : []
+    costProfiles: Array.isArray(data?.costProfiles) ? data.costProfiles : [],
+    profitStores: Array.isArray(data?.profitStores) ? data.profitStores : [],
+    profitProducts: Array.isArray(data?.profitProducts) ? data.profitProducts : [],
+    profitSkuMasters: Array.isArray(data?.profitSkuMasters) ? data.profitSkuMasters : [],
+    profitListings: Array.isArray(data?.profitListings) ? data.profitListings : [],
+    profitListingSkus: Array.isArray(data?.profitListingSkus) ? data.profitListingSkus : [],
+    profitDailyFacts: Array.isArray(data?.profitDailyFacts) ? data.profitDailyFacts : [],
+    profitDailyExpenses: Array.isArray(data?.profitDailyExpenses) ? data.profitDailyExpenses : [],
+    profitDailySettlements: Array.isArray(data?.profitDailySettlements) ? data.profitDailySettlements : [],
+    profitProductCostHistory: Array.isArray(data?.profitProductCostHistory) ? data.profitProductCostHistory : [],
+    profitSyncRecords: Array.isArray(data?.profitSyncRecords) ? data.profitSyncRecords : [],
+    profitPriceObservations: Array.isArray(data?.profitPriceObservations) ? data.profitPriceObservations : []
   };
 }
 
@@ -92,6 +111,55 @@ function normalizePatch(payload) {
   };
 }
 
+function taskStatusRank(status) {
+  return ({ "待处理": 1, "处理中": 2, "待复盘": 3, "已完成": 4, "已作废": 4 })[String(status || "")] || 0;
+}
+
+function mergeTaskTransition(previous, incoming, syncVersion) {
+  const next = { ...previous };
+  [
+    "status", "startedAt", "result", "evidence", "reviewAt", "resultSubmittedAt",
+    "reviewResult", "reviewedAt", "completedAt", "voidCategory", "voidReason",
+    "voidedAt", "voidedBy", "updatedAt", "updatedBy"
+  ].forEach((key) => {
+    if (Object.hasOwn(incoming, key)) next[key] = incoming[key];
+  });
+  next.syncVersion = syncVersion;
+  return next;
+}
+
+function mergeTaskRecord(previous, incoming) {
+  if (!previous) return {
+    ...incoming,
+    syncVersion: Math.max(1, Number(incoming?.syncVersion || 0))
+  };
+  const previousStatus = String(previous?.status || "");
+  const incomingStatus = String(incoming?.status || "");
+  if (["已完成", "已作废"].includes(previousStatus) && incomingStatus !== previousStatus) return previous;
+
+  const previousRank = taskStatusRank(previousStatus);
+  const incomingRank = taskStatusRank(incomingStatus);
+  if (previousRank && incomingRank && incomingRank < previousRank) return previous;
+
+  const previousVersion = Number(previous?.syncVersion || 0);
+  const incomingVersion = Number(incoming?.syncVersion || 0);
+  if (incomingRank > previousRank) {
+    const nextVersion = Math.max(previousVersion + 1, incomingVersion, 1);
+    return incomingVersion > previousVersion
+      ? { ...previous, ...incoming, syncVersion: nextVersion }
+      : mergeTaskTransition(previous, incoming, nextVersion);
+  }
+  if (incomingVersion !== previousVersion) return incomingVersion > previousVersion
+    ? { ...previous, ...incoming, syncVersion: Math.max(1, incomingVersion) }
+    : previous;
+
+  const previousTime = Date.parse(previous?.updatedAt || previous?.voidedAt || previous?.resultSubmittedAt || previous?.startedAt || "");
+  const incomingTime = Date.parse(incoming?.updatedAt || incoming?.voidedAt || incoming?.resultSubmittedAt || incoming?.startedAt || "");
+  if (Number.isFinite(previousTime) && !Number.isFinite(incomingTime)) return previous;
+  if (Number.isFinite(previousTime) && Number.isFinite(incomingTime) && incomingTime < previousTime) return previous;
+  return { ...previous, ...incoming, syncVersion: Math.max(previousVersion, incomingVersion, 1) };
+}
+
 function mergeCollection(current, operations, keyField, collectionName) {
   const deleted = new Set(operations.deletes);
   const records = new Map();
@@ -110,6 +178,11 @@ function mergeCollection(current, operations, keyField, collectionName) {
         ...record,
         image: String(record?.image || previous?.image || "")
       });
+      return;
+    }
+    if (collectionName === "tasks") {
+      const previous = records.get(key);
+      records.set(key, mergeTaskRecord(previous, record));
       return;
     }
     records.set(key, record);
@@ -185,6 +258,7 @@ async function readState(db) {
 
 function buildEntrySummary(data, date) {
   const current = normalizeData(data);
+  const coreRoles = new Set(["售后组", "BD", "店铺维护", "店群运营"]);
   const reportsBySlot = new Map();
   current.reports.forEach((report) => {
     if (report?.status !== "已提交" || report?.date !== date) return;
@@ -192,6 +266,7 @@ function buildEntrySummary(data, date) {
     reportsBySlot.set(slot, report);
   });
   const reports = [...reportsBySlot.values()];
+  const roles = new Set(reports.map((report) => report.role).filter((role) => coreRoles.has(role)));
   const stores = new Set(reports.flatMap((report) =>
     (Array.isArray(report.roleMetrics) ? report.roleMetrics : [])
       .map((row) => String(row?.store || "").trim())
@@ -203,7 +278,8 @@ function buildEntrySummary(data, date) {
   return {
     date,
     reports: reports.length,
-    reportTarget: 7,
+    roles: roles.size,
+    roleTarget: coreRoles.size,
     stores: stores.size,
     storeTarget: 6,
     openTasks: openTasks.length
@@ -238,6 +314,12 @@ async function handleGet(request, env) {
 }
 
 async function handlePost(request, env) {
+  if (!trustedMutationRequest(request)) {
+    return json(403, { error: "Cross-site write request blocked" }, request);
+  }
+  if (!requestBodyWithinLimit(request, 2_000_000)) {
+    return json(413, { error: "Payload too large" }, request);
+  }
   let payload;
   try {
     payload = await request.json();
@@ -317,3 +399,5 @@ export async function onRequest({ request, env }) {
   if (request.method === "POST") return handlePost(request, env);
   return json(405, { error: "Method not allowed" }, request);
 }
+
+export { applyPatch, mergeTaskRecord, normalizeData, normalizePatch };

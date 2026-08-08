@@ -29,63 +29,169 @@
       return numbers.length ? numbers.reduce((sum, value) => sum + value, 0) / numbers.length : 0;
     }
 
+    function profitMoney(value) {
+      return Math.round((profitNumber(value) + Number.EPSILON) * 100) / 100;
+    }
+
     function calculateProfitSkuFact(fact = {}) {
+      const itemsSource = fact.itemsSold ?? fact.units;
+      const itemsMissing = itemsSource === null || itemsSource === undefined || itemsSource === "";
+      const itemsSold = itemsMissing ? null : Math.max(0, Math.round(profitNumber(itemsSource)));
       const priceMissing = fact.price === null || fact.price === undefined || fact.price === "";
-      const unitsMissing = fact.units === null || fact.units === undefined || fact.units === "";
       const price = priceMissing ? null : Math.max(0, profitNumber(fact.price));
-      const units = unitsMissing ? null : Math.max(0, Math.round(profitNumber(fact.units)));
-      const completed = price !== null && units !== null;
-      const safePrice = price ?? 0;
-      const safeUnits = units ?? 0;
-      const cost = Math.max(0, profitNumber(fact.costSnapshot ?? fact.cost));
+      const gmvSource = fact.gmv ?? (price !== null && itemsSold !== null ? price * itemsSold : null);
+      const gmvMissing = gmvSource === null || gmvSource === undefined || gmvSource === "";
+      const gmv = gmvMissing ? null : profitMoney(Math.max(0, profitNumber(gmvSource)));
+      const completed = gmv !== null && itemsSold !== null;
+      const safeGmv = gmv ?? 0;
+      const safeItems = itemsSold ?? 0;
+      const productCost = Math.max(0, profitNumber(fact.productCostSnapshot ?? fact.costSnapshot ?? fact.cost));
+      const productCostTotal = profitMoney(productCost * safeItems);
       const commissionRate = Math.min(100, Math.max(0, profitNumber(fact.commissionSnapshot ?? fact.commissionRate)));
-      const unitGrossProfit = safePrice * (1 - commissionRate / 100) - cost;
+      const estimatedShippingFee = profitMoney(Math.max(0, profitNumber(fact.estimatedShippingFee)));
+      const estimatedPlatformFees = fact.estimatedPlatformFees === null || fact.estimatedPlatformFees === undefined
+        ? profitMoney(safeGmv * commissionRate / 100)
+        : profitMoney(Math.max(0, profitNumber(fact.estimatedPlatformFees)));
+      const estimatedReceived = fact.estimatedReceived === null || fact.estimatedReceived === undefined
+        ? profitMoney(safeGmv - estimatedShippingFee - estimatedPlatformFees)
+        : profitMoney(fact.estimatedReceived);
+      const contributionProfit = profitMoney(estimatedReceived - productCostTotal);
+      const averageTransactionPrice = safeItems ? profitMoney(safeGmv / safeItems) : null;
+      const unitGrossProfit = safeItems ? profitMoney(contributionProfit / safeItems) : profitMoney(-productCost);
       return {
-        price,
-        units,
-        revenue: safePrice * safeUnits,
+        gmv,
+        itemsSold,
+        grossSales: fact.grossSales === null || fact.grossSales === undefined ? null : profitMoney(Math.max(0, profitNumber(fact.grossSales))),
+        averageTransactionPrice,
+        productCost,
+        productCostTotal,
+        estimatedShippingFee,
+        estimatedPlatformFees,
+        estimatedReceived,
+        contributionProfit,
+        price: price ?? averageTransactionPrice,
+        units: itemsSold,
+        revenue: safeGmv,
         unitGrossProfit,
-        skuGrossProfit: unitGrossProfit * safeUnits,
+        skuGrossProfit: contributionProfit,
         completed
       };
     }
 
-    function calculateListingContribution(skuFacts = [], expense = {}) {
+    function calculateListingContribution(skuFacts = [], expense = {}, settlement = {}) {
       const results = skuFacts.map(calculateProfitSkuFact);
       const total = results.reduce((summary, result) => {
-        summary.units += result.units ?? 0;
-        summary.revenue += result.revenue;
-        summary.skuGrossProfit += result.skuGrossProfit;
+        summary.itemsSold += result.itemsSold ?? 0;
+        summary.sumSkuGmv += result.gmv ?? 0;
+        summary.productCostTotal += result.productCostTotal;
+        summary.estimatedReceived += result.estimatedReceived;
+        summary.skuContributionProfit += result.contributionProfit;
         summary.completedSkuCount += result.completed ? 1 : 0;
         summary.pendingSkuCount += result.completed ? 0 : 1;
         return summary;
-      }, { units: 0, revenue: 0, skuGrossProfit: 0, completedSkuCount: 0, pendingSkuCount: 0 });
-      const sampleCost = Math.max(0, profitNumber(expense.sampleCost));
-      const marketingSpend = Math.max(0, profitNumber(expense.marketingSpend));
-      const adjustments = Math.max(0, profitNumber(expense.adjustments));
-      const contributionProfit = total.skuGrossProfit - sampleCost - marketingSpend - adjustments;
+      }, { itemsSold: 0, sumSkuGmv: 0, productCostTotal: 0, estimatedReceived: 0, skuContributionProfit: 0, completedSkuCount: 0, pendingSkuCount: 0 });
+      const gmv = settlement.listingGmv === null || settlement.listingGmv === undefined
+        ? profitMoney(total.sumSkuGmv)
+        : profitMoney(Math.max(0, profitNumber(settlement.listingGmv)));
+      const sumSkuGmv = profitMoney(total.sumSkuGmv);
+      const reconciliationDifference = profitMoney(gmv - sumSkuGmv);
+      const netProductSales = settlement.netProductSales === null || settlement.netProductSales === undefined
+        ? gmv
+        : profitMoney(Math.max(0, profitNumber(settlement.netProductSales)));
+      const financialReconciliationDifference = profitMoney(netProductSales - gmv);
+      const platformDiscounts = profitMoney(Math.max(0, profitNumber(settlement.platformDiscounts)));
+      const sampleCostSource = expense.sampleCost ?? expense.sampleSpend;
+      const advertisingSpendSource = expense.advertisingSpend ?? expense.marketingSpend;
+      const adjustmentSource = expense.adjustments;
+      const expenseValues = [sampleCostSource, advertisingSpendSource, adjustmentSource];
+      const expensesComplete = expense.entryStatus !== "pending"
+        && expenseValues.every((value) => value !== null && value !== undefined && value !== "");
+      const sampleCost = sampleCostSource === null || sampleCostSource === undefined || sampleCostSource === ""
+        ? null
+        : profitMoney(Math.max(0, profitNumber(sampleCostSource)));
+      const advertisingSpend = advertisingSpendSource === null || advertisingSpendSource === undefined || advertisingSpendSource === ""
+        ? null
+        : profitMoney(Math.max(0, profitNumber(advertisingSpendSource)));
+      const adjustments = adjustmentSource === null || adjustmentSource === undefined || adjustmentSource === ""
+        ? null
+        : profitMoney(Math.max(0, profitNumber(adjustmentSource)));
+      const estimatedReceived = settlement.estimatedReceived === null || settlement.estimatedReceived === undefined
+        ? profitMoney(total.estimatedReceived)
+        : profitMoney(settlement.estimatedReceived);
+      const isSettled = settlement.settlementStatus === "settled"
+        && settlement.settlementAmount !== null
+        && settlement.settlementAmount !== undefined;
+      const actualReceived = isSettled ? profitMoney(settlement.settlementAmount) : null;
+      const receivedAmount = actualReceived ?? estimatedReceived;
+      const productCostTotal = profitMoney(total.productCostTotal);
+      const provisionalProfit = profitMoney(receivedAmount - productCostTotal);
+      const knownInternalExpenses = profitMoney(profitNumber(sampleCost) + profitNumber(advertisingSpend) + profitNumber(adjustments));
+      const finalProfit = profitMoney(provisionalProfit - knownInternalExpenses);
+      const contributionMargin = gmv ? finalProfit / gmv : 0;
       return {
-        units: total.units,
-        revenue: total.revenue,
-        skuGrossProfit: total.skuGrossProfit,
+        gmv,
+        sumSkuGmv,
+        reconciliationDifference,
+        netProductSales,
+        financialReconciliationDifference,
+        platformDiscounts,
+        itemsSold: total.itemsSold,
+        productCostTotal,
+        estimatedReceived,
+        actualReceived,
+        receivedAmount,
+        shippingFee: profitMoney(Math.max(0, profitNumber(settlement.shippingFee))),
+        platformFees: profitMoney(Math.max(0, profitNumber(settlement.platformFees))),
+        settlementStatus: settlement.settlementStatus || "estimated",
+        profitStatus: isSettled ? "settled" : "estimated",
         sampleCost,
-        marketingSpend,
+        advertisingSpend,
         adjustments,
-        contributionProfit,
-        contributionMargin: total.revenue ? contributionProfit / total.revenue : 0,
+        knownInternalExpenses,
+        provisionalProfit,
+        finalProfit,
+        profitCompleteness: expensesComplete ? "complete" : "provisional",
+        contributionMargin,
+        skuContributionProfit: profitMoney(total.skuContributionProfit),
         completedSkuCount: total.completedSkuCount,
-        pendingSkuCount: total.pendingSkuCount
+        pendingSkuCount: total.pendingSkuCount,
+        units: total.itemsSold,
+        revenue: gmv,
+        skuGrossProfit: profitMoney(sumSkuGmv - productCostTotal),
+        marketingSpend: advertisingSpend,
+        contributionProfit: finalProfit
       };
     }
 
     function aggregateProductContribution(listingResults = []) {
       const total = (listingResults || []).reduce((summary, result) => {
-        ["units", "revenue", "skuGrossProfit", "sampleCost", "marketingSpend", "adjustments", "contributionProfit"].forEach((key) => {
+        ["gmv", "sumSkuGmv", "netProductSales", "itemsSold", "productCostTotal", "estimatedReceived", "receivedAmount", "shippingFee", "platformFees", "platformDiscounts", "knownInternalExpenses", "provisionalProfit", "finalProfit", "skuContributionProfit", "skuGrossProfit"].forEach((key) => {
           summary[key] += profitNumber(result?.[key]);
         });
+        summary.provisionalListingCount += result?.profitCompleteness === "provisional" ? 1 : 0;
+        summary.actualReceived += result?.actualReceived === null || result?.actualReceived === undefined ? 0 : profitNumber(result.actualReceived);
+        const isAggregated = Number.isFinite(Number(result?.settledListingCount))
+          && Number.isFinite(Number(result?.estimatedListingCount));
+        summary.settledListingCount += isAggregated
+          ? profitNumber(result.settledListingCount)
+          : (result?.profitStatus === "settled" ? 1 : 0);
+        summary.estimatedListingCount += isAggregated
+          ? profitNumber(result.estimatedListingCount)
+          : (result?.profitStatus === "settled" ? 0 : 1);
         return summary;
-      }, { units: 0, revenue: 0, skuGrossProfit: 0, sampleCost: 0, marketingSpend: 0, adjustments: 0, contributionProfit: 0 });
-      return { ...total, contributionMargin: total.revenue ? total.contributionProfit / total.revenue : 0 };
+      }, { gmv: 0, sumSkuGmv: 0, netProductSales: 0, itemsSold: 0, productCostTotal: 0, estimatedReceived: 0, actualReceived: 0, receivedAmount: 0, shippingFee: 0, platformFees: 0, platformDiscounts: 0, knownInternalExpenses: 0, provisionalProfit: 0, finalProfit: 0, skuContributionProfit: 0, skuGrossProfit: 0, settledListingCount: 0, estimatedListingCount: 0, provisionalListingCount: 0 });
+      Object.keys(total).forEach((key) => { if (typeof total[key] === "number") total[key] = profitMoney(total[key]); });
+      return {
+        ...total,
+        reconciliationDifference: profitMoney(total.gmv - total.sumSkuGmv),
+        financialReconciliationDifference: profitMoney(total.netProductSales - total.gmv),
+        profitCompleteness: total.provisionalListingCount > 0 ? "provisional" : "complete",
+        contributionMargin: total.gmv ? total.finalProfit / total.gmv : 0,
+        units: total.itemsSold,
+        revenue: total.gmv,
+        marketingSpend: total.knownInternalExpenses,
+        contributionProfit: total.finalProfit
+      };
     }
 
     function prepareProfitDailyEntry(facts = [], dateKey) {
@@ -169,8 +275,5 @@
     function validateProfitListingSku(values = {}) {
       if (!String(values.listingId || "").trim()) return "请选择商品链接";
       if (!String(values.skuId || "").trim()) return "请选择公共 SKU";
-      if (profitNumber(values.cost, -1) < 0) return "单件成本不能小于 0";
-      const commissionRate = profitNumber(values.commissionRate, -1);
-      if (commissionRate < 0 || commissionRate > 100) return "佣金率必须在 0–100% 之间";
       return "";
     }

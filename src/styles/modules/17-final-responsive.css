@@ -1,0 +1,94 @@
+    /* Final responsive override: keep the report pair equal-height and contain
+       long generated summaries inside their own scroll area. */
+    body.workbench-entered #reports .report-overview-grid > .report-summary,
+    body.workbench-entered #reports .report-overview-grid > .panel {
+      box-sizing: border-box;
+      height: 408px;
+      min-height: 408px;
+      max-height: 408px;
+    }
+
+    body.workbench-entered #reports .report-overview-grid > .panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    body.workbench-entered #reports #dailyDigest {
+      height: auto;
+      min-height: 0;
+      max-height: none;
+      flex: 1 1 auto;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+    }
+
+    @media (max-width: 760px) {
+      body.workbench-entered #reports .report-overview-grid > .report-summary,
+      body.workbench-entered #reports .report-overview-grid > .panel {
+        height: 420px;
+        min-height: 420px;
+        max-height: 420px;
+      }
+    }
+
+    /* Overview range controls stay integrated with the overview date without
+       inheriting the generic toolbar's horizontal-scroll behavior. */
+    @media (max-width: 900px) {
+      body.workbench-entered #overview .overview-topline {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+      }
+
+      body.workbench-entered #overview .overview-range-toolbar {
+        width: 100%;
+        align-items: stretch;
+      }
+
+      body.workbench-entered #overview .overview-range-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        width: 100%;
+        gap: 10px;
+      }
+
+      body.workbench-entered #overview .overview-range-toolbar .data-range-presets {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        width: auto;
+        min-width: 0;
+        overflow: visible;
+        gap: 6px;
+        padding: 0;
+      }
+
+      body.workbench-entered #overview .overview-range-toolbar .data-range-preset {
+        min-width: 0;
+        padding-inline: 9px;
+      }
+
+      body.workbench-entered #overview .overview-range-toolbar .data-range-meaning {
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body.workbench-entered #overview .overview-range-controls {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      body.workbench-entered #overview .overview-range-toolbar .data-range-custom {
+        justify-content: space-between;
+      }
+
+      body.workbench-entered #overview .overview-range-toolbar .data-range-custom input {
+        flex: 1;
+        width: auto;
+      }
+
+      body.workbench-entered #overview .overview-range-toolbar .data-range-meaning {
+        white-space: normal;
+      }
+    }

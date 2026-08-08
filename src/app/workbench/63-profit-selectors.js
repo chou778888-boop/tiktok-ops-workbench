@@ -12,8 +12,9 @@
       });
       const completePoints = points.filter((point) => point.completed);
       const averageUnits = profitAverage(completePoints.map((point) => point.units));
-      const firstPrice = completePoints[0]?.price;
-      const lastPrice = completePoints.at(-1)?.price;
+      const averageTransactionPrice = profitAverage(completePoints.map((point) => point.averageTransactionPrice));
+      const firstPrice = completePoints[0]?.averageTransactionPrice;
+      const lastPrice = completePoints.at(-1)?.averageTransactionPrice;
       const priceChange = firstPrice ? (lastPrice - firstPrice) / firstPrice : null;
       const previousDates = profitDateWindow(profitShiftDate(dates[0], -1), count);
       const previousPoints = previousDates.map((dateKey) => calculateProfitSkuFact(
@@ -21,20 +22,56 @@
       )).filter((point) => point.completed);
       const previousAverageUnits = profitAverage(previousPoints.map((point) => point.units));
       const unitChange = previousAverageUnits ? (averageUnits - previousAverageUnits) / previousAverageUnits : null;
-      return { points, averageUnits, previousAverageUnits, unitChange, priceChange };
+      return { points, averageUnits, averageTransactionPrice, previousAverageUnits, unitChange, priceChange };
     }
 
     function classifyProfitHealth(result = {}, observing = false) {
-      if (profitNumber(result.contributionProfit) < 0) return { key: "loss", label: "贡献亏损", tone: "critical" };
+      if (profitNumber(result.pendingSkuCount) > 0) return { key: "pending", label: "数据待同步", tone: "pending" };
+      if (result.profitCompleteness === "provisional") return { key: "expense_pending", label: "费用待补", tone: "warning" };
+      if (profitNumber(result.finalProfit ?? result.contributionProfit) < 0) return { key: "loss", label: "经营亏损", tone: "critical" };
       if (profitNumber(result.contributionMargin) < 0.08) return { key: "low_margin", label: "利润偏低", tone: "warning" };
-      if (profitNumber(result.pendingSkuCount) > 0) return { key: "pending", label: "待完成填写", tone: "pending" };
       if (observing) return { key: "observing", label: "调价观察中", tone: "observing" };
+      if (result.profitStatus && result.profitStatus !== "settled") return { key: "processing", label: "结算处理中", tone: "processing" };
       return { key: "healthy", label: "经营正常", tone: "healthy" };
+    }
+
+    function selectListingDailyResult(repository, listing, listingSkus, product, dateKey) {
+      const activeListingSkus = listingSkus.filter((row) => row.active);
+      const facts = activeListingSkus.map((listingSku) => {
+        const entries = repository.getDailyFacts(listingSku.id);
+        const entry = repository.getDailyFact(listingSku.id, dateKey) || prepareProfitDailyEntry(entries, dateKey);
+        return {
+          ...entry,
+          productCostSnapshot: entry.productCostSnapshot ?? product?.standardUnitCost,
+          costSnapshot: entry.costSnapshot ?? product?.standardUnitCost,
+          commissionSnapshot: entry.commissionSnapshot ?? listingSku.commissionRateOverride
+        };
+      });
+      const expense = repository.getDailyExpense(listing.id, dateKey) || {
+        listingId: listing.id,
+        dateKey,
+        sampleQuantities: {},
+        sampleCost: null,
+        advertisingSpend: null,
+        marketingSpend: null,
+        adjustments: null,
+        entryStatus: "pending"
+      };
+      const settlement = repository.getDailySettlement(listing.id, dateKey) || {
+        listingId: listing.id,
+        dateKey,
+        settlementStatus: "estimated",
+        listingGmv: facts.reduce((sum, fact) => sum + profitNumber(fact.gmv), 0),
+        settlementAmount: null,
+        source: "待同步"
+      };
+      return { dateKey, facts, expense, settlement, result: calculateListingContribution(facts, expense, settlement) };
     }
 
     function selectListingProfitResult(repository, listingId, dateKey) {
       const listing = repository.getListing(listingId);
       if (!listing) return null;
+      const product = repository.getProduct(listing.productId);
       const listingSkus = repository.getListingSkus(listingId, { includeInactive: true });
       const skuRows = listingSkus.map((listingSku) => {
         const sku = repository.getSkuMaster(listingSku.skuId);
@@ -42,7 +79,8 @@
         const entry = repository.getDailyFact(listingSku.id, dateKey) || prepareProfitDailyEntry(facts, dateKey);
         const fact = {
           ...entry,
-          costSnapshot: entry.costSnapshot ?? listingSku.storeCostOverride ?? sku?.standardCost,
+          productCostSnapshot: entry.productCostSnapshot ?? product?.standardUnitCost,
+          costSnapshot: entry.costSnapshot ?? product?.standardUnitCost,
           commissionSnapshot: entry.commissionSnapshot ?? listingSku.commissionRateOverride
         };
         const observation = repository.getState().priceObservations.find((item) => (
@@ -57,27 +95,26 @@
           observation
         };
       });
-      const expense = repository.getDailyExpense(listingId, dateKey) || {
-        listingId,
-        dateKey,
-        sampleQuantities: {},
-        sampleCost: 0,
-        marketingSpend: 0,
-        adjustments: 0,
-        entryStatus: "pending"
+      const daily = selectListingDailyResult(repository, listing, listingSkus, product, dateKey);
+      const sevenDays = profitDateWindow(dateKey, 7).map((day) => selectListingDailyResult(repository, listing, listingSkus, product, day));
+      const sevenDayResult = aggregateProductContribution(sevenDays.map((day) => day.result));
+      const sevenDay = {
+        days: sevenDays,
+        result: sevenDayResult,
+        averageTransactionPrice: sevenDayResult.itemsSold ? profitMoney(sevenDayResult.gmv / sevenDayResult.itemsSold) : null
       };
-      const activeRows = skuRows.filter((row) => row.listingSku.active);
-      const result = calculateListingContribution(activeRows.map((row) => row.fact), expense);
       const observations = skuRows.map((row) => row.observation).filter(Boolean);
       return {
         listing,
         store: repository.getStore(listing.storeId),
-        product: repository.getProduct(listing.productId),
+        product,
         skuRows,
-        expense,
-        result,
+        expense: daily.expense,
+        settlement: daily.settlement,
+        result: daily.result,
+        sevenDay,
         observations,
-        health: classifyProfitHealth(result, observations.length > 0)
+        health: classifyProfitHealth(daily.result, observations.length > 0)
       };
     }
 
@@ -94,6 +131,13 @@
             .filter((listing) => !(listing.lifecycleStatus === "delisted" && listing.delistedAt && listing.delistedAt < dateKey))
             .map((listing) => selectListingProfitResult(repository, listing.id, dateKey));
           const result = aggregateProductContribution(listingRows.map((row) => row.result));
+          const sevenDays = profitDateWindow(dateKey, 7).map((day) => {
+            const dayResults = listingRows.map((row) => row.sevenDay.days.find((item) => item.dateKey === day)?.result).filter(Boolean);
+            return { dateKey: day, result: aggregateProductContribution(dayResults) };
+          });
+          const sevenDayResult = aggregateProductContribution(
+            listingRows.flatMap((row) => row.sevenDay.days.map((day) => day.result))
+          );
           const observationCount = listingRows.reduce((sum, row) => sum + row.observations.length, 0);
           const pendingListingCount = listingRows.filter((row) => row.result.pendingSkuCount > 0).length;
           const health = classifyProfitHealth({
@@ -110,15 +154,20 @@
             pendingListingCount,
             observationCount,
             result,
+            sevenDay: {
+              days: sevenDays,
+              result: sevenDayResult,
+              averageTransactionPrice: sevenDayResult.itemsSold ? profitMoney(sevenDayResult.gmv / sevenDayResult.itemsSold) : null
+            },
             health
           };
         })
         .filter((row) => row.listingCount > 0)
-        .sort((left, right) => right.result.units - left.result.units);
+        .sort((left, right) => right.sevenDay.result.itemsSold - left.sevenDay.result.itemsSold);
     }
 
     function selectProfitWorkspaceSummary(productRows = []) {
-      const result = aggregateProductContribution(productRows.map((row) => row.result));
+      const result = aggregateProductContribution(productRows.map((row) => row.sevenDay?.result || row.result));
       return {
         productCount: productRows.length,
         listingCount: productRows.reduce((sum, row) => sum + row.listingCount, 0),
@@ -145,7 +194,19 @@
               detail: `${listingRow.result.pendingSkuCount} 个 SKU 待填写今日销量`
             });
           }
-          if (listingRow.result.contributionProfit < 0) {
+          if (listingRow.result.profitCompleteness === "provisional") {
+            items.push({
+              id: `expense-pending-${listingRow.listing.id}`,
+              kind: "expense_pending",
+              tone: "warning",
+              priority: 1,
+              productId: productRow.product.id,
+              listingId: listingRow.listing.id,
+              title: `${productRow.product.code} · 广告、样品待补`,
+              detail: `已得暂算利润 ${listingRow.result.provisionalProfit.toFixed(2)} 美元，补齐内部费用后转为最终利润`
+            });
+          }
+          if (listingRow.result.finalProfit < 0) {
             items.push({
               id: `loss-${listingRow.listing.id}`,
               kind: "loss",
@@ -154,7 +215,19 @@
               productId: productRow.product.id,
               listingId: listingRow.listing.id,
               title: `${productRow.product.code} · ${listingRow.listing.displayName}`,
-              detail: `今日贡献利润 ${listingRow.result.contributionProfit.toFixed(2)} 美元`
+              detail: `当前利润 ${listingRow.result.finalProfit.toFixed(2)} 美元`
+            });
+          }
+          if (Math.abs(profitNumber(listingRow.result.reconciliationDifference)) >= 0.01) {
+            items.push({
+              id: `reconcile-${listingRow.listing.id}`,
+              kind: "reconcile",
+              tone: "warning",
+              priority: 2,
+              productId: productRow.product.id,
+              listingId: listingRow.listing.id,
+              title: `${productRow.product.code} · SKU 对账差异`,
+              detail: `链接与 SKU 汇总相差 ${profitMoney(Math.abs(listingRow.result.reconciliationDifference)).toFixed(2)} 美元`
             });
           }
           listingRow.observations.forEach((observation) => {

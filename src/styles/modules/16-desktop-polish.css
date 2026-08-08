@@ -1,0 +1,189 @@
+    /* Desktop polish: keep the Mac/Windows hierarchy identical without horizontal navigation. */
+    @media (min-width: 1181px) {
+      body.workbench-entered .topbar {
+        grid-template-columns: minmax(166px, 220px) minmax(520px, 1fr) auto;
+      }
+
+      body.workbench-entered .tabs,
+      .windows-performance body.workbench-entered .tabs {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        overflow: visible;
+      }
+
+      body.workbench-entered .tab,
+      html.mac-client body.workbench-entered .tab,
+      html.windows-performance body.workbench-entered .tab {
+        min-width: 0;
+        min-height: 42px;
+        padding-inline: clamp(7px, 0.72vw, 12px);
+        font-size: 14px;
+        line-height: 1;
+        letter-spacing: -0.01em;
+      }
+
+      body.workbench-entered #reports .panel-head,
+      body.workbench-entered #reports .report-summary-actions,
+      body.workbench-entered #reports .report-card-head,
+      body.workbench-entered #reports .weekly-head {
+        flex-wrap: nowrap;
+      }
+
+      body.workbench-entered #reports .panel-head > div,
+      body.workbench-entered #reports .report-card-head > div,
+      body.workbench-entered #reports .weekly-head > div {
+        min-width: 0;
+      }
+
+      body.workbench-entered #reports .panel-head .sub,
+      body.workbench-entered #reports .report-card-head small,
+      body.workbench-entered #reports .weekly-head p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      body.workbench-entered #reports .report-summary-actions,
+      body.workbench-entered #reports .report-date-filter,
+      body.workbench-entered #reports .daily-management-lane-head,
+      body.workbench-entered #reports .report-loop-step b,
+      body.workbench-entered #reports #reportForm > .field > label {
+        white-space: nowrap;
+      }
+    }
+
+    @media (min-width: 1181px) and (max-width: 1440px) {
+      body.workbench-entered .topbar {
+        grid-template-columns: 170px minmax(510px, 1fr) auto;
+        gap: 8px;
+      }
+
+      body.workbench-entered .brand {
+        gap: 8px;
+      }
+
+      body.workbench-entered .top-actions {
+        gap: 5px;
+      }
+
+      body.workbench-entered .sync-pill {
+        min-width: 98px;
+        padding-inline: 8px;
+      }
+
+      body.workbench-entered .top-actions > .primary {
+        min-width: 86px;
+        padding-inline: 12px;
+      }
+
+      body.workbench-entered #reports .daily-management-board {
+        gap: 10px;
+      }
+
+      body.workbench-entered #reports .daily-management-lane-head {
+        gap: 7px;
+        padding-inline: 14px;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      body.workbench-entered .tabs {
+        justify-content: flex-start;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      body.workbench-entered .report-overview-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      body.workbench-entered .report-overview-grid > .report-summary,
+      body.workbench-entered .report-overview-grid > .panel {
+        width: 100%;
+        height: auto;
+        min-width: 0;
+        min-height: 0;
+      }
+    }
+
+    @media (min-width: 761px) and (max-width: 1180px) {
+      body.workbench-entered .tabs,
+      .windows-performance body.workbench-entered .tabs {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 4px;
+        overflow: visible;
+      }
+
+      body.workbench-entered .tab-menu,
+      body.workbench-entered .tab-menu > .tab {
+        width: 100%;
+        min-width: 0;
+      }
+
+      body.workbench-entered .tab,
+      html.mac-client body.workbench-entered .tab,
+      html.windows-performance body.workbench-entered .tab {
+        min-width: 0;
+        padding-inline: 8px;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+    }
+
+    @media (max-width: 760px) {
+      html.mobile-client body,
+      html:not(.windows-performance):not(.mac-client) body {
+        font-family: "SF Pro Text", "PingFang SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei UI", sans-serif;
+      }
+
+      body.workbench-entered .tabs {
+        justify-content: flex-start;
+        gap: 4px;
+        padding-block: 5px 2px;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+      }
+
+      body.workbench-entered .tab,
+      html.mac-client body.workbench-entered .tab,
+      html.windows-performance body.workbench-entered .tab {
+        min-height: 44px;
+        padding-inline: 14px;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .report-summary-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .report-date-filter {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .report-date-filter input {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+        font-size: 16px;
+      }
+
+      body.workbench-entered #reports .panel-head h2 {
+        font-size: 22px;
+      }
+
+      body.workbench-entered #reports .field input,
+      body.workbench-entered #reports .field select,
+      body.workbench-entered #reports .field textarea,
+      body.workbench-entered #reports .template-input input,
+      body.workbench-entered #reports .template-input select {
+        font-size: 16px;
+      }
+
+    }

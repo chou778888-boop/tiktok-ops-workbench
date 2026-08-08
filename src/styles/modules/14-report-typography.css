@@ -1,0 +1,106 @@
+    /* Daily center typography follows the work-guide reading scale. */
+    body.workbench-entered #reports .panel-head h2 {
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    body.workbench-entered #reports .panel-head .sub,
+    body.workbench-entered #reports .weekly-head p,
+    body.workbench-entered #reports .report-work-guide-head p {
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    body.workbench-entered #reports .badge,
+    body.workbench-entered #reports .ghost,
+    body.workbench-entered #reports .primary,
+    body.workbench-entered #reports .small-btn,
+    body.workbench-entered #reports summary {
+      font-size: 13px;
+    }
+
+    body.workbench-entered #reports .report-summary-card b {
+      font-size: 21px;
+    }
+
+    body.workbench-entered #reports .report-summary-card span,
+    body.workbench-entered #reports .daily-management-item p,
+    body.workbench-entered #reports .daily-management-empty,
+    body.workbench-entered #reports .digest-box {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    body.workbench-entered #reports .daily-management-lane-head h3,
+    body.workbench-entered #reports .report-card-head b {
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    body.workbench-entered #reports .daily-management-lane-head span,
+    body.workbench-entered #reports .daily-management-item small,
+    body.workbench-entered #reports .report-card-head small,
+    body.workbench-entered #reports .template-section-head small,
+    body.workbench-entered #reports .workflow-summary-copy small,
+    body.workbench-entered #reports .template-note,
+    body.workbench-entered #reports .report-extra-work-body small,
+    body.workbench-entered #reports .report-guide-item small,
+    body.workbench-entered #reports .report-guide-task small {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    body.workbench-entered #reports .daily-management-item b,
+    body.workbench-entered #reports .report-loop-step b,
+    body.workbench-entered #reports .report-section strong,
+    body.workbench-entered #reports .report-guide-task b {
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    body.workbench-entered #reports .report-loop-step span {
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    body.workbench-entered #reports .template-section-head b,
+    body.workbench-entered #reports .workflow-summary-copy b,
+    body.workbench-entered #reports .report-common-title,
+    body.workbench-entered #reports .report-work-guide-column > b,
+    body.workbench-entered #reports .report-guide-rules > b {
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    body.workbench-entered #reports .field label,
+    body.workbench-entered #reports .template-input label {
+      font-size: 13px;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+
+    body.workbench-entered #reports .field input,
+    body.workbench-entered #reports .field select,
+    body.workbench-entered #reports .field textarea,
+    body.workbench-entered #reports .template-input input,
+    body.workbench-entered #reports .template-input select {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    body.workbench-entered #reports .report-section p,
+    body.workbench-entered #reports .report-task-link,
+    body.workbench-entered #reports .weekly-digest,
+    body.workbench-entered #reports .weekly-metric span {
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    body.workbench-entered #reports .report-matrix th,
+    body.workbench-entered #reports .report-matrix td,
+    body.workbench-entered #reports .weekly-table th,
+    body.workbench-entered #reports .weekly-table td {
+      font-size: 13px;
+      line-height: 1.45;
+    }

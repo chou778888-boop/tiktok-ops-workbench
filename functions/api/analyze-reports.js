@@ -1,10 +1,20 @@
+import {
+  apiSecurityHeaders,
+  corsHeaders,
+  trustedMutationRequest
+} from "../_shared/http.js";
+
 const headers = {
   "content-type": "application/json; charset=utf-8",
-  "cache-control": "no-store"
+  "cache-control": "no-store",
+  ...apiSecurityHeaders()
 };
 
-function json(status, body) {
-  return new Response(JSON.stringify(body), { status, headers });
+function json(status, body, request) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...headers, ...corsHeaders(request, "POST, OPTIONS") }
+  });
 }
 
 function outputText(response) {
@@ -122,16 +132,22 @@ const systemPrompt = `
 `;
 
 export async function onRequest({ request, env }) {
-  if (request.method !== "POST") return json(405, { error: "Method not allowed" });
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders(request, "POST, OPTIONS") });
+  }
+  if (request.method !== "POST") return json(405, { error: "Method not allowed" }, request);
+  if (!trustedMutationRequest(request)) {
+    return json(403, { error: "Cross-site write request blocked" }, request);
+  }
   if (!env.AI && !env.OPENAI_API_KEY) {
     return json(503, {
       error: "AI_NOT_CONFIGURED",
       message: "深度分析服务尚未配置。"
-    });
+    }, request);
   }
 
   const contentLength = Number(request.headers.get("content-length") || 0);
-  if (contentLength > 220000) return json(413, { error: "Payload too large" });
+  if (contentLength > 220000) return json(413, { error: "Payload too large" }, request);
 
   let payload;
   try {
