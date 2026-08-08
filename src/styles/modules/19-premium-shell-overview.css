@@ -1030,7 +1030,7 @@ body.workbench-entered #overview .overview-attribution-panel {
 body.workbench-entered #overview .overview-analysis-panels {
   display: grid;
   grid-template-columns: minmax(0, 1.04fr) minmax(420px, 0.96fr);
-  align-items: stretch;
+  align-items: start;
   gap: 12px;
   padding: 12px;
 }
@@ -1049,7 +1049,6 @@ body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .
 
 body.workbench-entered #overview .overview-attribution-panel.is-dual-dimension .overview-attribution-grid {
   grid-template-columns: 1fr;
-  height: 100%;
   padding: 0;
 }
 
@@ -1596,9 +1595,7 @@ body.workbench-entered #overview .empty {
 @media (max-width: 340px) {
   body.workbench-entered .workspace-pulse-dock .brand span { display: none; }
   body.workbench-entered .workspace-pulse-dock .primary { padding-inline: 9px; }
-  body.workbench-entered #overview .overview-pulse-metrics { grid-template-columns: 1fr; }
-  body.workbench-entered #overview .overview-pulse-metrics .mini { border-right: 0; border-bottom: 1px solid rgba(18, 32, 27, 0.08); }
-  body.workbench-entered #overview .overview-pulse-metrics .mini:last-child { border-bottom: 0; }
+  body.workbench-entered #overview .overview-pulse-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   body.workbench-entered #overview .overview-signal-briefs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   body.workbench-entered #overview .overview-signal-briefs > div { min-height: 64px; border-bottom: 1px solid rgba(18, 32, 27, 0.08); }
   body.workbench-entered #overview .overview-signal-briefs > div:nth-child(2) { border-right: 0; }
