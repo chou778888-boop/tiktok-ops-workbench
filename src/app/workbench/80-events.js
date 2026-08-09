@@ -23,6 +23,34 @@
       }
     });
 
+    const overviewAnalysisShell = document.querySelector("[data-overview-analysis-shell]");
+    if (overviewAnalysisShell && typeof ResizeObserver !== "undefined") {
+      const initialOverviewAnalysisRect = overviewAnalysisShell.getBoundingClientRect();
+      let overviewAnalysisObservedSize = {
+        width: Math.round(initialOverviewAnalysisRect.width),
+        height: Math.round(initialOverviewAnalysisRect.height)
+      };
+      let overviewAnalysisResizeFrame = null;
+      const overviewAnalysisResizeObserver = new ResizeObserver((entries) => {
+        const entry = entries.find((item) => item.target === overviewAnalysisShell);
+        if (!entry) return;
+        const decision = overviewAnalysisResizeDecision(
+          overviewAnalysisObservedSize,
+          entry.contentRect,
+          document.getElementById("overview")?.classList.contains("active")
+        );
+        overviewAnalysisObservedSize = { width: decision.width, height: decision.height };
+        if (!decision.redraw || overviewAnalysisResizeFrame !== null) return;
+        overviewAnalysisResizeFrame = window.requestAnimationFrame(() => {
+          overviewAnalysisResizeFrame = null;
+          if (document.getElementById("overview")?.classList.contains("active")) {
+            renderOverviewAnalysisMode(true);
+          }
+        });
+      });
+      overviewAnalysisResizeObserver.observe(overviewAnalysisShell);
+    }
+
     document.querySelectorAll("[data-blanket-filter]").forEach((button) => {
       button.addEventListener("click", () => {
         blanketCreatorFilter = button.dataset.blanketFilter || "all";

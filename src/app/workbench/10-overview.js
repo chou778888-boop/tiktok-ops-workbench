@@ -491,7 +491,13 @@
       document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === viewName));
       document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
       renderEntranceSnapshot();
-      if (renderedViewRevisions.get(viewName) === uiRevision) return;
+      const activationPlan = overviewViewActivationPlan(viewName, renderedViewRevisions.get(viewName), uiRevision);
+      if (activationPlan.syncOverviewAnalysis) {
+        window.requestAnimationFrame(() => {
+          if (activeViewName() === "overview") renderOverviewAnalysisMode(true);
+        });
+      }
+      if (!activationPlan.renderFullView) return;
       window.requestAnimationFrame(() => render());
     }
 
@@ -962,9 +968,6 @@
     function drawGmvTrend(range = selectedDataRange()) {
       const canvas = document.getElementById("gmvTrendChart");
       if (!canvas) return;
-      const { ctx, width, height } = setupCanvas(canvas);
-      ctx.clearRect(0, 0, width, height);
-
       const dates = dateKeysInRange(range);
       const scopedRows = entriesInRange(range);
       const gmvByDate = scopedRows.reduce((map, entry) => {
@@ -972,10 +975,12 @@
         return map;
       }, new Map());
       const points = dates.map((date) => ({ date, value: gmvByDate.get(date) || 0 }));
-      setOverviewChartEmptyState("gmvTrendEmpty", !scopedRows.length);
-      if (!scopedRows.length) {
-        return;
-      }
+      const chartState = overviewChartState(scopedRows.length > 0);
+      setOverviewChartEmptyState("gmvTrendEmpty", chartState.isEmpty);
+      if (!chartState.shouldDraw) return;
+
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
 
       const pad = { left: 58, right: 24, top: 24, bottom: 42 };
       const chartW = width - pad.left - pad.right;
@@ -1066,9 +1071,6 @@
       const legend = document.getElementById("sourceLegend");
       const insight = document.getElementById("sourceInsight");
       if (!canvas || !legend || !insight) return;
-      const { ctx, width, height } = setupCanvas(canvas);
-      ctx.clearRect(0, 0, width, height);
-
       const known = totals.affiliateGmv + totals.productCardGmv;
       const other = Math.max(0, totals.gmv - known);
       const priorKnown = Number(priorTotals.affiliateGmv || 0) + Number(priorTotals.productCardGmv || 0);
@@ -1079,13 +1081,17 @@
         { label: "未归类成交", value: other, previous: priorOther, color: "#aab3ad" }
       ];
       const total = slices.reduce((sum, item) => sum + item.value, 0);
-      setOverviewChartEmptyState("sourceDonutEmpty", !total);
+      const chartState = overviewChartState(total > 0);
+      setOverviewChartEmptyState("sourceDonutEmpty", chartState.isEmpty);
 
-      if (!total) {
+      if (!chartState.shouldDraw) {
         legend.innerHTML = "";
         insight.textContent = "等待来源数据形成经营判断。";
         return;
       }
+
+      const { ctx, width, height } = setupCanvas(canvas);
+      ctx.clearRect(0, 0, width, height);
 
       const barX = 4;
       const barY = Math.max(8, (height - 24) / 2);

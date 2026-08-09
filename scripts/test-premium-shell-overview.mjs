@@ -90,8 +90,6 @@ assert.match(premiumStyles, /@media \(max-width: 340px\)[\s\S]*?\.overview-signa
 assert.match(premiumStyles, /@media \(max-width: 340px\)[\s\S]*?\.overview-signal-briefs > div:last-child\s*\{[\s\S]*?grid-column:\s*1 \/ -1/);
 assert.match(premiumStyles, /prefers-reduced-motion/);
 assert.match(overviewSource, /function setOverviewChartEmptyState/);
-assert.match(overviewSource, /setOverviewChartEmptyState\("gmvTrendEmpty", !scopedRows\.length\)/);
-assert.match(overviewSource, /setOverviewChartEmptyState\("sourceDonutEmpty", !total\)/);
 assert.match(overviewSource, /renderOverviewProfitPulse\(\)/);
 assert.match(overviewSource, /function renderOverviewDecisionBrief\(/);
 assert.match(overviewSource, /function setOverviewAnalysisMode\(/);
@@ -112,4 +110,4 @@ assert.match(eventsSource, /data-overview-analysis-mode/);
 assert.match(profitTemplate, /renderProfitListingDetail/);
 assert.match(profitTemplate, /renderProfitSkuTrend/);
 
-console.log(JSON.stringify({ passed: 62, phase: "operating-pulse-overview-contract" }));
+console.log(JSON.stringify({ passed: 60, phase: "operating-pulse-overview-contract" }));

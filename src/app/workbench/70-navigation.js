@@ -48,26 +48,17 @@
     });
 
     document.getElementById("overviewProfitAction")?.addEventListener("click", (event) => {
-      const listingId = event.currentTarget.dataset.listingId;
-      if (!listingId || !profitWorkspaceState.repository.getListing(listingId)) return;
+      const target = overviewProfitNavigationTarget(
+        event.currentTarget.dataset.listingId,
+        (listingId) => profitWorkspaceState.repository.getListing(listingId)
+      );
+      if (!target) return;
       profitWorkspaceState.view = "listing";
-      profitWorkspaceState.activeListingId = listingId;
-      profitWorkspaceState.activeProductId = profitWorkspaceState.repository.getListing(listingId)?.productId || null;
+      profitWorkspaceState.activeListingId = target.listingId;
+      profitWorkspaceState.activeProductId = target.productId;
       setView("costing");
       renderProfitTemplate();
       document.getElementById("profitTemplateRoot")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-
-    const overviewProfitAction = document.getElementById("overviewProfitAction");
-    overviewProfitAction?.addEventListener("click", () => {
-      const listingId = overviewProfitAction.dataset.listingId || "";
-      if (!listingId) return;
-      profitWorkspaceState.view = "listing";
-      profitWorkspaceState.activeListingId = listingId;
-      profitWorkspaceState.activeProductId = null;
-      setView("costing");
-      renderProfitTemplate();
-      window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     function setAcademyTarget(targetId) {

@@ -11,6 +11,20 @@ assert.match(source, /function makeOverviewDecisionModel\(/, "总览必须先形
 assert.match(source, /function overviewAnalysisVisibility\(/, "总览分析模式必须由纯状态模型保证互斥可见");
 assert.match(source, /function overviewPulseRangeLabel\(/, "链接模式必须显示自身点位的真实日期范围");
 
+const runtime = Function(`${source}\nreturn {
+  makeOverviewPulseModel,
+  overviewPulseDensity,
+  overviewTrendComparisonState,
+  overviewCompactMoney,
+  overviewEntrySource,
+  makeOverviewDecisionModel,
+  overviewAnalysisVisibility,
+  overviewPulseRangeLabel,
+  overviewViewActivationPlan: typeof overviewViewActivationPlan === "function" ? overviewViewActivationPlan : null,
+  overviewAnalysisResizeDecision: typeof overviewAnalysisResizeDecision === "function" ? overviewAnalysisResizeDecision : null,
+  overviewChartState: typeof overviewChartState === "function" ? overviewChartState : null,
+  overviewProfitNavigationTarget: typeof overviewProfitNavigationTarget === "function" ? overviewProfitNavigationTarget : null
+};`)();
 const {
   makeOverviewPulseModel,
   overviewPulseDensity,
@@ -19,8 +33,52 @@ const {
   overviewEntrySource,
   makeOverviewDecisionModel,
   overviewAnalysisVisibility,
-  overviewPulseRangeLabel
-} = Function(`${source}\nreturn { makeOverviewPulseModel, overviewPulseDensity, overviewTrendComparisonState, overviewCompactMoney, overviewEntrySource, makeOverviewDecisionModel, overviewAnalysisVisibility, overviewPulseRangeLabel };`)();
+  overviewPulseRangeLabel,
+  overviewViewActivationPlan,
+  overviewAnalysisResizeDecision,
+  overviewChartState,
+  overviewProfitNavigationTarget
+} = runtime;
+
+assert.equal(typeof overviewViewActivationPlan, "function", "总览重新激活必须拥有独立于业务 revision 的同步计划");
+assert.deepEqual(overviewViewActivationPlan("overview", 4, 4), {
+  renderFullView: false,
+  syncOverviewAnalysis: true
+});
+assert.deepEqual(overviewViewActivationPlan("overview", 3, 4), {
+  renderFullView: true,
+  syncOverviewAnalysis: false
+});
+assert.deepEqual(overviewViewActivationPlan("reports", 4, 4), {
+  renderFullView: false,
+  syncOverviewAnalysis: false
+});
+
+assert.equal(typeof overviewAnalysisResizeDecision, "function", "总览分析区必须判断实际尺寸变化后再重绘");
+assert.deepEqual(
+  overviewAnalysisResizeDecision({ width: 690, height: 659 }, { width: 664.4, height: 659.2 }, true),
+  { width: 664, height: 659, redraw: true }
+);
+assert.deepEqual(
+  overviewAnalysisResizeDecision({ width: 664, height: 659 }, { width: 664.2, height: 659.4 }, true),
+  { width: 664, height: 659, redraw: false }
+);
+assert.deepEqual(
+  overviewAnalysisResizeDecision({ width: 664, height: 659 }, { width: 320, height: 724 }, false),
+  { width: 320, height: 724, redraw: false }
+);
+
+assert.equal(typeof overviewChartState, "function", "Canvas 空态恢复必须先形成可见绘制计划");
+assert.deepEqual(overviewChartState(false), { isEmpty: true, shouldDraw: false });
+assert.deepEqual(overviewChartState(true), { isEmpty: false, shouldDraw: true });
+
+assert.equal(typeof overviewProfitNavigationTarget, "function", "重点链接入口必须只导航到仓库中存在的链接");
+const listingLookup = new Map([["listing-jzz-main", { id: "listing-jzz-main", productId: "product-jzz" }]]);
+assert.deepEqual(
+  overviewProfitNavigationTarget("listing-jzz-main", (listingId) => listingLookup.get(listingId)),
+  { listingId: "listing-jzz-main", productId: "product-jzz" }
+);
+assert.equal(overviewProfitNavigationTarget("missing", (listingId) => listingLookup.get(listingId)), null);
 const sampleProductRow = {
   product: { id: "product-jzz", code: "JZZ", name: "UFIST 颈椎按摩枕 2 件套" },
   listings: [{
@@ -172,4 +230,4 @@ assert.equal(empty.signals.priceLabel, "等待成交数据");
 assert.equal(empty.signals.motionLabel, "等待同步数据");
 assert.equal(empty.signals.actionLabel, "等待经营判断");
 
-console.log(JSON.stringify({ passed: 39, phase: "overview-pulse-model" }));
+console.log(JSON.stringify({ passed: 53, phase: "overview-pulse-model" }));

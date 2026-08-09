@@ -36,6 +36,43 @@
       };
     }
 
+    function overviewViewActivationPlan(viewName, renderedRevision, currentRevision) {
+      const renderFullView = renderedRevision !== currentRevision;
+      return {
+        renderFullView,
+        syncOverviewAnalysis: viewName === "overview" && !renderFullView
+      };
+    }
+
+    function overviewAnalysisResizeDecision(previousSize = {}, nextSize = {}, isOverviewActive = false) {
+      const width = Math.max(0, Math.round(Number(nextSize.width) || 0));
+      const height = Math.max(0, Math.round(Number(nextSize.height) || 0));
+      const previousWidth = Math.max(0, Math.round(Number(previousSize.width) || 0));
+      const previousHeight = Math.max(0, Math.round(Number(previousSize.height) || 0));
+      return {
+        width,
+        height,
+        redraw: Boolean(isOverviewActive && width > 0 && height > 0
+          && (width !== previousWidth || height !== previousHeight))
+      };
+    }
+
+    function overviewChartState(hasData) {
+      const shouldDraw = Boolean(hasData);
+      return { isEmpty: !shouldDraw, shouldDraw };
+    }
+
+    function overviewProfitNavigationTarget(listingId, getListing) {
+      const normalizedListingId = String(listingId || "");
+      if (!normalizedListingId || typeof getListing !== "function") return null;
+      const listing = getListing(normalizedListingId);
+      if (!listing) return null;
+      return {
+        listingId: normalizedListingId,
+        productId: listing.productId || null
+      };
+    }
+
     function overviewPulseRangeLabel(points = []) {
       const dateKeys = (Array.isArray(points) ? points : [])
         .map((point) => String(point?.dateKey || ""))
