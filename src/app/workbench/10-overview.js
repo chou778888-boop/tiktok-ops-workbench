@@ -627,10 +627,13 @@
       const displayMetrics = latestComplete || model.metrics;
       const displayAvailable = model.available || Boolean(latestComplete);
       const statusLabel = latestComplete ? "今日待同步" : model.statusLabel;
+      const latestDayLabel = latestComplete
+        ? `${Number(latestComplete.dateKey.slice(5, 7))}月${Number(latestComplete.dateKey.slice(8, 10))}日`
+        : "";
       if (brief) brief.dataset.tone = latestComplete ? "watch" : model.tone;
       if (status) status.textContent = statusLabel;
       document.getElementById("overviewDecisionTitle").textContent = latestComplete
-        ? `今日数据待同步，先看 ${latestComplete.dateKey} 完整结果`
+        ? `今日待同步，先看 ${latestDayLabel}完整结果`
         : model.headline;
       document.getElementById("overviewDecisionDetail").textContent = latestComplete
         ? `最近完整日 GMV ${money(latestComplete.gmv)}、成交 ${num(latestComplete.orders)} 单；今日未同步，不按零计入经营判断。`
