@@ -9,7 +9,7 @@ const source = (suffix) => sources.get(appSourceFiles.find((file) => file.endsWi
 const ownership = [
   ["00-runtime.js", "function normalizeState"],
   ["00-runtime.js", "async function saveCloudState"],
-  ["10-overview.js", "function drawGmvTrend"],
+  ["10-overview.js", "function drawOverviewOperatingChart"],
   ["20-tasks.js", "function renderTasks"],
   ["30-reports.js", "async function saveReport"],
   ["40-creators.js", "function renderCreatorCenter"],
