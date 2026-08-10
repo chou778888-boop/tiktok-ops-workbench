@@ -23,7 +23,9 @@ const runtime = Function(`${source}\nreturn {
   overviewViewActivationPlan: typeof overviewViewActivationPlan === "function" ? overviewViewActivationPlan : null,
   overviewAnalysisResizeDecision: typeof overviewAnalysisResizeDecision === "function" ? overviewAnalysisResizeDecision : null,
   overviewChartState: typeof overviewChartState === "function" ? overviewChartState : null,
-  overviewProfitNavigationTarget: typeof overviewProfitNavigationTarget === "function" ? overviewProfitNavigationTarget : null
+  overviewProfitNavigationTarget: typeof overviewProfitNavigationTarget === "function" ? overviewProfitNavigationTarget : null,
+  makeOverviewOperatingTrendModel: typeof makeOverviewOperatingTrendModel === "function" ? makeOverviewOperatingTrendModel : null,
+  latestCompleteOverviewDay: typeof latestCompleteOverviewDay === "function" ? latestCompleteOverviewDay : null
 };`)();
 const {
   makeOverviewPulseModel,
@@ -37,8 +39,41 @@ const {
   overviewViewActivationPlan,
   overviewAnalysisResizeDecision,
   overviewChartState,
-  overviewProfitNavigationTarget
+  overviewProfitNavigationTarget,
+  makeOverviewOperatingTrendModel,
+  latestCompleteOverviewDay
 } = runtime;
+
+assert.equal(typeof makeOverviewOperatingTrendModel, "function", "店群趋势必须由纯模型区分待同步日期与真实零值");
+assert.equal(typeof latestCompleteOverviewDay, "function", "单日待同步时必须由纯模型查找最近完整经营日");
+
+const operatingTrend = makeOverviewOperatingTrendModel([
+  { date: "2026-08-03", gmv: 100, orders: 4 },
+  { date: "2026-08-03", gmv: 50, orders: 1 },
+  { date: "2026-08-04", gmv: 0, orders: 0 },
+  { date: "2026-08-06", gmv: 20, orders: 2 }
+], { start: "2026-08-03", end: "2026-08-09", days: 7 });
+
+assert.deepEqual(operatingTrend.points[0], {
+  dateKey: "2026-08-03", synced: true, gmv: 150, orders: 5, averageOrderValue: 30
+});
+assert.deepEqual(operatingTrend.points[1], {
+  dateKey: "2026-08-04", synced: true, gmv: 0, orders: 0, averageOrderValue: null
+});
+assert.deepEqual(operatingTrend.points[2], {
+  dateKey: "2026-08-05", synced: false, gmv: null, orders: null, averageOrderValue: null
+});
+assert.deepEqual(operatingTrend.summary, {
+  gmv: 170, orders: 7, averageOrderValue: 24.29, syncedDays: 3, expectedDays: 7
+});
+
+assert.deepEqual(latestCompleteOverviewDay([
+  { date: "2026-08-08", gmv: 200, orders: 10, units: 12, adSpend: 20, adGmv: 80 },
+  { date: "2026-08-10", gmv: 999, orders: 99, units: 99, adSpend: 0, adGmv: 0 }
+], "2026-08-09"), {
+  dateKey: "2026-08-08", gmv: 200, orders: 10, units: 12, adSpend: 20, adGmv: 80, roi: 4
+});
+assert.equal(latestCompleteOverviewDay([], "2026-08-09"), null);
 
 assert.equal(typeof overviewViewActivationPlan, "function", "总览重新激活必须拥有独立于业务 revision 的同步计划");
 assert.deepEqual(overviewViewActivationPlan("overview", 4, 4), {
@@ -230,4 +265,4 @@ assert.equal(empty.signals.priceLabel, "等待成交数据");
 assert.equal(empty.signals.motionLabel, "等待同步数据");
 assert.equal(empty.signals.actionLabel, "等待经营判断");
 
-console.log(JSON.stringify({ passed: 53, phase: "overview-pulse-model" }));
+console.log(JSON.stringify({ passed: 61, phase: "overview-pulse-model" }));

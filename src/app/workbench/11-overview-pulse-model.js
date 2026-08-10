@@ -19,6 +19,75 @@
       return `$${Math.round(amount).toLocaleString("en-US")}`;
     }
 
+    function overviewModelNumber(value) {
+      return Number.isFinite(Number(value)) ? Number(value) : 0;
+    }
+
+    function overviewModelDateKeys(start, end) {
+      const keys = [];
+      const cursor = new Date(`${String(start || "")}T00:00:00Z`);
+      const limit = new Date(`${String(end || "")}T00:00:00Z`);
+      while (!Number.isNaN(cursor.getTime()) && !Number.isNaN(limit.getTime()) && cursor <= limit) {
+        keys.push(cursor.toISOString().slice(0, 10));
+        cursor.setUTCDate(cursor.getUTCDate() + 1);
+      }
+      return keys;
+    }
+
+    function makeOverviewOperatingTrendModel(entries = [], range = {}) {
+      const rows = Array.isArray(entries) ? entries.filter(Boolean) : [];
+      const points = overviewModelDateKeys(range?.start, range?.end).map((dateKey) => {
+        const dayRows = rows.filter((entry) => String(entry?.date || "") === dateKey);
+        if (!dayRows.length) {
+          return { dateKey, synced: false, gmv: null, orders: null, averageOrderValue: null };
+        }
+        const gmv = dayRows.reduce((sum, entry) => sum + overviewModelNumber(entry.gmv), 0);
+        const orders = dayRows.reduce((sum, entry) => sum + overviewModelNumber(entry.orders), 0);
+        return {
+          dateKey,
+          synced: true,
+          gmv,
+          orders,
+          averageOrderValue: orders > 0 ? Math.round(gmv / orders * 100) / 100 : null
+        };
+      });
+      const syncedPoints = points.filter((point) => point.synced);
+      const gmv = syncedPoints.reduce((sum, point) => sum + point.gmv, 0);
+      const orders = syncedPoints.reduce((sum, point) => sum + point.orders, 0);
+      return {
+        points,
+        summary: {
+          gmv,
+          orders,
+          averageOrderValue: orders > 0 ? Math.round(gmv / orders * 100) / 100 : null,
+          syncedDays: syncedPoints.length,
+          expectedDays: points.length
+        }
+      };
+    }
+
+    function latestCompleteOverviewDay(entries = [], selectedDate = "") {
+      const rows = (Array.isArray(entries) ? entries : []).filter((entry) => {
+        const dateKey = String(entry?.date || "");
+        return /^\d{4}-\d{2}-\d{2}$/.test(dateKey) && dateKey <= String(selectedDate || "");
+      });
+      const dateKey = rows.map((entry) => String(entry.date)).sort().at(-1);
+      if (!dateKey) return null;
+      const dayRows = rows.filter((entry) => String(entry.date) === dateKey);
+      const totals = dayRows.reduce((result, entry) => ({
+        gmv: result.gmv + overviewModelNumber(entry.gmv),
+        orders: result.orders + overviewModelNumber(entry.orders),
+        units: result.units + overviewModelNumber(entry.units),
+        adSpend: result.adSpend + overviewModelNumber(entry.adSpend),
+        adGmv: result.adGmv + overviewModelNumber(entry.adGmv)
+      }), { gmv: 0, orders: 0, units: 0, adSpend: 0, adGmv: 0 });
+      return {
+        dateKey,
+        ...totals,
+        roi: totals.adSpend > 0 ? Math.round(totals.adGmv / totals.adSpend * 100) / 100 : 0
+      };
+    }
+
     function overviewEntrySource(entry = {}) {
       return String(entry?.source || "历史录入");
     }
