@@ -23,6 +23,7 @@
   const error = document.getElementById("entryLoginError");
   const mainScript = document.getElementById("workbenchMain");
   let mainLoadPromise = null;
+  let mainPreloadLink = null;
 
   function setLoginBusy(busy, text = "正在验证…") {
     if (!button) return;
@@ -43,6 +44,15 @@
     } catch {
       // 浏览器可能禁用密码管理器；30天登录会话仍然有效。
     }
+  }
+
+  function preloadWorkbenchMain() {
+    if (mainPreloadLink || !mainScript?.dataset.src) return;
+    mainPreloadLink = document.createElement("link");
+    mainPreloadLink.rel = "preload";
+    mainPreloadLink.as = "script";
+    mainPreloadLink.href = mainScript.dataset.src;
+    document.head.appendChild(mainPreloadLink);
   }
 
   function loadWorkbenchMain() {
@@ -127,8 +137,11 @@
       // 隐私模式可能禁用本地存储；不影响工作台进入。
     }
     const syncStatus = document.getElementById("syncStatus");
-    if (syncStatus) syncStatus.title = `本次载入 ${Math.max(0.1, record.totalMs / 1000).toFixed(1)} 秒；接口等待 ${Math.max(0.1, record.bootstrapMs / 1000).toFixed(1)} 秒`;
-    console.info("Workbench startup performance", record);
+    const seconds = (milliseconds) => Math.max(0.1, milliseconds / 1000).toFixed(1);
+    if (syncStatus) {
+      syncStatus.title = `本次载入 ${seconds(record.totalMs)} 秒；接口 ${seconds(record.bootstrapMs)} 秒；主程序 ${seconds(record.scriptMs)} 秒；首屏 ${seconds(record.firstViewMs)} 秒`;
+    }
+    console.info("Workbench startup performance", JSON.stringify(record));
   };
 
   form?.addEventListener("submit", async (event) => {
@@ -165,6 +178,7 @@
   const dateMetric = document.getElementById("entryCoverDate");
   if (dateMetric) dateMetric.innerHTML = `${date}<br />安全连接已准备`;
 
+  preloadWorkbenchMain();
   fetchBootstrap().then((payload) => {
     if (payload) return activateWorkbench(payload);
   }).catch((bootstrapError) => {

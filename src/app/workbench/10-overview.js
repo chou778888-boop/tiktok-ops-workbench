@@ -418,7 +418,6 @@
       document.body.classList.add("workbench-entered");
       const app = document.getElementById("workbenchApp");
       if (app) app.removeAttribute("inert");
-      window.requestAnimationFrame(() => window.requestAnimationFrame(render));
       window.setTimeout(() => document.querySelector(".topbar .tab.active")?.focus(), 180);
     }
 

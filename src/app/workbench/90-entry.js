@@ -1,11 +1,8 @@
     function initializeWorkbench() {
       renderEntranceSnapshot();
-      if (!document.body.classList.contains("cover-active")) render();
       loadCloudState().then((loaded) => {
         cloudReady = Boolean(loaded);
-        const hasPendingCloudChanges = cloudReady
-          && !cloudPatchIsEmpty(buildCloudPatch(cloudBaseline, state));
-        if (hasPendingCloudChanges) saveCloudState();
+        if (loaded === "pending") saveCloudState();
         restoreReportFormForToday();
         if (document.body.classList.contains("cover-active")) renderEntranceSnapshot();
         else render();

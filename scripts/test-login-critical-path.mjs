@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 const bootSource = await readFile("src/app/boot.js", "utf8");
 const fetchCalls = [];
 const scriptListeners = {};
+const preloadLinks = [];
 let submitLogin;
 let resolveCredentialStore;
 const performanceMarks = [0, 10, 20, 100, 300, 350, 450, 550];
@@ -64,6 +65,8 @@ const context = {
   console: { info() {}, warn() {} },
   document: {
     body: { classList: { add() {}, remove() {} } },
+    head: { appendChild(node) { preloadLinks.push(node); } },
+    createElement(tagName) { return { tagName: String(tagName).toUpperCase() }; },
     getElementById(id) {
       return elements[id] || null;
     }
@@ -105,6 +108,12 @@ context.window = {
 vm.runInNewContext(bootSource, context, { filename: "src/app/boot.js" });
 await new Promise((resolve) => setImmediate(resolve));
 assert.equal(typeof submitLogin, "function", "登录提交行为必须完成绑定");
+assert.equal(preloadLinks.length, 1, "页面启动时必须并行预载工作台主程序，避免等数据返回后才开始下载");
+assert.deepEqual(
+  { rel: preloadLinks[0].rel, as: preloadLinks[0].as, href: preloadLinks[0].href },
+  { rel: "preload", as: "script", href: "workbench.js" }
+);
+assert.equal(mainScript._src, undefined, "预载只能下载主程序，未认证前不得执行工作台逻辑");
 fetchCalls.length = 0;
 
 const loginCompletion = submitLogin({ preventDefault() {} });
@@ -126,8 +135,8 @@ assert.deepEqual(
 );
 assert.equal(
   elements.syncStatus.title,
-  "本次载入 0.5 秒；接口等待 0.2 秒",
-  "登录链路的耗时诊断必须从点击登录开始计算，不能混入此前未登录 bootstrap 的时间"
+  "本次载入 0.5 秒；接口 0.2 秒；主程序 0.1 秒；首屏 0.1 秒",
+  "登录链路必须分别显示接口、主程序和首屏耗时，不能混入此前未登录 bootstrap 的时间"
 );
 
 console.log(JSON.stringify({ passed: 3, phase: "single-response-windows-login" }));

@@ -347,30 +347,45 @@ window.__workbenchMainReady = true;
         setSyncStatus("本地模式", "local");
         return false;
       }
-      const localStateAtLoadStart = normalizeState(structuredClone(state));
       setSyncStatus("连接云端", "saving");
       try {
-        let payload = window.__workbenchInitialStatePromise
-          ? await window.__workbenchInitialStatePromise
+        const initialStatePromise = window.__workbenchInitialStatePromise;
+        let payload = initialStatePromise
+          ? await initialStatePromise
           : null;
         window.__workbenchInitialStatePromise = null;
+        const hasDirectInitialData = Boolean(initialStatePromise && payload?.data);
+        let localStateAtLoadStart = null;
         if (!payload?.data) {
+          localStateAtLoadStart = normalizeState(structuredClone(state));
           const response = await fetch(cloudEndpoint, { headers: { "accept": "application/json" } });
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
           payload = await response.json();
         }
         if (payload?.data) {
           const remoteState = normalizeState(payload.data);
-          const changesMadeWhileLoading = buildCloudPatch(localStateAtLoadStart, normalizeState(state));
-          state = applyCloudPatch(structuredClone(remoteState), changesMadeWhileLoading);
+          const changesMadeWhileLoading = hasDirectInitialData
+            ? null
+            : buildCloudPatch(localStateAtLoadStart, normalizeState(state));
+          state = hasDirectInitialData
+            ? remoteState
+            : applyCloudPatch(structuredClone(remoteState), changesMadeWhileLoading);
           if (typeof hydrateProfitWorkspaceFromState === "function") hydrateProfitWorkspaceFromState();
           uiRevision += 1;
-          cloudBaseline = normalizeState(structuredClone(remoteState));
+          cloudBaseline = structuredClone(remoteState);
           cloudRevision = Number(payload.revision || 0);
-          localStorage.setItem(storeKey, JSON.stringify(state));
+          const persistLocalBackup = () => localStorage.setItem(storeKey, JSON.stringify(state));
+          if (hasDirectInitialData && typeof window.requestIdleCallback === "function") {
+            window.requestIdleCallback(persistLocalBackup, { timeout: 2000 });
+          } else if (hasDirectInitialData) {
+            window.setTimeout(persistLocalBackup, 600);
+          } else {
+            persistLocalBackup();
+          }
           hydrateCostProfilesFromTeam();
-          setSyncStatus(cloudPatchIsEmpty(changesMadeWhileLoading) ? "已同步" : "正在同步新内容", cloudPatchIsEmpty(changesMadeWhileLoading) ? "" : "saving");
-          return true;
+          const hasPendingChanges = changesMadeWhileLoading && !cloudPatchIsEmpty(changesMadeWhileLoading);
+          setSyncStatus(hasPendingChanges ? "正在同步新内容" : "已同步", hasPendingChanges ? "saving" : "");
+          return hasPendingChanges ? "pending" : true;
         }
         cloudBaseline = normalizeState({});
         setSyncStatus("云端待初始化", "saving");
