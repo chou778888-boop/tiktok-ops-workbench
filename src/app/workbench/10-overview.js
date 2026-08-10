@@ -652,10 +652,13 @@
         + "</div>"
       )).join("");
       if (riskAction) {
-        riskAction.disabled = !model.priority;
-        riskAction.innerHTML = model.priority
-          ? `查看优先风险 <span aria-hidden="true">↓</span>`
-          : `暂无高优先风险 <span aria-hidden="true">✓</span>`;
+        const riskState = overviewRiskActionState(model.priority, model.metrics.highPriorityCount);
+        riskAction.hidden = riskState.hidden;
+        riskAction.disabled = riskState.disabled;
+        riskAction.classList.toggle("is-compact-risk", !riskState.hidden);
+        riskAction.innerHTML = riskState.hidden
+          ? ""
+          : `${escapeHtml(riskState.label)} <span aria-hidden="true">↓</span>`;
       }
       document.getElementById("overviewDataHealth").innerHTML = [
         ["16:00", "店铺更新", model.available],

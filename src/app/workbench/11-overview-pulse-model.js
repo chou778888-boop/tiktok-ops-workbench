@@ -220,6 +220,16 @@
       };
     }
 
+    function overviewRiskActionState(priority, highPriorityCount = 0) {
+      if (!priority) return { hidden: true, disabled: true, label: "" };
+      const count = Math.max(1, Number(highPriorityCount) || 0);
+      return {
+        hidden: false,
+        disabled: false,
+        label: `查看 ${count} 项优先风险`
+      };
+    }
+
     function makeOverviewPulseModel(productRows = [], attentionItems = [], activeDate = "") {
       const number = (value) => Number.isFinite(Number(value)) ? Number(value) : 0;
       const products = Array.isArray(productRows) ? productRows.filter((row) => row?.product) : [];

@@ -43,7 +43,12 @@ assert.equal((html.match(/id="overviewOperatingChart"/g) || []).length, 1, "总�
 assert.match(html, /data-overview-operating-shell/);
 assert.match(html, /id="overviewOperatingSummary"/);
 assert.match(html, /id="overviewOperatingEmpty"[^>]*data-jump="reports"/);
-assert.match(html, /class="overview-evidence-band"[^>]*id="overviewEvidenceBand"/);
+assert.match(html, /class="overview-operating-row"[^>]*id="overviewEvidenceBand"/);
+assert.match(
+  html,
+  /class="overview-operating-row"[^>]*>[\s\S]*?class="overview-chart-column"[\s\S]*?id="overviewOperatingChart"[\s\S]*?class="overview-source-evidence"[\s\S]*?<\/aside>\s*<\/div>\s*<aside class="overview-profit-focus overview-link-decision"/,
+  "桌面经营图与来源必须同排，重点链接必须位于下一整行"
+);
 assert.match(html, /id="overviewLinkDecisionMetrics"/);
 assert.doesNotMatch(html, /overview-analysis-switch/);
 assert.doesNotMatch(html, /id="overviewPulseChart"/);
@@ -72,7 +77,9 @@ assert.match(premiumStyles, /\.overview-operating-panel\s*\{[\s\S]*?overflow:\s*
 assert.match(premiumStyles, /\.overview-operating-stage\s*\{[\s\S]*?background:\s*linear-gradient\(145deg, #14221a 0%, var\(--color-pulse-instrument\) 100%\)/, "统一经营图必须使用深绿仪表画布");
 assert.match(premiumStyles, /#overviewOperatingChart\s*\{[\s\S]*?height:\s*clamp\(230px, 20vw, 300px\)/, "桌面统一图应保留足够判断高度但不能过度占屏");
 assert.match(premiumStyles, /\.overview-operating-summary\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
-assert.match(premiumStyles, /\.overview-evidence-band\s*\{[\s\S]*?grid-template-columns:\s*minmax\(300px, 0\.78fr\) minmax\(0, 1\.22fr\)/, "来源贡献应小于需要更多信息的重点链接决策区");
+assert.match(premiumStyles, /\.overview-operating-row\s*\{[^}]*grid-template-columns:\s*minmax\(0, 2fr\) minmax\(300px, 1fr\)/, "经营图与成交来源必须按约 2/3 和 1/3 同排");
+assert.match(premiumStyles, /\.overview-link-decision\s*\{[^}]*grid-template-columns:/, "重点链接必须成为下一行横向决策条");
+assert.match(premiumStyles, /\.overview-risk-action\.is-compact-risk\s*\{[^}]*min-height:\s*32px/, "有风险时只保留紧凑入口");
 assert.match(premiumStyles, /\.overview-link-decision-metrics\s*\{[\s\S]*?grid-template-columns:\s*repeat\(5, minmax\(0, 1fr\)\)/);
 assert.match(premiumStyles, /scrollbar-color:\s*var\(--color-brand-green\)/);
 assert.match(premiumStyles, /@media \(max-width: 1320px\)[\s\S]*?\.data-menu-trigger\s*\{[\s\S]*?font-size:\s*0/);
@@ -85,7 +92,7 @@ assert.match(premiumStyles, /@media \(max-width: 1180px\)[\s\S]*?\.overview-deci
 assert.match(premiumStyles, /\.overview-signal-briefs\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
 assert.match(premiumStyles, /@media \(max-width: 760px\)[\s\S]*?\.sync-pill\s*\{[\s\S]*?font-size:\s*0/);
 assert.match(premiumStyles, /@media \(max-width: 760px\)[\s\S]*?#overviewOperatingChart\s*\{[\s\S]*?height:\s*220px/, "移动端统一图必须保留可读高度");
-assert.match(premiumStyles, /@media \(max-width: 760px\)[\s\S]*?\.overview-evidence-band\s*\{[\s\S]*?grid-template-columns:\s*1fr/, "移动端证据区必须单列且不产生整页横向溢出");
+assert.match(premiumStyles, /@media \(max-width: 1050px\)[\s\S]*?\.overview-operating-row\s*\{[\s\S]*?grid-template-columns:\s*1fr/, "内容开始挤压前经营图与来源必须改为单列");
 assert.match(premiumStyles, /@media \(max-width: 760px\)[\s\S]*?\.overview-product-panel th:nth-child\(3\)[\s\S]*?min-width:\s*156px/, "移动端产品列必须保留可读宽度，避免真实长名称碎裂");
 assert.doesNotMatch(premiumStyles, /\.workspace-rail/);
 assert.match(premiumStyles, /@media \(max-width: 340px\)/);
@@ -96,6 +103,7 @@ assert.match(overviewSource, /function renderOverviewOperatingSurface\(/);
 assert.match(overviewSource, /function drawOverviewOperatingChart\(model\)/);
 assert.match(overviewSource, /renderOverviewProfitPulse\(\)/);
 assert.match(overviewSource, /function renderOverviewDecisionBrief\(/);
+assert.match(overviewSource, /overviewRiskActionState\(model\.priority, model\.metrics\.highPriorityCount\)/);
 assert.match(overviewSource, /今日待同步，先看/, "待同步标题必须使用窄屏可读的短句，避免“同步”被拆成孤字");
 assert.doesNotMatch(overviewSource, /function setOverviewAnalysisMode\(/);
 assert.doesNotMatch(overviewSource, /\["实际 \/ 预估到手"/);

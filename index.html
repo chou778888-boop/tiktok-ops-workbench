@@ -173,23 +173,25 @@
 
         <div class="analysis-grid overview-intelligence-grid">
           <section class="panel overview-operating-panel" data-overview-operating-shell aria-labelledby="overviewOperatingTitle">
-            <div class="panel-head overview-operating-head">
-              <div>
-                <span class="overview-section-kicker">店群经营脉冲</span>
-                <h2 id="overviewOperatingTitle">近 7 日 GMV 与成交订单</h2>
-                <p class="sub" id="gmvTrendSubtitle">同一店群、同一周期判断规模与订单变化；客单价只作为解释指标。</p>
-              </div>
-              <div class="overview-operating-summary" id="overviewOperatingSummary" aria-label="近七日经营摘要"></div>
-            </div>
-            <div class="overview-operating-stage">
-              <canvas id="overviewOperatingChart" width="1600" height="360" aria-label="近七日 GMV 与成交订单双轴趋势"></canvas>
-              <button class="chart-empty-state overview-operating-empty" id="overviewOperatingEmpty" data-jump="reports" type="button" hidden>
-                <b>还没有可绘制的店群经营数据</b>
-                <span>完成日报同步后，这里会按真实日期绘制 GMV 与成交订单；未同步日期不会按零计算。</span>
-                <strong>去填写日报</strong>
-              </button>
-            </div>
-            <div class="overview-evidence-band" id="overviewEvidenceBand">
+            <div class="overview-operating-row" id="overviewEvidenceBand">
+              <section class="overview-chart-column" aria-labelledby="overviewOperatingTitle">
+                <div class="panel-head overview-operating-head">
+                  <div>
+                    <span class="overview-section-kicker">店群经营脉冲</span>
+                    <h2 id="overviewOperatingTitle">近 7 日 GMV 与成交订单</h2>
+                    <p class="sub" id="gmvTrendSubtitle">同一店群、同一周期判断规模与订单变化；客单价只作为解释指标。</p>
+                  </div>
+                  <div class="overview-operating-summary" id="overviewOperatingSummary" aria-label="近七日经营摘要"></div>
+                </div>
+                <div class="overview-operating-stage">
+                  <canvas id="overviewOperatingChart" width="1600" height="360" aria-label="近七日 GMV 与成交订单双轴趋势"></canvas>
+                  <button class="chart-empty-state overview-operating-empty" id="overviewOperatingEmpty" data-jump="reports" type="button" hidden>
+                    <b>还没有可绘制的店群经营数据</b>
+                    <span>完成日报同步后，这里会按真实日期绘制 GMV 与成交订单；未同步日期不会按零计算。</span>
+                    <strong>去填写日报</strong>
+                  </button>
+                </div>
+              </section>
               <aside class="overview-source-evidence" aria-labelledby="sourceContributionTitle">
                 <header class="overview-evidence-head">
                   <div>
@@ -203,31 +205,31 @@
                 <div class="chart-legend" id="sourceLegend"></div>
                 <small class="overview-source-footnote">广告归因单独展示，不重复计入成交来源占比。</small>
               </aside>
-              <aside class="overview-profit-focus overview-link-decision" id="overviewProfitFocus" aria-labelledby="overviewProfitFocusTitle">
-                <div class="overview-focus-content">
-                  <div class="overview-focus-kicker">
-                    <span>优先链接决策</span>
-                    <b id="overviewProfitHealth">正在读取利润数据</b>
-                  </div>
-                  <h2 id="overviewProfitFocusTitle">正在定位最值得处理的产品链接</h2>
-                  <p id="overviewProfitFocusDetail">利润与成交数据准备完成后，这里会直接给出经营判断。</p>
-                  <div class="overview-decision-path" id="overviewPulsePath">产品 → 店铺 → 链接 → SKU</div>
-                </div>
-                <div class="overview-link-decision-metrics" id="overviewLinkDecisionMetrics"></div>
-                <div class="overview-link-ledger">
-                  <div class="overview-focus-ledger" aria-label="链接利润摘要">
-                    <span><small id="overviewFocusReceivedLabel">近7日实际到手</small><strong id="overviewFocusReceived">—</strong></span>
-                    <span><small id="overviewFocusProfitLabel">暂算利润</small><strong id="overviewFocusProfit">—</strong></span>
-                  </div>
-                  <button class="overview-focus-action" id="overviewProfitAction" type="button" disabled>处理此链接 <span aria-hidden="true">→</span></button>
-                </div>
-                <div class="overview-signal-briefs" aria-label="经营判断摘要">
-                  <div><small>价格</small><strong id="overviewSignalPrice">等待成交数据</strong></div>
-                  <div><small>动销</small><strong id="overviewSignalMotion">等待同步数据</strong></div>
-                  <div><small>动作</small><strong id="overviewSignalAction">等待经营判断</strong></div>
-                </div>
-              </aside>
             </div>
+            <aside class="overview-profit-focus overview-link-decision" id="overviewProfitFocus" aria-labelledby="overviewProfitFocusTitle">
+              <div class="overview-focus-content">
+                <div class="overview-focus-kicker">
+                  <span>优先链接决策</span>
+                  <b id="overviewProfitHealth">正在读取利润数据</b>
+                </div>
+                <h2 id="overviewProfitFocusTitle">正在定位最值得处理的产品链接</h2>
+                <p id="overviewProfitFocusDetail">利润与成交数据准备完成后，这里会直接给出经营判断。</p>
+                <div class="overview-decision-path" id="overviewPulsePath">产品 → 店铺 → 链接 → SKU</div>
+              </div>
+              <div class="overview-link-decision-metrics" id="overviewLinkDecisionMetrics"></div>
+              <div class="overview-link-ledger">
+                <div class="overview-focus-ledger" aria-label="链接利润摘要">
+                  <span><small id="overviewFocusReceivedLabel">近7日实际到手</small><strong id="overviewFocusReceived">—</strong></span>
+                  <span><small id="overviewFocusProfitLabel">暂算利润</small><strong id="overviewFocusProfit">—</strong></span>
+                </div>
+                <button class="overview-focus-action" id="overviewProfitAction" type="button" disabled>处理此链接 <span aria-hidden="true">→</span></button>
+              </div>
+              <div class="overview-signal-briefs" aria-label="经营判断摘要">
+                <div><small>价格</small><strong id="overviewSignalPrice">等待成交数据</strong></div>
+                <div><small>动销</small><strong id="overviewSignalMotion">等待同步数据</strong></div>
+                <div><small>动作</small><strong id="overviewSignalAction">等待经营判断</strong></div>
+              </div>
+            </aside>
           </section>
         </div>
 

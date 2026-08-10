@@ -25,7 +25,8 @@ const runtime = Function(`${source}\nreturn {
   overviewChartState: typeof overviewChartState === "function" ? overviewChartState : null,
   overviewProfitNavigationTarget: typeof overviewProfitNavigationTarget === "function" ? overviewProfitNavigationTarget : null,
   makeOverviewOperatingTrendModel: typeof makeOverviewOperatingTrendModel === "function" ? makeOverviewOperatingTrendModel : null,
-  latestCompleteOverviewDay: typeof latestCompleteOverviewDay === "function" ? latestCompleteOverviewDay : null
+  latestCompleteOverviewDay: typeof latestCompleteOverviewDay === "function" ? latestCompleteOverviewDay : null,
+  overviewRiskActionState: typeof overviewRiskActionState === "function" ? overviewRiskActionState : null
 };`)();
 const {
   makeOverviewPulseModel,
@@ -41,8 +42,21 @@ const {
   overviewChartState,
   overviewProfitNavigationTarget,
   makeOverviewOperatingTrendModel,
-  latestCompleteOverviewDay
+  latestCompleteOverviewDay,
+  overviewRiskActionState
 } = runtime;
+
+assert.equal(typeof overviewRiskActionState, "function", "无风险时必须取消独占一行的大按钮");
+assert.deepEqual(overviewRiskActionState(null, 0), {
+  hidden: true,
+  disabled: true,
+  label: ""
+});
+assert.deepEqual(overviewRiskActionState({ level: "重要" }, 2), {
+  hidden: false,
+  disabled: false,
+  label: "查看 2 项优先风险"
+});
 
 assert.equal(typeof makeOverviewOperatingTrendModel, "function", "店群趋势必须由纯模型区分待同步日期与真实零值");
 assert.equal(typeof latestCompleteOverviewDay, "function", "单日待同步时必须由纯模型查找最近完整经营日");
@@ -265,4 +279,4 @@ assert.equal(empty.signals.priceLabel, "等待成交数据");
 assert.equal(empty.signals.motionLabel, "等待同步数据");
 assert.equal(empty.signals.actionLabel, "等待经营判断");
 
-console.log(JSON.stringify({ passed: 61, phase: "overview-pulse-model" }));
+console.log(JSON.stringify({ passed: 64, phase: "overview-pulse-model" }));
