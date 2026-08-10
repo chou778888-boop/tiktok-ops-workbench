@@ -421,6 +421,7 @@ body.workbench-entered #overview .overview-decision-copy {
 body.workbench-entered #overview .overview-decision-kicker {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   color: #376044;
   font-size: 10px;
@@ -429,6 +430,7 @@ body.workbench-entered #overview .overview-decision-kicker {
 
 body.workbench-entered #overview .overview-decision-kicker > span {
   letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
 body.workbench-entered #overview .overview-decision-kicker b {

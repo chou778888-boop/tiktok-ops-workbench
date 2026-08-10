@@ -635,9 +635,9 @@
       document.getElementById("overviewDecisionTitle").textContent = latestComplete
         ? `今日待同步，先看 ${latestDayLabel}完整结果`
         : model.headline;
-      document.getElementById("overviewDecisionDetail").textContent = latestComplete
+      document.getElementById("overviewDecisionDetail").textContent = overviewReadableWrap(latestComplete
         ? `最近完整日 GMV ${money(latestComplete.gmv)}、成交 ${num(latestComplete.orders)} 单；今日未同步，不按零计入经营判断。`
-        : model.detail;
+        : model.detail);
       document.getElementById("overviewDecisionPath").textContent = model.pathLabel;
       document.getElementById("overviewDecisionMetrics").innerHTML = [
         [latestComplete ? "最近完整日 GMV" : "区间 GMV", displayAvailable ? money(displayMetrics.gmv) : "—", latestComplete ? latestComplete.dateKey : model.available ? "店群成交结果" : "等待同步"],

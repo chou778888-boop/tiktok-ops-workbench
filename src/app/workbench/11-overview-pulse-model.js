@@ -26,6 +26,10 @@
         : { axis: 13, endpoint: 13, endpointPillHeight: 26 };
     }
 
+    function overviewReadableWrap(text) {
+      return String(text ?? "").replaceAll("经营判断", "经\u2060营\u2060判\u2060断");
+    }
+
     function overviewModelNumber(value) {
       return Number.isFinite(Number(value)) ? Number(value) : 0;
     }

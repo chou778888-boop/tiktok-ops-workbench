@@ -1,5 +1,6 @@
 import { apiSecurityHeaders } from "../_shared/http.js";
-import { publicUser, requestSessionToken, sha256Hex } from "../_shared/auth.js";
+import { requestSessionToken, sha256Hex } from "../_shared/auth.js";
+import { workbenchPayload } from "../_shared/workbench-payload.js";
 import { normalizeData } from "./state.js";
 
 const headers = {
@@ -31,13 +32,7 @@ export async function onRequestGet({ request, env }) {
   const user = userResult.results?.[0] || null;
   if (!user) return json(401, { error: "请先登录" });
   const state = stateResult.results?.[0] || null;
-  return json(200, {
-    user: publicUser(user),
-    version: state?.version || "v2",
-    updatedAt: state?.updated_at || null,
-    revision: Number(state?.revision || 0),
-    data: state?.data ? normalizeData(JSON.parse(state.data)) : normalizeData(null)
-  }, { "server-timing": `app;dur=${Date.now() - startedAt}` });
+  return json(200, workbenchPayload(user, state, normalizeData), { "server-timing": `app;dur=${Date.now() - startedAt}` });
 }
 
 export async function onRequest({ request, env }) {

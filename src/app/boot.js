@@ -11,6 +11,9 @@
     bootstrapStartedAt: null,
     bootstrapResponseAt: null,
     bootstrapParsedAt: null,
+    loginStartedAt: null,
+    loginResponseAt: null,
+    loginParsedAt: null,
     scriptReadyAt: null,
     firstViewReadyAt: null
   };
@@ -102,14 +105,18 @@
     if (!metrics || metrics.firstViewReadyAt) return;
     metrics.firstViewReadyAt = performance.now();
     const rounded = (end, start) => Math.max(0, Math.round((end || 0) - (start || 0)));
+    const loginFlow = Boolean(metrics.loginStartedAt);
+    const requestStartedAt = loginFlow ? metrics.loginStartedAt : metrics.bootstrapStartedAt;
+    const requestResponseAt = loginFlow ? metrics.loginResponseAt : metrics.bootstrapResponseAt;
+    const requestParsedAt = loginFlow ? metrics.loginParsedAt : metrics.bootstrapParsedAt;
     const record = {
       at: new Date().toISOString(),
       release: metrics.release,
       platform: metrics.platform,
-      totalMs: rounded(metrics.firstViewReadyAt, metrics.bootStartedAt),
-      bootstrapMs: rounded(metrics.bootstrapResponseAt, metrics.bootstrapStartedAt),
-      parseMs: rounded(metrics.bootstrapParsedAt, metrics.bootstrapResponseAt),
-      scriptMs: rounded(metrics.scriptReadyAt, metrics.bootstrapParsedAt),
+      totalMs: rounded(metrics.firstViewReadyAt, metrics.loginStartedAt || metrics.bootStartedAt),
+      bootstrapMs: rounded(requestResponseAt, requestStartedAt),
+      parseMs: rounded(requestParsedAt, requestResponseAt),
+      scriptMs: rounded(metrics.scriptReadyAt, requestParsedAt),
       firstViewMs: rounded(metrics.firstViewReadyAt, metrics.scriptReadyAt),
       serverTiming: metrics.serverTiming
     };
@@ -131,17 +138,21 @@
     const rememberCredentials = Boolean(form.elements.rememberCredentials?.checked);
     if (!username || !password) return showLoginError("请输入账号和密码");
     if (error) error.hidden = true;
-    setLoginBusy(true);
+    setLoginBusy(true, "正在登录并载入数据…");
     try {
+      window.__workbenchPerformance.loginStartedAt = performance.now();
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "content-type": "application/json", accept: "application/json" },
         body: JSON.stringify({ username, password, remember: rememberCredentials })
       });
+      window.__workbenchPerformance.loginResponseAt = performance.now();
       const loginPayload = await response.json().catch(() => ({}));
+      window.__workbenchPerformance.loginParsedAt = performance.now();
+      window.__workbenchPerformance.serverTiming = response.headers.get("server-timing") || "";
       if (!response.ok) throw new Error(loginPayload.error || "登录失败，请稍后重试");
-      setLoginBusy(true, "正在载入团队数据…");
-      const bootstrapPromise = fetchBootstrap(true);
+      setLoginBusy(true, "正在进入工作台…");
+      const bootstrapPromise = loginPayload?.data ? Promise.resolve(loginPayload) : fetchBootstrap(true);
       void saveBrowserCredential(username, password, rememberCredentials);
       await activateWorkbench(await bootstrapPromise);
     } catch (loginError) {

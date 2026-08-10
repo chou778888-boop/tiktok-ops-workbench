@@ -28,7 +28,8 @@ const runtime = Function(`${source}\nreturn {
   overviewOperatingRelationship: typeof overviewOperatingRelationship === "function" ? overviewOperatingRelationship : null,
   latestCompleteOverviewDay: typeof latestCompleteOverviewDay === "function" ? latestCompleteOverviewDay : null,
   overviewRiskActionState: typeof overviewRiskActionState === "function" ? overviewRiskActionState : null,
-  overviewChartTypography: typeof overviewChartTypography === "function" ? overviewChartTypography : null
+  overviewChartTypography: typeof overviewChartTypography === "function" ? overviewChartTypography : null,
+  overviewReadableWrap: typeof overviewReadableWrap === "function" ? overviewReadableWrap : null
 };`)();
 const {
   makeOverviewPulseModel,
@@ -47,8 +48,16 @@ const {
   overviewOperatingRelationship,
   latestCompleteOverviewDay,
   overviewRiskActionState,
-  overviewChartTypography
+  overviewChartTypography,
+  overviewReadableWrap
 } = runtime;
+
+assert.equal(typeof overviewReadableWrap, "function", "经营判断等完整语义词组必须拥有统一的防孤字换行规则");
+assert.equal(
+  overviewReadableWrap("今日未同步，不按零计入经营判断。"),
+  "今日未同步，不按零计入经\u2060营\u2060判\u2060断。",
+  "经营判断应优先作为完整词组留在一行，只有整组放不下时再换行"
+);
 
 assert.equal(typeof overviewChartTypography, "function", "总览 Canvas 必须使用可测试的统一字号模型");
 assert.deepEqual(overviewChartTypography(390), { axis: 12, endpoint: 12, endpointPillHeight: 24 });

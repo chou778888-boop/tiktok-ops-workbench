@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { buildEntrySummary } from "../functions/api/state.js";
+import { buildEntrySummary, normalizeData } from "../functions/api/state.js";
+import { workbenchPayload } from "../functions/_shared/workbench-payload.js";
 
-const [runtime, stateApi, bootstrap, buildScript] = await Promise.all([
+const [runtime, stateApi, buildScript] = await Promise.all([
   readFile("src/app/workbench/00-runtime.js", "utf8"),
   readFile("functions/api/state.js", "utf8"),
-  readFile("functions/api/bootstrap.js", "utf8"),
   readFile("scripts/build-cloudflare.mjs", "utf8")
 ]);
 
@@ -41,8 +41,18 @@ for (const name of serverCollections) {
 
 assert.match(runtime, /creatorEdits:\s*data\?\.creatorEdits[\s\S]*?\? data\.creatorEdits : \{\}/, "前端必须保留达人编辑映射");
 assert.match(stateApi, /creatorEdits:\s*data\?\.creatorEdits[\s\S]*?\? data\.creatorEdits : \{\}/, "服务端必须保留达人编辑映射");
-assert.match(bootstrap, /import \{ normalizeData \} from "\.\/state\.js"/, "登录启动必须复用服务端统一数据规范");
-assert.match(bootstrap, /data:\s*state\?\.data \? normalizeData\(JSON\.parse\(state\.data\)\) : normalizeData\(null\)/, "启动接口必须兼容历史云端数据");
+const legacyPayload = workbenchPayload({
+  id: "user-1",
+  username: "KK",
+  display_name: "KK",
+  role: "admin"
+}, {
+  version: "v2",
+  revision: 9,
+  data: JSON.stringify({ tasks: [{ id: "task-1" }] })
+}, normalizeData);
+assert.equal(legacyPayload.data.tasks[0].syncVersion, 1, "登录启动必须复用服务端统一数据规范");
+assert.ok(serverCollections.every((name) => Array.isArray(legacyPayload.data[name])), "启动响应必须把历史云端缺失集合补成空数组");
 assert.match(buildScript, /loadDeploymentBackendSources/, "发布指纹必须包含 Pages Functions 与部署配置");
 assert.match(buildScript, /update\(backendSources\)/, "接口逻辑变化必须生成新的 release");
 
