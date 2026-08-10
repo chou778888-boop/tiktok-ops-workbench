@@ -1,44 +1,38 @@
-# TikTok 运营工作台
+# TikTok 经营中枢
 
-团队共享版 TikTok 运营工作台，包含：
+基于 Cloudflare Pages、Pages Functions 和 D1 的团队运营工作台，包含总览、日报、任务、成本测算、达人中心和运营学院。
 
-- 今日经营总览
-- 数据录入
-- 异常看板
-- 任务中心
-- 达人中心
-- 运营学院
-- Netlify 云端数据同步
+## 本地开发
 
-## Netlify 自动部署配置
-
-推荐使用 GitHub 仓库绑定 Netlify：
-
-1. 将本项目推送到 GitHub 仓库。
-2. 在 Netlify 当前站点中进入 `Site configuration`。
-3. 找到 `Build & deploy` -> `Continuous deployment`。
-4. 选择 `Link repository`，授权并选择本仓库。
-5. Build settings：
+日常本地预览使用不依赖 Cloudflare OAuth 的配置，并继续复用 `.wrangler/state` 中的本地 D1 数据：
 
 ```bash
-Build command: npm run build
-Publish directory: .
-Functions directory: netlify/functions
+npm run dev:local
 ```
 
-绑定完成后，之后只要 GitHub 主分支有新提交，Netlify 会自动重新部署。
+固定访问地址为 `http://127.0.0.1:52098/`。本地预览不绑定远程 AI；AI 深度分析接口会提示尚未配置，但日报、任务、利润及其他本地功能不受影响。
 
-## 数据同步说明
-
-线上页面会通过：
-
-```text
-/.netlify/functions/state
+```bash
+pnpm install
+pnpm check
+pnpm build
+pnpm dev:cloudflare
 ```
 
-读取和保存团队共享数据。顶部显示 `已同步` 时，说明当前正在使用云端共享数据。
+源文件与构建产物已经分离。日常修改只编辑 `index.html`、`src/`、`functions/` 和 `assets/`，不要直接修改 `dist/`。
 
-本地直接打开 `index.html` 会进入本地模式，仅用于预览页面结构。
+## 文档
+
+- [架构说明](docs/ARCHITECTURE.md)
+- [应用模块与修改位置](docs/APP_MODULES.md)
+- [日常修改指南](docs/CHANGE_GUIDE.md)
+- [安全基线](docs/SECURITY.md)
+
+## 发布规则
+
+所有调整先完成本地预览和全流程检查，经用户确认后再提交 GitHub 和部署 Cloudflare。构建与部署不得写入或覆盖团队业务数据。
+
+应用源码按 `scripts/app-sources.mjs` 的固定顺序合并，线上仍只加载一个完整工作台脚本。新增或移动业务源码时必须同步更新模块清单与边界测试。
 
 ## 固定排版规则
 

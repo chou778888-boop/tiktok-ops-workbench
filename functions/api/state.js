@@ -36,6 +36,15 @@ const arrayKeys = {
   profitPriceObservations: "id"
 };
 
+const reportStoreKeys = new Set([
+  "DreamWeave",
+  "sweet dream",
+  "Dreamland",
+  "Dreamdaily",
+  "MoonDream",
+  "Himood Smile"
+].map((name) => name.trim().toLowerCase()));
+
 const maxCostImageLength = 220000;
 const costImagePattern = /^data:image\/(?:png|jpe?g|webp);base64,/i;
 const costImageUrlPattern = /^(?:https:\/\/tiktok-ops-workbench\.pages\.dev)?\/api\/cost-image\?id=[a-f0-9]{64}$/i;
@@ -269,8 +278,8 @@ function buildEntrySummary(data, date) {
   const roles = new Set(reports.map((report) => report.role).filter((role) => coreRoles.has(role)));
   const stores = new Set(reports.flatMap((report) =>
     (Array.isArray(report.roleMetrics) ? report.roleMetrics : [])
-      .map((row) => String(row?.store || "").trim())
-      .filter(Boolean)
+      .map((row) => String(row?.store || "").trim().toLowerCase())
+      .filter((store) => reportStoreKeys.has(store))
   ));
   const openTasks = current.tasks.filter((task) =>
     !["已完成", "已作废"].includes(String(task?.status || ""))
@@ -281,7 +290,7 @@ function buildEntrySummary(data, date) {
     roles: roles.size,
     roleTarget: coreRoles.size,
     stores: stores.size,
-    storeTarget: 6,
+    storeTarget: reportStoreKeys.size,
     openTasks: openTasks.length
   };
 }
@@ -400,4 +409,4 @@ export async function onRequest({ request, env }) {
   return json(405, { error: "Method not allowed" }, request);
 }
 
-export { applyPatch, mergeTaskRecord, normalizeData, normalizePatch };
+export { applyPatch, buildEntrySummary, mergeTaskRecord, normalizeData, normalizePatch };

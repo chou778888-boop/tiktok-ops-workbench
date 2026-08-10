@@ -14,7 +14,7 @@
       justify-content: space-between;
       gap: 14px;
     }
-    .cost-hero h1 { margin: 8px 0 7px; max-width: none; font-size: clamp(22px, 2.55vw, 40px); letter-spacing: -.035em; white-space: nowrap; }
+    .cost-hero h1 { margin: 8px 0 7px; max-width: none; font-size: var(--text-view-title); letter-spacing: -.035em; white-space: nowrap; }
     .cost-hero p { margin: 0; max-width: 980px; color: rgba(255,255,255,.65); line-height: 1.7; text-wrap: pretty; }
     .cost-nowrap { white-space: nowrap; }
     .cost-kicker { color: #7effc4; font-size: 12px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }

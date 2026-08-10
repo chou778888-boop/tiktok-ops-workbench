@@ -58,6 +58,7 @@
     --text-md: 16px;
     --text-lg: 18px;
     --text-title: clamp(24px, 2vw, 36px);
+    --text-view-title: clamp(28px, 2.4vw, 36px);
     --line-compact: 1.25;
     --line-body: 1.55;
 

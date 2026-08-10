@@ -4,6 +4,7 @@ export const appSourceFiles = [
   "src/app/workbench/00-runtime.js",
   "src/app/workbench/10-overview.js",
   "src/app/workbench/11-overview-pulse-model.js",
+  "src/app/workbench/19-task-center-model.js",
   "src/app/workbench/20-tasks.js",
   "src/app/workbench/30-reports.js",
   "src/app/workbench/40-creators.js",

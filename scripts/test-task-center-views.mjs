@@ -4,7 +4,7 @@ import { loadAppSources } from "./app-sources.mjs";
 
 const html = await readFile("index.html", "utf8");
 const source = (await loadAppSources()).combined;
-const styles = await readFile("src/styles/modules/06-tasks.css", "utf8");
+const styles = await readFile("src/styles/modules/21-task-command-center.css", "utf8");
 
 for (const [view, label] of [["mine", "我的任务"], ["team", "团队任务"], ["history", "历史任务"]]) {
   assert.match(html, new RegExp(`data-task-view="${view}"[\\s\\S]*?${label}`), `必须提供“${label}”视图入口`);
@@ -29,11 +29,11 @@ for (const selector of ["task-center-nav", "task-identity", "task-summary-grid",
   assert.match(styles, new RegExp(`\\.${selector}`), `任务样式模块必须包含 .${selector}`);
 }
 
-assert.match(styles, /#tasks\s*>\s*\.panel[\s\S]*max-width:\s*1260px[\s\S]*margin-inline:\s*auto/, "任务中心必须使用1260px居中内容容器");
-assert.match(styles, /\.task-center-panel\[data-task-panel="mine"\][\s\S]*gap:\s*0/, "人员身份和任务统计必须组成连续状态栏");
-assert.match(styles, /\.task-center-nav[\s\S]*margin:\s*0\s+28px\s+16px/, "三个任务视图入口必须与内容区左侧对齐");
-assert.match(styles, /\.task-personal-list\s*>\s*\.empty[\s\S]*min-height:\s*72px/, "无任务状态必须紧凑展示，不能占据大块空白");
-assert.match(styles, /\.task-personal-list,[\s\S]*grid-template-columns:\s*repeat\(3,\s*minmax\(0,\s*1fr\)\)/, "宽屏任务卡必须使用三列布局");
-assert.match(styles, /@media\s*\(max-width:\s*1279px\)[\s\S]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/, "中等屏幕任务卡必须回落为两列");
+assert.match(styles, /#tasks\s*>\s*\.panel[\s\S]*max-width:\s*1420px[\s\S]*margin-inline:\s*auto/, "任务中心必须使用1420px居中行动工作区");
+assert.match(styles, /\.task-personal-command[\s\S]*grid-template-columns:\s*minmax\(220px,\s*0\.78fr\)\s+minmax\(0,\s*2\.22fr\)/, "执行人和快捷状态必须在同一行动带内分配空间");
+assert.match(styles, /\.task-center-nav[\s\S]*margin:\s*0\s+32px\s+17px/, "三个任务视图入口必须与主工作区左侧对齐");
+assert.match(styles, /\.task-empty-state[\s\S]*min-height:\s*0/, "空任务状态必须随内容自然收缩，不能占据大块空白");
+assert.match(styles, /\.task-personal-list,[\s\S]*grid-template-columns:\s*1fr/, "行动任务必须使用可展开的单列优先队列");
+assert.match(styles, /@media\s*\(max-width:\s*1100px\)[\s\S]*\.task-command-layout\s*\{\s*grid-template-columns:\s*1fr/, "中等屏幕必须将行动队列与闭环记录回落为单列");
 
 console.log(JSON.stringify({ passed: 27, phase: "task-center-scalable-views" }));

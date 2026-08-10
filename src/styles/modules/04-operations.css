@@ -433,6 +433,12 @@
       align-items: start;
     }
 
+    #sop > .panel > .panel-head h2 {
+      font-size: var(--text-view-title);
+      line-height: 1.12;
+      text-wrap: balance;
+    }
+
     .academy-shell.lesson-open {
       grid-template-columns: minmax(0, 1fr);
     }

@@ -66,6 +66,56 @@
       };
     }
 
+    function overviewOperatingRelationship(points = []) {
+      const usablePoints = (Array.isArray(points) ? points : []).filter((point) => (
+        point?.synced
+        && overviewModelNumber(point.orders) > 0
+        && overviewModelNumber(point.gmv) >= 0
+      ));
+      if (!usablePoints.length) {
+        return {
+          mode: "insufficient",
+          stable: false,
+          averageOrderValue: null,
+          minAverageOrderValue: null,
+          maxAverageOrderValue: null,
+          spreadPercent: null,
+          label: "量价关系待更多数据"
+        };
+      }
+      const orderValues = usablePoints.map((point) => overviewModelNumber(point.gmv) / overviewModelNumber(point.orders));
+      const totalGmv = usablePoints.reduce((sum, point) => sum + overviewModelNumber(point.gmv), 0);
+      const totalOrders = usablePoints.reduce((sum, point) => sum + overviewModelNumber(point.orders), 0);
+      const rounded = (value) => Math.round(value * 100) / 100;
+      const averageOrderValue = rounded(totalGmv / totalOrders);
+      const minAverageOrderValue = rounded(Math.min(...orderValues));
+      const maxAverageOrderValue = rounded(Math.max(...orderValues));
+      const spreadPercent = averageOrderValue > 0
+        ? rounded((maxAverageOrderValue - minAverageOrderValue) / averageOrderValue * 100)
+        : 0;
+      if (usablePoints.length < 2) {
+        return {
+          mode: "insufficient",
+          stable: false,
+          averageOrderValue,
+          minAverageOrderValue,
+          maxAverageOrderValue,
+          spreadPercent,
+          label: "量价关系待更多数据"
+        };
+      }
+      const stable = spreadPercent <= 3;
+      return {
+        mode: stable ? "volume-led" : "price-changing",
+        stable,
+        averageOrderValue,
+        minAverageOrderValue,
+        maxAverageOrderValue,
+        spreadPercent,
+        label: stable ? "客单稳定 · GMV 由订单量驱动" : "客单变化 · 需结合价格判断"
+      };
+    }
+
     function latestCompleteOverviewDay(entries = [], selectedDate = "") {
       const rows = (Array.isArray(entries) ? entries : []).filter((entry) => {
         const dateKey = String(entry?.date || "");

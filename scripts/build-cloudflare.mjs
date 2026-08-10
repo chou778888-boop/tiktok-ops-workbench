@@ -1,17 +1,37 @@
 import { createHash } from "node:crypto";
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { transform } from "esbuild";
 import { loadAppSources } from "./app-sources.mjs";
 import { loadStyleSources } from "./style-sources.mjs";
 
+async function deploymentFiles(directory) {
+  const entries = await readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(entries.map(async (entry) => {
+    const file = `${directory}/${entry.name}`;
+    return entry.isDirectory() ? deploymentFiles(file) : [file];
+  }));
+  return nested.flat().sort();
+}
+
+async function loadDeploymentBackendSources() {
+  const files = [
+    ...(await deploymentFiles("functions")),
+    "wrangler.jsonc",
+    "_headers"
+  ];
+  const contents = await Promise.all(files.map((file) => readFile(file, "utf8")));
+  return files.map((file, index) => `${file}\n${contents[index]}`).join("\n");
+}
+
 await rm("dist", { recursive: true, force: true });
 await mkdir("dist", { recursive: true });
-const [sourceHtml, sourceTokens, styleBundle, sourceBoot, appBundle] = await Promise.all([
+const [sourceHtml, sourceTokens, styleBundle, sourceBoot, appBundle, backendSources] = await Promise.all([
   readFile("index.html", "utf8"),
   readFile("src/styles/tokens.css", "utf8"),
   loadStyleSources(),
   readFile("src/app/boot.js", "utf8"),
-  loadAppSources()
+  loadAppSources(),
+  loadDeploymentBackendSources()
 ]);
 const sourceCss = styleBundle.combined;
 const sourceApp = appBundle.combined;
@@ -21,6 +41,7 @@ const release = createHash("sha256")
   .update(sourceCss)
   .update(sourceBoot)
   .update(sourceApp)
+  .update(backendSources)
   .digest("hex")
   .slice(0, 12);
 

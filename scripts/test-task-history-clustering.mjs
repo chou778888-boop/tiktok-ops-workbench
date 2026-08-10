@@ -3,7 +3,7 @@ import vm from "node:vm";
 import { readFile } from "node:fs/promises";
 
 const source = await readFile("src/app/workbench/20-tasks.js", "utf8");
-const styles = await readFile("src/styles/modules/06-tasks.css", "utf8");
+const styles = await readFile("src/styles/modules/21-task-command-center.css", "utf8");
 
 function functionSource(name) {
   const marker = `function ${name}(`;

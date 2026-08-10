@@ -15,7 +15,7 @@ const css = styleBundle.combined;
 const app = appBundle.combined;
 
 const requiredViews = ["overview", "reports", "tasks", "costing", "creators", "sop"];
-const requiredControls = ["entryLoginForm", "reportForm", "taskBoard", "costProfileForm"];
+const requiredControls = ["entryLoginForm", "reportForm", "costProfileForm"];
 const missing = [...requiredViews, ...requiredControls].filter((id) => !html.includes(`id="${id}"`));
 
 if (missing.length) throw new Error(`Missing required workbench elements: ${missing.join(", ")}`);

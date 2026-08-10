@@ -1,0 +1,278 @@
+{
+  "surface": "report",
+  "manifest": {
+    "version": 1,
+    "surface": "report",
+    "title": "工作台全流程交叉验收",
+    "description": "2026年8月2日线上版本的功能、数据、同步、性能与使用体验验收。",
+    "generatedAt": "2026-08-02T04:15:00Z",
+    "sources": [
+      {
+        "id": "cloud-state",
+        "label": "Cloudflare Pages 团队状态只读快照",
+        "href": "https://tiktok-ops-workbench.pages.dev/api/state",
+        "query": {
+          "engine": "Cloudflare D1 via Pages Functions",
+          "description": "读取线上团队状态并按日报、任务、成本和达人主键执行完整性与汇总复算。",
+          "sql": "SELECT data, revision, updated_at FROM workbench_state WHERE id = 'default';",
+          "executed_at": "2026-08-02T04:00:00Z",
+          "language": "JavaScript",
+          "filters": [
+            "日报周区间为2026-07-27至2026-08-02",
+            "只统计状态为已提交的日报",
+            "不写入或删除团队数据"
+          ],
+          "metric_definitions": [
+            "广告加权ROI为各店广告花费乘ROI之和除以广告花费之和",
+            "固定岗位应报数为工作日每天7份：售后1、BD3、店铺维护1、店群运营2",
+            "日报槽位按日期、岗位和填写人去重；售后与店铺维护按团队汇总槽位去重"
+          ],
+          "tables_used": [
+            "workbench_state.data.reports",
+            "workbench_state.data.tasks",
+            "workbench_state.data.costProfiles",
+            "workbench_state.data.customCreators"
+          ]
+        }
+      },
+      {
+        "id": "browser-qa",
+        "label": "线上与本地浏览器验收",
+        "query": {
+          "engine": "Codex in-app browser",
+          "description": "逐页操作总览、日报、周报、任务、成本和达人中心，检查可见状态、按钮、表格、横向溢出与控制台错误。",
+          "sql": "SELECT module, status, evidence, risk FROM browser_qa_results ORDER BY module;",
+          "executed_at": "2026-08-02T04:10:00Z",
+          "language": "Browser automation",
+          "filters": [
+            "线上只读操作为主",
+            "会改变状态的弹窗在本地副本验证",
+            "桌面视口为浏览器提供的1280至1366像素宽度"
+          ]
+        }
+      },
+      {
+        "id": "source-review",
+        "label": "同步与汇总逻辑源代码复核",
+        "query": {
+          "engine": "Local source review",
+          "description": "复核客户端版本合并、服务端并发更新、日报防覆盖校验、周报期望值和缓存策略。",
+          "sql": "SELECT finding, severity, evidence FROM source_review_findings ORDER BY severity DESC;",
+          "executed_at": "2026-08-02T04:12:00Z",
+          "language": "HTML, CSS and JavaScript",
+          "tables_used": [
+            "index.html",
+            "functions/api/state.js",
+            "dist/_headers"
+          ]
+        }
+      }
+    ],
+    "charts": [
+      {
+        "id": "reports-by-role",
+        "title": "本周已提交日报按岗位分布",
+        "subtitle": "2026年7月27日至8月2日，共21份；BD允许多人分别提交",
+        "showDescription": true,
+        "type": "bar",
+        "dataset": "report_role_counts",
+        "sourceId": "cloud-state",
+        "encodings": {
+          "x": {
+            "field": "role",
+            "type": "nominal",
+            "label": "岗位"
+          },
+          "y": {
+            "field": "reports",
+            "type": "quantitative",
+            "label": "日报份数",
+            "format": "number"
+          }
+        },
+        "layout": "full",
+        "maxRows": 10
+      }
+    ],
+    "tables": [
+      {
+        "id": "daily-completeness-table",
+        "title": "日报完整度按日期复算",
+        "subtitle": "固定岗位应报数按工作日计算；周末补充记录不应抵消其他日期缺报",
+        "showDescription": true,
+        "dataset": "daily_completeness",
+        "defaultSort": {
+          "field": "date",
+          "direction": "asc"
+        },
+        "density": "spacious",
+        "sourceId": "cloud-state",
+        "layout": "full",
+        "columns": [
+          { "field": "date", "label": "日期", "type": "date" },
+          { "field": "day_type", "label": "日期属性", "type": "text" },
+          { "field": "expected", "label": "固定岗位应报", "format": "number" },
+          { "field": "submitted", "label": "实际提交", "format": "number" },
+          { "field": "counted", "label": "应计入完整度", "format": "number" },
+          { "field": "note", "label": "说明", "type": "text" }
+        ]
+      },
+      {
+        "id": "module-audit-table",
+        "title": "模块验收结论",
+        "subtitle": "线上版本14a29317ddbf；数据写入类交互在本地副本补充验证",
+        "showDescription": true,
+        "dataset": "module_audit",
+        "defaultSort": {
+          "field": "module",
+          "direction": "asc"
+        },
+        "density": "spacious",
+        "sourceId": "browser-qa",
+        "layout": "full",
+        "columns": [
+          { "field": "module", "label": "模块", "type": "text" },
+          { "field": "status", "label": "结论", "type": "text" },
+          { "field": "evidence", "label": "核对证据", "type": "text" },
+          { "field": "risk", "label": "影响", "type": "text" }
+        ]
+      }
+    ],
+    "blocks": [
+      {
+        "id": "report-title",
+        "type": "markdown",
+        "layout": "full",
+        "body": "# 工作台全流程交叉验收"
+      },
+      {
+        "id": "executive-summary",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Executive Summary\n\n- **核心数据与防覆盖机制可以继续使用。** 线上共有21份日报、16项任务、6个成本SKU和39位毛毯项目达人；主键、日报槽位、任务来源、状态枚举和版本号均未发现重复或断链。\n- **自动周报的经营指标复算一致。** GMV $14,034.78、订单1,035、加权ROI 12.88、退货/退款75单、寄样152件均与原始日报复算结果一致。\n- **有两项业务口径需要修正。** 周报把周末5份补充日报计入工作日完整度，显示21/21和100%，按日期复算应为15/21、71.4%；周日无应报数据时，总览仍显示较昨日-100%，容易被理解为经营暴跌。\n- **首次进入速度仍未稳定达到Mac体感。** 本轮浏览器端重载约4.0—6.3秒，静态首页请求约1.7秒；未复现持续10秒，但Windows弱网或冷缓存仍可能明显偏慢。"
+      },
+      {
+        "id": "data-chain-heading",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 数据链路已闭环，经营汇总可以信任\n\n本周21份日报按岗位分布如下。BD允许多人分别提交，因此10份并非重复；日报ID和业务槽位重复数均为0。店群运营、售后和BD的核心指标已从原始行重新求和，结果与运营整体周报一致。"
+      },
+      {
+        "id": "reports-role-chart",
+        "type": "chart",
+        "layout": "full",
+        "chartId": "reports-by-role"
+      },
+      {
+        "id": "completeness-heading",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 完整度被跨日期补偿，当前100%结论偏高\n\n7月29日至31日是三个工作日，固定岗位目标合计21份。系统当前用整周全部21份日报除以21，其中包含8月1日周六的5份补充日报；这使周末补充抵消了7月29日的缺报。按日期分别封顶后，应计入15份，完整度为71.4%。这会让管理层误判团队执行完整性，建议优先修复。"
+      },
+      {
+        "id": "daily-completeness",
+        "type": "table",
+        "layout": "full",
+        "tableId": "daily-completeness-table"
+      },
+      {
+        "id": "module-heading",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 核心模块功能正常，但入口性能仍需继续压缩\n\n总览日期筛选、日报岗位切换、BD整行新增、自动周报、任务收缩与弹窗、成本图片和达人三栏目均完成实际操作检查。任务状态使用递增版本和服务端并发更新，旧页面不能覆盖新状态；浏览器控制台没有错误或警告。"
+      },
+      {
+        "id": "module-audit",
+        "type": "table",
+        "layout": "full",
+        "tableId": "module-audit-table"
+      },
+      {
+        "id": "next-actions",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## 建议按影响顺序处理\n\n1. **先修日报完整度。** 分日期计算每个岗位应报槽位，工作日内最多计入当日目标；周末补充只显示为补充，不抵扣其他日期缺报。\n2. **统一休息日语义。** 当选择周末且无经营日报时，总览同比卡片显示“休息日 / 暂无数据”，不显示-100%。\n3. **继续优化首次进入。** 保持摘要接口先展示封面数字，将完整团队状态延后到点击进入后并行加载；针对Windows冷缓存采集真实加载分段。\n4. **暂不调整其余业务模块。** 任务防回退、成本图片、达人同步和各岗位日报结构已通过本轮验收。"
+      },
+      {
+        "id": "further-questions",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Further Questions\n\n- 7月29日仅1份日报，是工作台试运行的合理起点，还是需要补交的实际缺报？这个答案会影响首周完整度的最终口径。\n- 是否把“其他”岗位纳入每天固定7份目标？当前7份目标不包含其他岗位，其他日报应作为额外完成事项统计。\n- Windows实际办公电脑是否使用Chrome或Edge，以及网络所在地区，会影响首次进入优化的优先级和验证方式。"
+      },
+      {
+        "id": "caveats",
+        "type": "markdown",
+        "layout": "full",
+        "body": "## Caveats and Assumptions\n\n本次线上验收以只读操作为主；一次“开始处理”测试触发即时状态更新后，已将唯一受影响任务恢复为原来的待处理状态，并以更高同步版本保存，云端最终仍为16项待处理。移动端因当前浏览器未能应用窄视口覆盖，只完成响应式代码与桌面无横向溢出的结构检查，不能替代真实手机验收。"
+      }
+    ]
+  },
+  "snapshot": {
+    "version": 1,
+    "generatedAt": "2026-08-02T04:15:00Z",
+    "status": "ready",
+    "datasets": {
+      "report_role_counts": [
+        { "role": "BD", "reports": 10 },
+        { "role": "售后组", "reports": 3 },
+        { "role": "店群运营", "reports": 3 },
+        { "role": "店铺维护", "reports": 3 },
+        { "role": "其他", "reports": 2 }
+      ],
+      "daily_completeness": [
+        { "date": "2026-07-29", "day_type": "工作日", "expected": 7, "submitted": 1, "counted": 1, "note": "首日仅1份" },
+        { "date": "2026-07-30", "day_type": "工作日", "expected": 7, "submitted": 8, "counted": 7, "note": "允许8/7，但完整度最多计7" },
+        { "date": "2026-07-31", "day_type": "工作日", "expected": 7, "submitted": 7, "counted": 7, "note": "当日完整" },
+        { "date": "2026-08-01", "day_type": "休息日", "expected": 0, "submitted": 5, "counted": 0, "note": "补充记录，不抵扣其他日期" }
+      ],
+      "module_audit": [
+        { "module": "01 部署与版本", "status": "通过", "evidence": "正式域名版本14a29317ddbf；首页、脚本、样式和接口均返回200", "risk": "无阻断" },
+        { "module": "02 登录与加载", "status": "需优化", "evidence": "静态首页约1.7秒；浏览器重载约4.0—6.3秒；哈希资源已长期缓存", "risk": "Windows冷缓存仍可能感到等待" },
+        { "module": "03 总览", "status": "部分通过", "evidence": "今日、昨日、近7日、近30日筛选及汇总值正确；周日空数据仍显示-100%", "risk": "休息日经营含义可能被误读" },
+        { "module": "04 日报与周报", "status": "需修复", "evidence": "岗位结构、补交日期、摘要、周报指标均正常；完整度跨日期补偿", "risk": "100%完整度结论偏高" },
+        { "module": "05 任务中心", "status": "通过", "evidence": "16项任务主键唯一、来源完整、版本有效；卡片收缩、结果与作废弹窗正常", "risk": "无阻断" },
+        { "module": "06 成本测算", "status": "通过", "evidence": "6个SKU；4张云端图片全部返回200，大小约88—146KB", "risk": "两款枕头尚未配置图片，属于内容缺口" },
+        { "module": "07 达人中心", "status": "通过", "evidence": "39位毛毯项目达人、18位头达、529条登记记录；三栏目导航和Excel入口正常", "risk": "无阻断" },
+        { "module": "08 云端一致性", "status": "通过", "evidence": "日报和任务无重复ID、无重复槽位、无孤儿任务、无无效状态", "risk": "无阻断" },
+        { "module": "09 跨设备排版", "status": "部分验证", "evidence": "1280—1366桌面宽度无页面级横向溢出；窄视口覆盖未生效", "risk": "真实手机仍需实机验收" }
+      ]
+    }
+  },
+  "sources": [
+    {
+      "id": "cloud-state",
+      "label": "Cloudflare Pages 团队状态只读快照",
+      "href": "https://tiktok-ops-workbench.pages.dev/api/state",
+      "query": {
+        "engine": "Cloudflare D1 via Pages Functions",
+        "description": "读取线上团队状态并执行完整性与汇总复算。",
+        "sql": "SELECT data, revision, updated_at FROM workbench_state WHERE id = 'default';",
+        "executed_at": "2026-08-02T04:00:00Z",
+        "language": "JavaScript",
+        "tables_used": ["workbench_state.data.reports", "workbench_state.data.tasks", "workbench_state.data.costProfiles", "workbench_state.data.customCreators"]
+      }
+    },
+    {
+      "id": "browser-qa",
+      "label": "线上与本地浏览器验收",
+      "query": {
+        "engine": "Codex in-app browser",
+        "description": "逐页操作主要模块并检查可见状态、布局与控制台。",
+        "sql": "SELECT module, status, evidence, risk FROM browser_qa_results ORDER BY module;",
+        "executed_at": "2026-08-02T04:10:00Z",
+        "language": "Browser automation"
+      }
+    },
+    {
+      "id": "source-review",
+      "label": "同步与汇总逻辑源代码复核",
+      "query": {
+        "engine": "Local source review",
+        "description": "复核同步、并发、日报防覆盖、周报期望值和缓存策略。",
+        "sql": "SELECT finding, severity, evidence FROM source_review_findings ORDER BY severity DESC;",
+        "executed_at": "2026-08-02T04:12:00Z",
+        "language": "HTML, CSS and JavaScript"
+      }
+    }
+  ]
+}

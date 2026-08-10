@@ -213,6 +213,9 @@
     document.addEventListener("click", (event) => {
       const overviewRiskBtn = event.target.closest("#overviewRiskAction");
       const taskViewBtn = event.target.closest("[data-task-view]");
+      const taskJumpBtn = event.target.closest("[data-task-jump]");
+      const taskFocusBtn = event.target.closest("[data-task-focus]");
+      const taskHistoryOpenBtn = event.target.closest("[data-task-history-open]");
       const taskGroupBtn = event.target.closest("[data-task-group-toggle]");
       const taskHistoryMoreBtn = event.target.closest("[data-task-history-more]");
       const goReportAuthorBtn = event.target.closest("[data-go-report-author]");
@@ -240,6 +243,26 @@
         activeTaskCenterView = taskViewBtn.dataset.taskView || "mine";
         if (activeTaskCenterView === "history") taskHistoryLimit = TASK_HISTORY_PAGE_SIZE;
         renderTasks();
+        return;
+      }
+      if (taskJumpBtn) {
+        activeTaskCenterView = taskJumpBtn.dataset.taskJump || "mine";
+        if (activeTaskCenterView === "history") taskHistoryLimit = TASK_HISTORY_PAGE_SIZE;
+        renderTasks();
+        return;
+      }
+      if (taskFocusBtn) {
+        taskCenterFilters.mineFocus = taskFocusBtn.dataset.taskFocus || "all";
+        renderTasks();
+        return;
+      }
+      if (taskHistoryOpenBtn) {
+        const taskId = String(taskHistoryOpenBtn.dataset.taskHistoryOpen || "");
+        if (taskId) expandedTaskIds.add(taskId);
+        activeTaskCenterView = "history";
+        taskHistoryLimit = TASK_HISTORY_PAGE_SIZE;
+        renderTasks();
+        requestAnimationFrame(() => document.querySelector(`[data-task-id="${CSS.escape(taskId)}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" }));
         return;
       }
       if (taskGroupBtn) {

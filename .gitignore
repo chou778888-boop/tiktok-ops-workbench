@@ -5,7 +5,8 @@ node_modules/
 .dev.vars
 .migration-backups/
 dist/
-dist/
+.local-preview/
 .env
 .env.*
 *.log
+outputs/

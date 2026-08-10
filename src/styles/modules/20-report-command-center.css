@@ -34,7 +34,7 @@ body.workbench-entered #reports .report-page-copy h2 {
   max-width: 780px;
   margin: 0;
   color: var(--report-ink);
-  font-size: 34px;
+  font-size: var(--text-view-title);
   line-height: 1.12;
   font-weight: 790;
   letter-spacing: -0.04em;

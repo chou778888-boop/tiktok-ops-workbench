@@ -24,7 +24,8 @@ assert.match(tokens, /--surface-raised:/);
 assert.match(tokens, /--shadow-raised:/);
 assert.match(manifest, /modules\/19-premium-shell-overview\.css/);
 assert.ok(manifest.indexOf("19-premium-shell-overview.css") < manifest.indexOf("20-report-command-center.css"), "总览样式必须先于后续页面专属覆盖");
-assert.equal(manifest.trim().split("\n").at(-1), '@import url("./modules/20-report-command-center.css");');
+assert.ok(manifest.indexOf("20-report-command-center.css") < manifest.indexOf("21-task-command-center.css"), "任务中心专属样式必须位于通用跨设备样式之后");
+assert.equal(manifest.trim().split("\n").at(-1), '@import url("./modules/21-task-command-center.css");');
 assert.match(html, /class="topbar premium-topbar workspace-pulse-dock"/);
 assert.doesNotMatch(html, /workspace-rail/);
 assert.match(html, /class="hero-card overview-command-card"/);
@@ -42,6 +43,7 @@ assert.match(
 assert.equal((html.match(/id="overviewOperatingChart"/g) || []).length, 1, "总览只能存在一张 GMV 与成交订单统一经营图");
 assert.match(html, /data-overview-operating-shell/);
 assert.match(html, /id="overviewOperatingSummary"/);
+assert.match(html, /id="overviewOperatingRelationship"/, "重合曲线必须给出量价关系解释");
 assert.match(html, /id="overviewOperatingEmpty"[^>]*data-jump="reports"/);
 assert.match(html, /class="overview-operating-row"[^>]*id="overviewEvidenceBand"/);
 assert.match(
@@ -119,4 +121,4 @@ assert.doesNotMatch(eventsSource, /data-overview-analysis-mode/);
 assert.match(profitTemplate, /renderProfitListingDetail/);
 assert.match(profitTemplate, /renderProfitSkuTrend/);
 
-console.log(JSON.stringify({ passed: 60, phase: "operating-pulse-overview-contract" }));
+console.log(JSON.stringify({ passed: 61, phase: "operating-pulse-overview-contract" }));

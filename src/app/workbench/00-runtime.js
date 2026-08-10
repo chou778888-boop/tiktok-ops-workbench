@@ -90,6 +90,7 @@ window.__workbenchMainReady = true;
     let taskHistoryLimit = TASK_HISTORY_PAGE_SIZE;
     const expandedTaskAssigneeGroups = new Set();
     const taskCenterFilters = {
+      mineFocus: "all",
       teamSearch: "",
       teamStatus: "all",
       teamPriority: "all",

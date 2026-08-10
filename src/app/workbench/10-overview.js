@@ -721,6 +721,7 @@
       const model = makeOverviewOperatingTrendModel(entriesInRange(trendRange), trendRange);
       const priorTrendRange = previousDataRange(trendRange);
       const summary = document.getElementById("overviewOperatingSummary");
+      const relationshipElement = document.getElementById("overviewOperatingRelationship");
       const rangeBadge = document.getElementById("overviewOperatingRange");
       const subtitle = document.getElementById("gmvTrendSubtitle");
       const canvas = document.getElementById("overviewOperatingChart");
@@ -733,6 +734,16 @@
           ["成交订单", model.summary.syncedDays ? `${num(model.summary.orders)} 单` : "—"],
           ["平均客单", model.summary.averageOrderValue === null ? "—" : money(model.summary.averageOrderValue)]
         ].map(([label, value], index) => `<span class="${index === 0 ? "featured" : ""}"><small>${label}</small><strong>${value}</strong></span>`).join("");
+      }
+      if (relationshipElement) {
+        const relationship = overviewOperatingRelationship(model.points);
+        relationshipElement.dataset.mode = relationship.mode;
+        const rangeText = relationship.minAverageOrderValue === null
+          ? "等待完整日报"
+          : relationship.minAverageOrderValue === relationship.maxAverageOrderValue
+            ? `客单 ${money(relationship.averageOrderValue)}`
+            : `客单 ${money(relationship.minAverageOrderValue)}—${money(relationship.maxAverageOrderValue)} · 波动 ${relationship.spreadPercent.toFixed(2)}%`;
+        relationshipElement.innerHTML = `<i aria-hidden="true"></i><strong>${escapeHtml(relationship.label)}</strong><span>${escapeHtml(rangeText)}</span>`;
       }
       if (empty) empty.hidden = model.summary.syncedDays > 0;
       if (canvas) canvas.hidden = model.summary.syncedDays === 0;
@@ -786,7 +797,30 @@
           ordersY: point.synced ? pad.top + chartHeight - Number(point.orders || 0) / maxOrders * chartHeight : null
         };
       });
-      const drawSegmentedLine = (key, color, dash = []) => {
+      const gmvGradient = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartHeight);
+      gmvGradient.addColorStop(0, "rgba(120,245,143,0.18)");
+      gmvGradient.addColorStop(0.72, "rgba(120,245,143,0.045)");
+      gmvGradient.addColorStop(1, "rgba(120,245,143,0)");
+      const fillGmvArea = () => {
+        let segment = [];
+        const flush = () => {
+          if (!segment.length) return;
+          ctx.beginPath();
+          ctx.moveTo(segment[0].x, pad.top + chartHeight);
+          segment.forEach((point) => ctx.lineTo(point.x, point.gmvY));
+          ctx.lineTo(segment.at(-1).x, pad.top + chartHeight);
+          ctx.closePath();
+          ctx.fillStyle = gmvGradient;
+          ctx.fill();
+          segment = [];
+        };
+        coordinates.forEach((point) => {
+          if (point.synced && point.gmvY !== null) segment.push(point);
+          else flush();
+        });
+        flush();
+      };
+      const drawSegmentedLine = (key, color, { dash = [], width: strokeWidth = 2.75, underlayColor = "", underlayWidth = 0, shadowColor = "", shadowBlur = 0 } = {}) => {
         let segmentOpen = false;
         ctx.beginPath();
         coordinates.forEach((point) => {
@@ -799,15 +833,32 @@
           segmentOpen = true;
         });
         ctx.setLineDash(dash);
+        if (underlayColor && underlayWidth > strokeWidth) {
+          ctx.strokeStyle = underlayColor;
+          ctx.lineWidth = underlayWidth;
+          ctx.stroke();
+        }
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2.75;
+        ctx.lineWidth = strokeWidth;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
+        ctx.shadowColor = shadowColor;
+        ctx.shadowBlur = shadowBlur;
         ctx.stroke();
+        ctx.shadowColor = "transparent";
+        ctx.shadowBlur = 0;
         ctx.setLineDash([]);
       };
-      drawSegmentedLine("gmvY", acid);
-      drawSegmentedLine("ordersY", orderColor, [7, 6]);
+      fillGmvArea();
+      drawSegmentedLine("gmvY", acid, { width: 3.1, shadowColor: "rgba(120,245,143,0.35)", shadowBlur: 8 });
+      drawSegmentedLine("ordersY", orderColor, {
+        dash: [3, 7],
+        width: 3.4,
+        underlayColor: "rgba(7,18,12,0.78)",
+        underlayWidth: 6.4,
+        shadowColor: "rgba(183,216,255,0.28)",
+        shadowBlur: 5
+      });
       coordinates.forEach((point) => {
         ctx.textAlign = "center";
         ctx.textBaseline = "alphabetic";
@@ -830,6 +881,49 @@
         ctx.fillStyle = orderColor;
         ctx.fillRect(point.x - 3.5, point.ordersY - 3.5, 7, 7);
       });
+      const drawEndpointLabel = ({ text, anchorX, anchorY, offsetY, fill, ink }) => {
+        const fontSize = width < 520 ? 9 : 10;
+        const pillHeight = width < 520 ? 20 : 22;
+        ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
+        const pillWidth = Math.ceil(ctx.measureText(text).width) + 18;
+        const preferRight = anchorX + 12 + pillWidth <= width - 6;
+        const pillX = preferRight ? anchorX + 12 : anchorX - pillWidth - 12;
+        const pillY = Math.max(pad.top + 2, Math.min(pad.top + chartHeight - pillHeight - 2, anchorY + offsetY));
+        const edgeX = preferRight ? pillX : pillX + pillWidth;
+        ctx.beginPath();
+        ctx.moveTo(anchorX, anchorY);
+        ctx.lineTo(edgeX, pillY + pillHeight / 2);
+        ctx.strokeStyle = fill;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillWidth, pillHeight, pillHeight / 2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.fillStyle = ink;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, pillX + pillWidth / 2, pillY + pillHeight / 2 + 0.5);
+      };
+      const latestSyncedPoint = coordinates.filter((point) => point.synced).at(-1);
+      if (latestSyncedPoint) {
+        drawEndpointLabel({
+          text: `GMV ${overviewCompactMoney(latestSyncedPoint.gmv)}`,
+          anchorX: latestSyncedPoint.x,
+          anchorY: latestSyncedPoint.gmvY,
+          offsetY: -34,
+          fill: acid,
+          ink: "#102019"
+        });
+        drawEndpointLabel({
+          text: `订单 ${num(latestSyncedPoint.orders)}`,
+          anchorX: latestSyncedPoint.x,
+          anchorY: latestSyncedPoint.ordersY,
+          offsetY: 12,
+          fill: orderColor,
+          ink: "#102019"
+        });
+      }
       canvas._operatingPoints = coordinates;
       bindChartHover(canvas, (event) => {
         const activePoints = canvas._operatingPoints || [];

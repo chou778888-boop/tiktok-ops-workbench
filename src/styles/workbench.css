@@ -5,7 +5,6 @@
 @import url("./modules/18-profit-template.css");
 @import url("./modules/04-operations.css");
 @import url("./modules/05-creator-base.css");
-@import url("./modules/06-tasks.css");
 @import url("./modules/07-creators.css");
 @import url("./modules/08-workspace-theme.css");
 @import url("./modules/09-report-records.css");
@@ -19,3 +18,4 @@
 @import url("./modules/17-final-responsive.css");
 @import url("./modules/19-premium-shell-overview.css");
 @import url("./modules/20-report-command-center.css");
+@import url("./modules/21-task-command-center.css");

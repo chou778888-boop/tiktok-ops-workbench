@@ -12,7 +12,8 @@ const migration = await readFile("migrations/0003_auth.sql", "utf8");
 
 assert.match(migration, /CREATE TABLE IF NOT EXISTS users/, "必须创建用户表");
 assert.match(migration, /CREATE TABLE IF NOT EXISTS auth_sessions/, "必须创建登录会话表");
-assert.equal((migration.match(/INSERT OR REPLACE INTO users/g) || []).length, 10, "必须配置8名成员和2名管理员");
+assert.equal((migration.match(/INSERT OR IGNORE INTO users/g) || []).length, 10, "必须配置8名成员和2名管理员");
+assert.doesNotMatch(migration, /INSERT OR REPLACE INTO users/, "重复执行认证迁移不能覆盖团队已经轮换的密码");
 const configuredIterations = [...migration.matchAll(/,\s*(\d+),\s*1,\s*'2026-08-03/g)].map((match) => Number(match[1]));
 assert.equal(configuredIterations.length, 10, "每个账号都必须配置密码迭代次数");
 assert.ok(configuredIterations.every((iterations) => iterations <= 100000), "Cloudflare生产环境不支持超过100000次PBKDF2迭代");

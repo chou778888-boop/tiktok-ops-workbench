@@ -1,4 +1,8 @@
 import assert from "node:assert/strict";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import * as previewSupervisor from "./dev-local-supervisor.mjs";
 import {
   localPreviewProcessGroupTarget,
   localPreviewHealthCheck,
@@ -45,4 +49,22 @@ assert.equal(await localPreviewHealthCheck({
 assert.equal(await localPreviewHealthCheck({ fetchPreview: async () => ({ ok: false }) }), false);
 assert.equal(await localPreviewHealthCheck({ fetchPreview: async () => { throw new Error("offline"); } }), false);
 
-console.log(JSON.stringify({ passed: 22, phase: "resilient-local-preview" }));
+assert.equal(typeof previewSupervisor.prepareLocalPreviewSnapshot, "function", "本地预览必须从不可变发布快照启动，不能直接监听正在重建的 dist");
+assert.equal(typeof previewSupervisor.localPreviewWranglerArgs, "function", "Wrangler 启动参数必须由稳定快照路径生成");
+
+const previewRoot = await mkdtemp(path.join(os.tmpdir(), "tk-preview-snapshot-"));
+try {
+  const sourceDirectory = path.join(previewRoot, "dist");
+  await mkdir(sourceDirectory, { recursive: true });
+  await writeFile(path.join(sourceDirectory, "release.json"), JSON.stringify({ release: "stable-123" }));
+  await writeFile(path.join(sourceDirectory, "index.html"), "stable build");
+  const snapshot = await previewSupervisor.prepareLocalPreviewSnapshot({ projectRoot: previewRoot, sourceDirectory });
+  assert.equal(snapshot.release, "stable-123");
+  assert.equal(snapshot.directory, path.join(previewRoot, ".local-preview", "releases", "stable-123"));
+  assert.equal(await readFile(path.join(snapshot.directory, "index.html"), "utf8"), "stable build");
+  assert.deepEqual(previewSupervisor.localPreviewWranglerArgs(snapshot.directory).slice(0, 3), ["pages", "dev", snapshot.directory]);
+} finally {
+  await rm(previewRoot, { recursive: true, force: true });
+}
+
+console.log(JSON.stringify({ passed: 28, phase: "resilient-local-preview" }));

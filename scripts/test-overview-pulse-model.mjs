@@ -25,6 +25,7 @@ const runtime = Function(`${source}\nreturn {
   overviewChartState: typeof overviewChartState === "function" ? overviewChartState : null,
   overviewProfitNavigationTarget: typeof overviewProfitNavigationTarget === "function" ? overviewProfitNavigationTarget : null,
   makeOverviewOperatingTrendModel: typeof makeOverviewOperatingTrendModel === "function" ? makeOverviewOperatingTrendModel : null,
+  overviewOperatingRelationship: typeof overviewOperatingRelationship === "function" ? overviewOperatingRelationship : null,
   latestCompleteOverviewDay: typeof latestCompleteOverviewDay === "function" ? latestCompleteOverviewDay : null,
   overviewRiskActionState: typeof overviewRiskActionState === "function" ? overviewRiskActionState : null
 };`)();
@@ -42,6 +43,7 @@ const {
   overviewChartState,
   overviewProfitNavigationTarget,
   makeOverviewOperatingTrendModel,
+  overviewOperatingRelationship,
   latestCompleteOverviewDay,
   overviewRiskActionState
 } = runtime;
@@ -59,6 +61,7 @@ assert.deepEqual(overviewRiskActionState({ level: "重要" }, 2), {
 });
 
 assert.equal(typeof makeOverviewOperatingTrendModel, "function", "店群趋势必须由纯模型区分待同步日期与真实零值");
+assert.equal(typeof overviewOperatingRelationship, "function", "重合曲线必须由纯模型解释量价关系，不能人为错位");
 assert.equal(typeof latestCompleteOverviewDay, "function", "单日待同步时必须由纯模型查找最近完整经营日");
 
 const operatingTrend = makeOverviewOperatingTrendModel([
@@ -79,6 +82,48 @@ assert.deepEqual(operatingTrend.points[2], {
 });
 assert.deepEqual(operatingTrend.summary, {
   gmv: 170, orders: 7, averageOrderValue: 24.29, syncedDays: 3, expectedDays: 7
+});
+
+assert.deepEqual(overviewOperatingRelationship([
+  { synced: true, gmv: 12321.4, orders: 370 },
+  { synced: true, gmv: 13133.8, orders: 394 },
+  { synced: true, gmv: 13946.2, orders: 419 },
+  { synced: true, gmv: 14623.2, orders: 438 },
+  { synced: true, gmv: 15435.6, orders: 464 },
+  { synced: false, gmv: null, orders: null }
+]), {
+  mode: "volume-led",
+  stable: true,
+  averageOrderValue: 33.31,
+  minAverageOrderValue: 33.27,
+  maxAverageOrderValue: 33.39,
+  spreadPercent: 0.36,
+  label: "客单稳定 · GMV 由订单量驱动"
+});
+
+assert.deepEqual(overviewOperatingRelationship([
+  { synced: true, gmv: 100, orders: 10 },
+  { synced: true, gmv: 200, orders: 10 }
+]), {
+  mode: "price-changing",
+  stable: false,
+  averageOrderValue: 15,
+  minAverageOrderValue: 10,
+  maxAverageOrderValue: 20,
+  spreadPercent: 66.67,
+  label: "客单变化 · 需结合价格判断"
+});
+
+assert.deepEqual(overviewOperatingRelationship([
+  { synced: true, gmv: 100, orders: 10 }
+]), {
+  mode: "insufficient",
+  stable: false,
+  averageOrderValue: 10,
+  minAverageOrderValue: 10,
+  maxAverageOrderValue: 10,
+  spreadPercent: 0,
+  label: "量价关系待更多数据"
 });
 
 assert.deepEqual(latestCompleteOverviewDay([
@@ -279,4 +324,4 @@ assert.equal(empty.signals.priceLabel, "等待成交数据");
 assert.equal(empty.signals.motionLabel, "等待同步数据");
 assert.equal(empty.signals.actionLabel, "等待经营判断");
 
-console.log(JSON.stringify({ passed: 64, phase: "overview-pulse-model" }));
+console.log(JSON.stringify({ passed: 68, phase: "overview-pulse-model" }));

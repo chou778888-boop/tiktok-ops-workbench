@@ -180,6 +180,9 @@
                     <span class="overview-section-kicker">店群经营脉冲</span>
                     <h2 id="overviewOperatingTitle">近 7 日 GMV 与成交订单</h2>
                     <p class="sub" id="gmvTrendSubtitle">同一店群、同一周期判断规模与订单变化；客单价只作为解释指标。</p>
+                    <div class="overview-operating-relationship" id="overviewOperatingRelationship" data-mode="insufficient" aria-live="polite">
+                      <i aria-hidden="true"></i><strong>正在判断量价关系</strong><span>等待完整日报</span>
+                    </div>
                   </div>
                   <div class="overview-operating-summary" id="overviewOperatingSummary" aria-label="近七日经营摘要"></div>
                 </div>
@@ -1025,10 +1028,15 @@
         <div class="panel">
           <div class="panel-head">
             <div>
+              <span class="task-center-kicker">ACTION CONTROL</span>
               <h2>任务中心</h2>
-              <p class="sub">每个异常都要有人负责、有限期、有处理结果；任务不可无痕删除，作废必须说明原因。</p>
+              <p class="sub">把日报异常、明日跟进和团队协同收进同一条行动链，直到结果被复查。</p>
             </div>
-            <span class="badge amber" id="openTaskCount">0 个未完成</span>
+            <div class="task-center-headline">
+              <span>当前行动</span>
+              <strong id="openTaskCount">0 个未完成</strong>
+              <small>逾期优先 · 全程留痕</small>
+            </div>
           </div>
           <div class="task-center-nav" id="taskCenterNav" role="tablist" aria-label="任务视图">
             <button class="active" data-task-view="mine" type="button" role="tab" aria-selected="true">我的任务</button>
@@ -1038,7 +1046,6 @@
           <div class="task-center-panel" data-task-panel="mine" role="tabpanel"></div>
           <div class="task-center-panel" data-task-panel="team" role="tabpanel" hidden></div>
           <div class="task-center-panel" data-task-panel="history" role="tabpanel" hidden></div>
-          <div id="taskBoard" hidden></div>
         </div>
       </section>
 

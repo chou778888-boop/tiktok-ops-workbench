@@ -1,4 +1,5 @@
 import { spawn } from "node:child_process";
+import { cp, mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -40,6 +41,43 @@ function wranglerExecutable() {
   return path.resolve("node_modules", ".bin", process.platform === "win32" ? "wrangler.cmd" : "wrangler");
 }
 
+async function localPreviewSourceRelease(sourceDirectory) {
+  try {
+    const payload = JSON.parse(await readFile(path.join(sourceDirectory, "release.json"), "utf8"));
+    const release = String(payload?.release || "").trim();
+    return /^[a-z0-9][a-z0-9-]{2,63}$/i.test(release) ? release : "";
+  } catch {
+    return "";
+  }
+}
+
+export function localPreviewSnapshotDirectory(projectRoot, release) {
+  return path.join(projectRoot, ".local-preview", "releases", release);
+}
+
+export async function prepareLocalPreviewSnapshot({
+  projectRoot = process.cwd(),
+  sourceDirectory = path.join(projectRoot, "dist")
+} = {}) {
+  const release = await localPreviewSourceRelease(sourceDirectory);
+  if (!release) throw new Error("dist/release.json 缺失或发布号无效");
+  const directory = localPreviewSnapshotDirectory(projectRoot, release);
+  await mkdir(path.dirname(directory), { recursive: true });
+  await cp(sourceDirectory, directory, { recursive: true, force: true });
+  return { release, directory, sourceDirectory };
+}
+
+export function localPreviewWranglerArgs(snapshotDirectory) {
+  return [
+    "pages", "dev", snapshotDirectory,
+    "--ip", "127.0.0.1",
+    "--port", "52098",
+    "--persist-to", ".wrangler/state",
+    "--log-level", "warn",
+    "--show-interactive-dev-session", "false"
+  ];
+}
+
 export function localPreviewProcessGroupTarget(child, platform = process.platform) {
   const pid = Number(child?.pid);
   if (platform === "win32" || !Number.isInteger(pid) || pid <= 0) return null;
@@ -64,14 +102,9 @@ export function terminateLocalPreviewProcessTree(child, {
   }
 }
 
-function startWrangler() {
+function startWrangler(snapshotDirectory) {
   const command = wranglerExecutable();
-  const args = [
-    "pages", "dev", "dist",
-    "--ip", "127.0.0.1",
-    "--port", "52098",
-    "--persist-to", ".wrangler/state"
-  ];
+  const args = localPreviewWranglerArgs(snapshotDirectory);
   const child = spawn(command, args, {
     cwd: process.cwd(),
     env: process.env,
@@ -81,7 +114,7 @@ function startWrangler() {
   return child;
 }
 
-export async function superviseLocalPreview() {
+export async function superviseLocalPreview({ projectRoot = process.cwd() } = {}) {
   let stopping = false;
   let child = null;
   let retryAttempt = 0;
@@ -98,9 +131,10 @@ export async function superviseLocalPreview() {
   process.once("SIGTERM", () => stop("SIGTERM"));
 
   while (!stopping) {
+    const snapshot = await prepareLocalPreviewSnapshot({ projectRoot });
     const startedAt = Date.now();
-    console.log(`[local-preview] 正在启动 ${LOCAL_PREVIEW_URL}`);
-    child = startWrangler();
+    console.log(`[local-preview] 正在启动 ${LOCAL_PREVIEW_URL}（${snapshot.release}）`);
+    child = startWrangler(snapshot.directory);
 
     const exitResult = new Promise((resolve) => {
       let resolved = false;
@@ -124,6 +158,13 @@ export async function superviseLocalPreview() {
         result = outcome;
         break;
       }
+      const latestRelease = await localPreviewSourceRelease(snapshot.sourceDirectory);
+      if (latestRelease && latestRelease !== snapshot.release) {
+        terminateLocalPreviewProcessTree(child);
+        const exited = await exitResult;
+        result = { ...exited, reload: true, nextRelease: latestRelease };
+        break;
+      }
       const healthy = await localPreviewHealthCheck();
       consecutiveHealthFailures = healthy ? 0 : consecutiveHealthFailures + 1;
       if (!shouldRecycleUnhealthyPreview(consecutiveHealthFailures)) continue;
@@ -137,6 +178,12 @@ export async function superviseLocalPreview() {
     terminateLocalPreviewProcessTree(child);
 
     if (!shouldRestartLocalPreview({ stopping, ...result })) break;
+
+    if (result.reload) {
+      retryAttempt = 0;
+      console.log(`[local-preview] 检测到新构建 ${result.nextRelease}，正在切换稳定快照。`);
+      continue;
+    }
 
     const livedFor = Date.now() - startedAt;
     retryAttempt = livedFor >= 60_000 ? 0 : retryAttempt + 1;
