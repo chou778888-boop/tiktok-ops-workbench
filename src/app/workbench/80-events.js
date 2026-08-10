@@ -17,13 +17,7 @@
     document.getElementById("blanketCreatorSearch")?.addEventListener("input", filterBlanketCreatorPreview);
     ["blanketLevelFilter", "blanketCategoryFilter"].forEach((id) => document.getElementById(id)?.addEventListener("change", filterBlanketCreatorPreview));
 
-    overviewAnalysisLayoutMedia.addEventListener("change", () => {
-      if (document.getElementById("overview")?.classList.contains("active")) {
-        renderOverviewAnalysisMode(true);
-      }
-    });
-
-    const overviewAnalysisShell = document.querySelector("[data-overview-analysis-shell]");
+    const overviewAnalysisShell = document.querySelector("[data-overview-operating-shell]");
     if (overviewAnalysisShell && typeof ResizeObserver !== "undefined") {
       const initialOverviewAnalysisRect = overviewAnalysisShell.getBoundingClientRect();
       let overviewAnalysisObservedSize = {
@@ -44,7 +38,7 @@
         overviewAnalysisResizeFrame = window.requestAnimationFrame(() => {
           overviewAnalysisResizeFrame = null;
           if (document.getElementById("overview")?.classList.contains("active")) {
-            renderOverviewAnalysisMode(true);
+            renderOverviewOperatingSurface(true);
           }
         });
       });
@@ -217,7 +211,6 @@
     });
 
     document.addEventListener("click", (event) => {
-      const overviewAnalysisBtn = event.target.closest("[data-overview-analysis-mode]");
       const overviewRiskBtn = event.target.closest("#overviewRiskAction");
       const taskViewBtn = event.target.closest("[data-task-view]");
       const taskGroupBtn = event.target.closest("[data-task-group-toggle]");
@@ -239,10 +232,6 @@
       const removeCreatorBtn = event.target.closest("[data-remove-creator]");
       const editableRow = event.target.closest("[data-row-edit]");
       const blanketSummaryBtn = event.target.closest("[data-blanket-summary-filter]");
-      if (overviewAnalysisBtn) {
-        setOverviewAnalysisMode(overviewAnalysisBtn.dataset.overviewAnalysisMode);
-        return;
-      }
       if (overviewRiskBtn) {
         document.querySelector("#overview .overview-risk-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
         return;

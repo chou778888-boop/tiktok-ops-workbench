@@ -494,7 +494,7 @@
       const activationPlan = overviewViewActivationPlan(viewName, renderedViewRevisions.get(viewName), uiRevision);
       if (activationPlan.syncOverviewAnalysis) {
         window.requestAnimationFrame(() => {
-          if (activeViewName() === "overview") renderOverviewAnalysisMode(true);
+          if (activeViewName() === "overview") renderOverviewOperatingSurface(true);
         });
       }
       if (!activationPlan.renderFullView) return;
@@ -533,10 +533,6 @@
 
     function renderOverview() {
       const range = selectedDataRange();
-      const trendRange = gmvTrendDataRange(range.end);
-      const priorTrendRange = previousDataRange(trendRange);
-      const trendTotals = aggregateByRange(trendRange);
-      const priorTrendTotals = aggregateByRange(priorTrendRange);
       const priorRange = previousDataRange(range);
       const storeEntries = aggregateStoresByRange(range);
       const scopedEntries = [...storeEntries.values()];
@@ -576,14 +572,6 @@
       document.getElementById("overviewRiskSubtitle").textContent = range.isSingle
         ? "基于当日店铺数据与已提交日报识别风险。"
         : "基于区间汇总指标与期间已提交日报识别风险；SPS使用各店铺最新值。";
-      document.getElementById("gmvTrendSubtitle").textContent = `${dataRangeDateText(trendRange)} · GMV 与来源使用同一批多店铺数据。`;
-      const trendComparison = overviewTrendComparisonState(trendTotals.dataDays, priorTrendTotals.dataDays);
-      const trendChange = trendComparison.comparable
-        ? changeText(trendTotals.gmv, priorTrendTotals.gmv, "", false, "较前7日")
-        : { text: trendComparison.label, cls: "" };
-      const trendSummary = document.getElementById("gmvTrendSummary");
-      trendSummary.textContent = trendTotals.dataDays ? `${money(trendTotals.gmv)} · ${trendChange.text}` : "等待近 7 日数据";
-      trendSummary.className = trendTotals.dataDays ? trendChange.cls : "";
       renderDataRangeControls(range);
 
       const priority = anomalies.slice(0, 5);
@@ -626,23 +614,33 @@
         `;
       }).join("");
 
-      renderOverviewAnalysisMode();
+      renderOverviewOperatingSurface();
     }
 
-    function renderOverviewDecisionBrief(model) {
+    function renderOverviewDecisionBrief(model, range = selectedDataRange()) {
       const brief = document.getElementById("overviewDecisionBrief");
       const status = document.getElementById("overviewDecisionStatus");
       const riskAction = document.getElementById("overviewRiskAction");
-      if (brief) brief.dataset.tone = model.tone;
-      if (status) status.textContent = model.statusLabel;
-      document.getElementById("overviewDecisionTitle").textContent = model.headline;
-      document.getElementById("overviewDecisionDetail").textContent = model.detail;
+      const latestComplete = !model.available && range.isSingle
+        ? latestCompleteOverviewDay(state.entries, range.end)
+        : null;
+      const displayMetrics = latestComplete || model.metrics;
+      const displayAvailable = model.available || Boolean(latestComplete);
+      const statusLabel = latestComplete ? "今日待同步" : model.statusLabel;
+      if (brief) brief.dataset.tone = latestComplete ? "watch" : model.tone;
+      if (status) status.textContent = statusLabel;
+      document.getElementById("overviewDecisionTitle").textContent = latestComplete
+        ? `今日数据待同步，先看 ${latestComplete.dateKey} 完整结果`
+        : model.headline;
+      document.getElementById("overviewDecisionDetail").textContent = latestComplete
+        ? `最近完整日 GMV ${money(latestComplete.gmv)}、成交 ${num(latestComplete.orders)} 单；今日未同步，不按零计入经营判断。`
+        : model.detail;
       document.getElementById("overviewDecisionPath").textContent = model.pathLabel;
       document.getElementById("overviewDecisionMetrics").innerHTML = [
-        ["区间 GMV", money(model.metrics.gmv), model.available ? "店群成交结果" : "等待同步"],
-        ["成交订单", num(model.metrics.orders) + " 单", model.available ? "所选范围汇总" : "等待同步"],
-        ["成交销量", num(model.metrics.units) + " 件", model.available ? "多店合计" : "等待同步"],
-        ["广告 ROI", model.metrics.roi ? model.metrics.roi.toFixed(2) : "—", model.metrics.roi ? "归因产出 / 花费" : "暂无花费"]
+        [latestComplete ? "最近完整日 GMV" : "区间 GMV", displayAvailable ? money(displayMetrics.gmv) : "—", latestComplete ? latestComplete.dateKey : model.available ? "店群成交结果" : "等待同步"],
+        ["成交订单", displayAvailable ? num(displayMetrics.orders) + " 单" : "—", latestComplete ? "最近完整日" : model.available ? "所选范围汇总" : "等待同步"],
+        ["成交销量", displayAvailable ? num(displayMetrics.units) + " 件" : "—", latestComplete ? "最近完整日" : model.available ? "多店合计" : "等待同步"],
+        ["广告 ROI", displayMetrics.roi ? displayMetrics.roi.toFixed(2) : "—", displayMetrics.roi ? "归因产出 / 花费" : "暂无花费"]
       ].map(([label, value, detail], index) => (
         '<div class="mini ' + (index === 0 ? "featured" : "") + '">'
         + "<span>" + escapeHtml(label) + "</span>"
@@ -660,69 +658,191 @@
         ["16:00", "店铺更新", model.available],
         ["17:00", "工作台同步", model.available],
         [`${model.metrics.storesWithData}/${model.metrics.totalStores}店`, "范围内有数据", model.metrics.storesWithData > 0],
-        [model.statusLabel, "经营判断", model.available]
+        [statusLabel, "经营判断", model.available]
       ].map(([value, label, done]) => (
         '<span class="' + (done ? "done" : "") + '"><i></i><b>'
         + escapeHtml(value) + "</b><small>" + escapeHtml(label) + "</small></span>"
       )).join("");
     }
 
-    const overviewAnalysisLayoutMedia = window.matchMedia("(min-width: 1180px)");
-
-    function isOverviewDualDimensionLayout() {
-      return overviewAnalysisLayoutMedia.matches;
+    function overviewOperatingDateLabel(dateKey) {
+      const parts = String(dateKey || "").split("-");
+      return parts.length === 3 ? `${Number(parts[1])}/${Number(parts[2])}` : String(dateKey || "");
     }
 
-    function renderOverviewAnalysisMode(drawActiveCharts = true) {
-      const visibility = overviewAnalysisVisibility(
-        activeOverviewAnalysisMode,
-        isOverviewDualDimensionLayout()
-      );
-      activeOverviewAnalysisMode = visibility.mode;
-      document.querySelector("[data-overview-analysis-shell]")
-        ?.classList.toggle("is-dual-dimension", visibility.dualDisplay);
-      document.querySelectorAll("[data-overview-analysis-panel]").forEach((panel) => {
-        panel.hidden = panel.dataset.overviewAnalysisPanel === "gmv" ? visibility.gmvHidden : visibility.linkHidden;
-      });
-      document.querySelectorAll("[data-overview-analysis-mode]").forEach((button) => {
-        const pressed = button.dataset.overviewAnalysisMode === "gmv" ? visibility.gmvPressed : visibility.linkPressed;
-        button.classList.toggle("active", pressed);
-        button.setAttribute("aria-pressed", String(pressed));
-      });
+    function renderOverviewSourceEvidence(totals, priorTotals = {}) {
+      const legend = document.getElementById("sourceLegend");
+      const insight = document.getElementById("sourceInsight");
+      const stack = document.getElementById("sourceContributionBar");
+      if (!legend || !insight || !stack) return;
+      const known = Number(totals.affiliateGmv || 0) + Number(totals.productCardGmv || 0);
+      const priorKnown = Number(priorTotals.affiliateGmv || 0) + Number(priorTotals.productCardGmv || 0);
+      const slices = [
+        { label: "联盟 GMV", value: Number(totals.affiliateGmv || 0), previous: Number(priorTotals.affiliateGmv || 0), color: "#78f58f" },
+        { label: "商品卡", value: Number(totals.productCardGmv || 0), previous: Number(priorTotals.productCardGmv || 0), color: "#2f6fed" },
+        { label: "未归类", value: Math.max(0, Number(totals.gmv || 0) - known), previous: Math.max(0, Number(priorTotals.gmv || 0) - priorKnown), color: "#aeb8b1" }
+      ];
+      const total = slices.reduce((sum, item) => sum + item.value, 0);
+      if (!total) {
+        stack.innerHTML = '<span class="is-pending" style="width:100%"></span>';
+        legend.innerHTML = '<span class="overview-evidence-pending">来源明细待同步</span>';
+        insight.textContent = "等待来源数据形成经营判断。";
+        return;
+      }
+      stack.innerHTML = slices.filter((item) => item.value > 0).map((item) => (
+        `<span style="width:${item.value / total * 100}%;background:${item.color}" title="${escapeHtml(item.label)} ${pct(item.value / total * 100)}"></span>`
+      )).join("");
+      const deltaText = (value, previous) => {
+        const delta = value - previous;
+        return delta === 0 ? "持平" : `${delta > 0 ? "+" : "-"}${money(Math.abs(delta))}`;
+      };
+      legend.innerHTML = slices.map((item) => `
+        <span class="source-legend-item">
+          <i class="legend-dot" style="background:${item.color}"></i>
+          <b>${escapeHtml(item.label)}</b>
+          <strong>${pct(item.value / total * 100)}<small>${money(item.value)} · ${deltaText(item.value, item.previous)}</small></strong>
+        </span>
+      `).join("");
+      const totalDelta = Number(totals.gmv || 0) - Number(priorTotals.gmv || 0);
+      const driver = [...slices].sort((left, right) => Math.abs(right.value - right.previous) - Math.abs(left.value - left.previous))[0];
+      const driverDelta = driver.value - driver.previous;
+      insight.innerHTML = `<b>${totalDelta >= 0 ? "增长" : "下滑"}主要来自 ${escapeHtml(driver.label)}</b><span>${driverDelta >= 0 ? "+" : "-"}${money(Math.abs(driverDelta))}，贡献占比 ${pct(driver.value / total * 100)}</span>`;
+    }
 
+    function renderOverviewOperatingSurface(drawChart = true) {
       const range = selectedDataRange();
       const trendRange = gmvTrendDataRange(range.end);
+      const model = makeOverviewOperatingTrendModel(entriesInRange(trendRange), trendRange);
+      const priorTrendRange = previousDataRange(trendRange);
+      const summary = document.getElementById("overviewOperatingSummary");
+      const rangeBadge = document.getElementById("overviewOperatingRange");
       const subtitle = document.getElementById("gmvTrendSubtitle");
-      const overviewGmvRange = document.getElementById("overviewGmvRange");
-      if (overviewGmvRange) overviewGmvRange.textContent = dataRangeDateText(trendRange);
-      if (visibility.dualDisplay) {
-        if (subtitle) subtitle.textContent = "同时查看多店整体结果与重点链接价量，快速定位经营变化。";
-        if (!drawActiveCharts) return;
-        drawGmvTrend(trendRange);
-        drawSourceDonut(
-          aggregateByRange(trendRange),
-          aggregateByRange(previousDataRange(trendRange))
-        );
-        renderOverviewProfitPulse();
-        return;
+      const canvas = document.getElementById("overviewOperatingChart");
+      const empty = document.getElementById("overviewOperatingEmpty");
+      if (rangeBadge) rangeBadge.textContent = dataRangeDateText(trendRange);
+      if (subtitle) subtitle.textContent = `${dataRangeDateText(trendRange)} · 多店 GMV 与成交订单来自同一批日报；空缺日期保持待同步。`;
+      if (summary) {
+        summary.innerHTML = [
+          ["GMV", model.summary.syncedDays ? money(model.summary.gmv) : "—"],
+          ["成交订单", model.summary.syncedDays ? `${num(model.summary.orders)} 单` : "—"],
+          ["平均客单", model.summary.averageOrderValue === null ? "—" : money(model.summary.averageOrderValue)]
+        ].map(([label, value], index) => `<span class="${index === 0 ? "featured" : ""}"><small>${label}</small><strong>${value}</strong></span>`).join("");
       }
-      if (visibility.mode === "link") {
-        if (subtitle) subtitle.textContent = "按需下钻当前重点链接，查看价量、实际到手与利润。";
-        if (drawActiveCharts) renderOverviewProfitPulse();
-        return;
-      }
-
-      if (subtitle) subtitle.textContent = `${dataRangeDateText(trendRange)} · GMV 与来源使用同一批多店铺数据。`;
-      if (!drawActiveCharts) return;
-      drawGmvTrend(trendRange);
-      drawSourceDonut(aggregateByRange(trendRange), aggregateByRange(previousDataRange(trendRange)));
+      if (empty) empty.hidden = model.summary.syncedDays > 0;
+      if (canvas) canvas.hidden = model.summary.syncedDays === 0;
+      renderOverviewSourceEvidence(
+        aggregateByRange(trendRange),
+        aggregateByRange(priorTrendRange)
+      );
+      renderOverviewProfitPulse();
+      if (drawChart && canvas && model.summary.syncedDays > 0) drawOverviewOperatingChart(model);
     }
 
-    function setOverviewAnalysisMode(mode) {
-      activeOverviewAnalysisMode = overviewAnalysisVisibility(mode).mode;
-      renderOverviewAnalysisMode();
+    function drawOverviewOperatingChart(model) {
+      const canvas = document.getElementById("overviewOperatingChart");
+      if (!canvas || canvas.hidden) return;
+      const { ctx, width, height } = setupCanvas(canvas);
+      const rootStyles = getComputedStyle(document.documentElement);
+      const acid = rootStyles.getPropertyValue("--color-pulse-acid").trim() || "#78f58f";
+      const orderColor = "#b7d8ff";
+      const points = Array.isArray(model?.points) ? model.points : [];
+      ctx.clearRect(0, 0, width, height);
+      if (!points.length) return;
+      const pad = { left: width < 520 ? 42 : 66, right: width < 520 ? 38 : 58, top: 26, bottom: 42 };
+      const chartWidth = Math.max(1, width - pad.left - pad.right);
+      const chartHeight = Math.max(1, height - pad.top - pad.bottom);
+      const synced = points.filter((point) => point.synced);
+      const maxGmv = Math.max(...synced.map((point) => Number(point.gmv || 0)), 1) * 1.12;
+      const maxOrders = Math.max(...synced.map((point) => Number(point.orders || 0)), 1) * 1.12;
+      ctx.font = `${width < 520 ? 10 : 11}px -apple-system, BlinkMacSystemFont, sans-serif`;
+      ctx.textBaseline = "middle";
+      for (let index = 0; index <= 4; index += 1) {
+        const ratio = index / 4;
+        const y = pad.top + chartHeight * ratio;
+        ctx.strokeStyle = "rgba(255,255,255,0.1)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(pad.left, y);
+        ctx.lineTo(width - pad.right, y);
+        ctx.stroke();
+        ctx.fillStyle = "rgba(255,255,255,0.52)";
+        ctx.textAlign = "right";
+        ctx.fillText(overviewCompactMoney(maxGmv * (1 - ratio)), pad.left - 9, y);
+        ctx.textAlign = "left";
+        ctx.fillText(String(Math.round(maxOrders * (1 - ratio))), width - pad.right + 9, y);
+      }
+      const coordinates = points.map((point, index) => {
+        const x = pad.left + (points.length === 1 ? chartWidth / 2 : chartWidth * index / (points.length - 1));
+        return {
+          ...point,
+          x,
+          gmvY: point.synced ? pad.top + chartHeight - Number(point.gmv || 0) / maxGmv * chartHeight : null,
+          ordersY: point.synced ? pad.top + chartHeight - Number(point.orders || 0) / maxOrders * chartHeight : null
+        };
+      });
+      const drawSegmentedLine = (key, color, dash = []) => {
+        let segmentOpen = false;
+        ctx.beginPath();
+        coordinates.forEach((point) => {
+          if (!point.synced || point[key] === null) {
+            segmentOpen = false;
+            return;
+          }
+          if (segmentOpen) ctx.lineTo(point.x, point[key]);
+          else ctx.moveTo(point.x, point[key]);
+          segmentOpen = true;
+        });
+        ctx.setLineDash(dash);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.75;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.stroke();
+        ctx.setLineDash([]);
+      };
+      drawSegmentedLine("gmvY", acid);
+      drawSegmentedLine("ordersY", orderColor, [7, 6]);
+      coordinates.forEach((point) => {
+        ctx.textAlign = "center";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = point.synced ? "rgba(255,255,255,0.66)" : "rgba(255,255,255,0.34)";
+        ctx.fillText(overviewOperatingDateLabel(point.dateKey), point.x, height - 13);
+        if (!point.synced) {
+          ctx.beginPath();
+          ctx.arc(point.x, pad.top + chartHeight, 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = "rgba(255,255,255,0.3)";
+          ctx.fill();
+          return;
+        }
+        ctx.beginPath();
+        ctx.arc(point.x, point.gmvY, 4, 0, Math.PI * 2);
+        ctx.fillStyle = "#102019";
+        ctx.fill();
+        ctx.strokeStyle = acid;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = orderColor;
+        ctx.fillRect(point.x - 3.5, point.ordersY - 3.5, 7, 7);
+      });
+      canvas._operatingPoints = coordinates;
+      bindChartHover(canvas, (event) => {
+        const activePoints = canvas._operatingPoints || [];
+        const rect = canvas.getBoundingClientRect();
+        const pointerX = event.clientX - rect.left;
+        const nearest = activePoints.reduce((best, point) => {
+          const distance = Math.abs(point.x - pointerX);
+          return !best || distance < best.distance ? { point, distance } : best;
+        }, null);
+        if (!nearest || nearest.distance > Math.max(28, rect.width / Math.max(activePoints.length, 1) / 2)) {
+          hideChartTooltip();
+          return;
+        }
+        const point = nearest.point;
+        showChartTooltip(event, point.synced
+          ? `<b>${point.dateKey}</b><span>GMV：${money(point.gmv)}</span><span>成交订单：${num(point.orders)} 单</span><span>平均客单：${point.averageOrderValue === null ? "—" : money(point.averageOrderValue)}</span>`
+          : `<b>${point.dateKey}</b><span>日报待同步，不按零计算</span>`);
+      });
     }
-
 
     function metricHtml([label, value, desc, color]) {
       const cls = color === "blue" ? "up" : color || "";
@@ -758,14 +878,6 @@
       canvas.addEventListener("mouseleave", hideChartTooltip);
     }
 
-    function setOverviewChartEmptyState(id, isEmpty) {
-      const emptyState = document.getElementById(id);
-      if (!emptyState) return;
-      emptyState.hidden = !isEmpty;
-      const canvas = emptyState.parentElement?.querySelector("canvas");
-      if (canvas) canvas.hidden = isEmpty;
-    }
-
     function overviewProfitPulseModel() {
       try {
         const rows = selectProductProfitRows(
@@ -787,125 +899,11 @@
       }
     }
 
-    function overviewPulseDateLabel(dateKey) {
-      const parts = String(dateKey || "").split("-");
-      return parts.length === 3 ? Number(parts[1]) + "/" + Number(parts[2]) : String(dateKey || "");
-    }
-
-    function drawOverviewProfitPulse(model) {
-      const canvas = document.getElementById("overviewPulseChart");
-      if (!canvas) return;
-      const { ctx, width, height } = setupCanvas(canvas);
-      const rootStyles = getComputedStyle(document.documentElement);
-      const acid = rootStyles.getPropertyValue("--color-pulse-acid").trim() || "#78f58f";
-      const instrument = rootStyles.getPropertyValue("--color-pulse-instrument").trim() || "#0d1712";
-      ctx.clearRect(0, 0, width, height);
-      const points = Array.isArray(model?.points) ? model.points : [];
-      if (!points.length) return;
-
-      const pad = { left: 26, right: 26, top: 20, bottom: 22 };
-      const chartWidth = Math.max(1, width - pad.left - pad.right);
-      const chartHeight = Math.max(1, height - pad.top - pad.bottom);
-      const barBaseline = pad.top + chartHeight;
-      const step = points.length > 1 ? chartWidth / (points.length - 1) : chartWidth;
-      const synced = points.filter((point) => point.synced);
-      const prices = synced.map((point) => point.averageTransactionPrice).filter((value) => Number.isFinite(value));
-      const units = synced.map((point) => Number(point.itemsSold || 0));
-      const minPrice = prices.length ? Math.min(...prices) : 0;
-      const maxPrice = prices.length ? Math.max(...prices) : 0;
-      const priceRange = Math.max(maxPrice - minPrice, 1);
-      const maxUnits = Math.max(...units, 1);
-      const barWidth = Math.min(34, Math.max(14, step * 0.34));
-
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.09)";
-      ctx.lineWidth = 1;
-      [0.2, 0.5, 0.8].forEach((ratio) => {
-        const y = pad.top + chartHeight * ratio;
-        ctx.beginPath();
-        ctx.moveTo(pad.left, y);
-        ctx.lineTo(width - pad.right, y);
-        ctx.stroke();
-      });
-
-      const coordinates = points.map((point, index) => {
-        const x = pad.left + step * index;
-        const barHeight = point.synced ? Math.max(4, Number(point.itemsSold || 0) / maxUnits * chartHeight * 0.42) : 0;
-        if (point.synced) {
-          ctx.save();
-          ctx.globalAlpha = index === points.length - 1 ? 0.78 : 0.34;
-          ctx.fillStyle = acid;
-          ctx.fillRect(x - barWidth / 2, barBaseline - barHeight, barWidth, barHeight);
-          ctx.restore();
-        } else {
-          ctx.save();
-          ctx.setLineDash([2, 5]);
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-          ctx.beginPath();
-          ctx.moveTo(x, pad.top + 6);
-          ctx.lineTo(x, barBaseline - 2);
-          ctx.stroke();
-          ctx.setLineDash([]);
-          ctx.beginPath();
-          ctx.arc(x, barBaseline - 4, 2.5, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(255, 255, 255, 0.28)";
-          ctx.fill();
-          ctx.restore();
-        }
-        const price = point.averageTransactionPrice;
-        const y = Number.isFinite(price)
-          ? pad.top + chartHeight * 0.58 - ((price - minPrice) / priceRange) * chartHeight * 0.45
-          : null;
-        return { ...point, x, y };
-      });
-
-      let segmentOpen = false;
-      ctx.beginPath();
-      coordinates.forEach((point) => {
-        if (!point.synced || point.y === null) {
-          segmentOpen = false;
-          return;
-        }
-        if (!segmentOpen) {
-          ctx.moveTo(point.x, point.y);
-          segmentOpen = true;
-        } else {
-          ctx.lineTo(point.x, point.y);
-        }
-      });
-      ctx.strokeStyle = acid;
-      ctx.lineWidth = 2.75;
-      ctx.lineJoin = "round";
-      ctx.stroke();
-
-      const activePoints = coordinates.filter((point) => point.synced && point.y !== null);
-      activePoints.forEach((point) => {
-        const isCurrent = point === activePoints.at(-1);
-        ctx.save();
-        if (isCurrent) {
-          ctx.shadowColor = acid;
-          ctx.shadowBlur = 16;
-        }
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, isCurrent ? 6 : 4, 0, Math.PI * 2);
-        ctx.fillStyle = isCurrent ? acid : instrument;
-        ctx.fill();
-        ctx.strokeStyle = isCurrent ? "#ffffff" : acid;
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.restore();
-      });
-    }
-
     function renderOverviewProfitPulse() {
       const model = overviewProfitPulseModel();
-      const density = overviewPulseDensity(model.points);
       const focus = document.getElementById("overviewProfitFocus");
       const action = document.getElementById("overviewProfitAction");
       const health = document.getElementById("overviewProfitHealth");
-      const pulseCanvas = document.getElementById("overviewPulseChart");
-      const pulseSparse = document.getElementById("overviewPulseSparse");
-      const pulseSparseDetail = document.getElementById("overviewPulseSparseDetail");
-      const pulseRibbon = pulseSparse?.closest(".overview-pulse-ribbon");
       const focusReceived = document.getElementById("overviewFocusReceived");
       const focusReceivedLabel = document.getElementById("overviewFocusReceivedLabel");
       const focusProfit = document.getElementById("overviewFocusProfit");
@@ -913,8 +911,6 @@
       const signalPrice = document.getElementById("overviewSignalPrice");
       const signalMotion = document.getElementById("overviewSignalMotion");
       const signalAction = document.getElementById("overviewSignalAction");
-      const overviewLinkRange = document.getElementById("overviewLinkRange");
-      if (overviewLinkRange) overviewLinkRange.textContent = overviewPulseRangeLabel(model.points);
       document.getElementById("overviewProfitFocusTitle").textContent = model.focusTitle;
       document.getElementById("overviewProfitFocusDetail").textContent = model.focusDetail;
       document.getElementById("overviewPulsePath").textContent = model.pathLabel;
@@ -934,230 +930,21 @@
         action.disabled = !model.available || !model.listingId;
         action.dataset.listingId = model.listingId;
       }
-      if (pulseCanvas) pulseCanvas.hidden = density.sparse;
-      if (pulseSparse) pulseSparse.hidden = !density.sparse;
-      if (pulseSparseDetail) {
-        pulseSparseDetail.textContent = `已同步 ${density.syncedDays}/7 天，至少需要 2 个有效数据日。`;
-      }
-      pulseRibbon?.classList.toggle("is-sparse", density.sparse);
-
+      const latestSyncedPoint = [...(model.points || [])].reverse().find((point) => point.synced);
+      const averagePrice = latestSyncedPoint?.averageTransactionPrice;
       const metricRows = [
-        ["近 7 天销量", num(model.metrics.itemsSold) + " 件", model.available ? model.productCode + " · " + model.activeSkuCount + " 个在售 SKU" : "等待同步"],
-        ["近 7 天 GMV", profitUiMoney(model.metrics.gmv), model.available ? "产品链接成交总额" : "等待同步"],
-        ["有效数据", density.syncedDays + "/7 天", density.sparse ? "至少 2 天后展示趋势" : "成交趋势可用于判断"],
-        ["经营状态", model.healthLabel, model.available ? "费用与经营判断已形成" : "等待同步后判断"]
+        ["成交均价", Number.isFinite(averagePrice) ? profitUiMoney(averagePrice) : "—"],
+        ["销量", model.available ? `${num(model.metrics.itemsSold)} 件` : "—"],
+        ["GMV", model.available ? profitUiMoney(model.metrics.gmv) : "—"],
+        ["实际到手", model.available ? profitUiMoney(model.metrics.receivedAmount) : "—"],
+        [model.metrics.profitLabel || "暂算利润", model.available ? profitUiMoney(model.metrics.finalProfit) : "—"]
       ];
-      document.getElementById("overviewLinkMetrics").innerHTML = metricRows.map(([label, value, detail], index) => (
-        '<div class="mini ' + (index === 1 ? "featured" : "") + '">'
-        + "<span>" + escapeHtml(label) + "</span>"
-        + "<strong>" + escapeHtml(value) + "</strong>"
-        + "<small>" + escapeHtml(detail) + "</small>"
-        + "</div>"
-      )).join("");
-
-      document.getElementById("overviewPulseDays").innerHTML = model.points.map((point) => (
-        '<span class="' + (point.synced ? "synced" : "pending") + '">'
-        + "<b>" + escapeHtml(overviewPulseDateLabel(point.dateKey)) + "</b>"
-        + "<small>" + (point.synced ? num(point.itemsSold) + " 件" : "待同步") + "</small>"
-        + "</span>"
-      )).join("");
-
-      if (!density.sparse) drawOverviewProfitPulse(model);
-    }
-
-    function drawGmvTrend(range = selectedDataRange()) {
-      const canvas = document.getElementById("gmvTrendChart");
-      if (!canvas) return;
-      const dates = dateKeysInRange(range);
-      const scopedRows = entriesInRange(range);
-      const gmvByDate = scopedRows.reduce((map, entry) => {
-        map.set(entry.date, (map.get(entry.date) || 0) + Number(entry.gmv || 0));
-        return map;
-      }, new Map());
-      const points = dates.map((date) => ({ date, value: gmvByDate.get(date) || 0 }));
-      const chartState = overviewChartState(scopedRows.length > 0);
-      setOverviewChartEmptyState("gmvTrendEmpty", chartState.isEmpty);
-      if (!chartState.shouldDraw) return;
-
-      const { ctx, width, height } = setupCanvas(canvas);
-      ctx.clearRect(0, 0, width, height);
-
-      const pad = { left: 58, right: 24, top: 24, bottom: 42 };
-      const chartW = width - pad.left - pad.right;
-      const chartH = height - pad.top - pad.bottom;
-      const maxValue = Math.max(...points.map((point) => point.value), 1);
-      const yMax = maxValue * 1.18;
-
-      ctx.strokeStyle = "rgba(12,15,20,0.08)";
-      ctx.lineWidth = 1;
-      ctx.fillStyle = "#7a808a";
-      ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
-      for (let i = 0; i <= 4; i += 1) {
-        const y = pad.top + chartH * i / 4;
-        const value = yMax * (1 - i / 4);
-        ctx.beginPath();
-        ctx.moveTo(pad.left, y);
-        ctx.lineTo(width - pad.right, y);
-        ctx.stroke();
-        ctx.fillText(overviewCompactMoney(value), 8, y + 4);
+      const metrics = document.getElementById("overviewLinkDecisionMetrics");
+      if (metrics) {
+        metrics.innerHTML = metricRows.map(([label, value], index) => (
+          `<span class="${index === metricRows.length - 1 ? "featured" : ""}"><small>${escapeHtml(label)}</small><strong>${escapeHtml(value)}</strong></span>`
+        )).join("");
       }
-
-      const coords = points.map((point, index) => {
-        const x = pad.left + (points.length === 1 ? chartW / 2 : chartW * index / (points.length - 1));
-        const y = pad.top + chartH - (point.value / yMax) * chartH;
-        return { ...point, x, y };
-      });
-
-      const gradient = ctx.createLinearGradient(0, pad.top, 0, height - pad.bottom);
-      gradient.addColorStop(0, "rgba(44,110,232,0.2)");
-      gradient.addColorStop(1, "rgba(44,110,232,0)");
-      ctx.beginPath();
-      coords.forEach((point, index) => {
-        if (index === 0) ctx.moveTo(point.x, point.y);
-        else ctx.lineTo(point.x, point.y);
-      });
-      ctx.lineTo(coords[coords.length - 1].x, height - pad.bottom);
-      ctx.lineTo(coords[0].x, height - pad.bottom);
-      ctx.closePath();
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      ctx.beginPath();
-      coords.forEach((point, index) => {
-        if (index === 0) ctx.moveTo(point.x, point.y);
-        else ctx.lineTo(point.x, point.y);
-      });
-      ctx.strokeStyle = "#2c6ee8";
-      ctx.lineWidth = 3;
-      ctx.lineJoin = "round";
-      ctx.stroke();
-
-      const dateLabelStep = coords.length <= 7 ? 1 : Math.ceil((coords.length - 1) / 6);
-      coords.forEach((point, index) => {
-        ctx.beginPath();
-        ctx.arc(point.x, point.y, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#fff";
-        ctx.fill();
-        ctx.strokeStyle = "#2c6ee8";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.fillStyle = "#48505c";
-        ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
-        ctx.textAlign = "center";
-        if (index === 0 || index === coords.length - 1 || index % dateLabelStep === 0) {
-          ctx.fillText(overviewPulseDateLabel(point.date), point.x, height - 14);
-        }
-      });
-      ctx.textAlign = "left";
-      canvas._trendPoints = coords;
-      bindChartHover(canvas, (event) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const nearest = canvas._trendPoints.reduce((best, point) => {
-          const distance = Math.abs(point.x - x);
-          return !best || distance < best.distance ? { point, distance } : best;
-        }, null);
-        if (!nearest || nearest.distance > 42) {
-          hideChartTooltip();
-          return;
-        }
-        const point = nearest.point;
-        showChartTooltip(event, `<b>${point.date}</b><span>GMV：${money(point.value)}</span><span>多店铺汇总</span>`);
-      });
-    }
-
-    function drawSourceDonut(totals, priorTotals = {}) {
-      const canvas = document.getElementById("sourceDonutChart");
-      const legend = document.getElementById("sourceLegend");
-      const insight = document.getElementById("sourceInsight");
-      if (!canvas || !legend || !insight) return;
-      const known = totals.affiliateGmv + totals.productCardGmv;
-      const other = Math.max(0, totals.gmv - known);
-      const priorKnown = Number(priorTotals.affiliateGmv || 0) + Number(priorTotals.productCardGmv || 0);
-      const priorOther = Math.max(0, Number(priorTotals.gmv || 0) - priorKnown);
-      const slices = [
-        { label: "联盟GMV", value: Number(totals.affiliateGmv || 0), previous: Number(priorTotals.affiliateGmv || 0), color: "#12201b" },
-        { label: "商品卡", value: Number(totals.productCardGmv || 0), previous: Number(priorTotals.productCardGmv || 0), color: "#2f6fed" },
-        { label: "未归类成交", value: other, previous: priorOther, color: "#aab3ad" }
-      ];
-      const total = slices.reduce((sum, item) => sum + item.value, 0);
-      const chartState = overviewChartState(total > 0);
-      setOverviewChartEmptyState("sourceDonutEmpty", chartState.isEmpty);
-
-      if (!chartState.shouldDraw) {
-        legend.innerHTML = "";
-        insight.textContent = "等待来源数据形成经营判断。";
-        return;
-      }
-
-      const { ctx, width, height } = setupCanvas(canvas);
-      ctx.clearRect(0, 0, width, height);
-
-      const barX = 4;
-      const barY = Math.max(8, (height - 24) / 2);
-      const barWidth = Math.max(1, width - 8);
-      const barHeight = 24;
-      ctx.fillStyle = "rgba(18,32,27,0.08)";
-      ctx.beginPath();
-      ctx.roundRect(barX, barY, barWidth, barHeight, 12);
-      ctx.fill();
-      ctx.save();
-      ctx.beginPath();
-      ctx.roundRect(barX, barY, barWidth, barHeight, 12);
-      ctx.clip();
-      let cursor = barX;
-      const sliceMeta = [];
-      slices.filter((slice) => slice.value > 0).forEach((slice) => {
-        const segmentWidth = barWidth * slice.value / total;
-        ctx.fillStyle = slice.color;
-        ctx.fillRect(cursor, barY, segmentWidth, barHeight);
-        sliceMeta.push({ ...slice, total, startX: cursor, endX: cursor + segmentWidth, top: barY, bottom: barY + barHeight });
-        cursor += segmentWidth;
-      });
-      ctx.restore();
-
-      const adRoi = totals.adSpend ? totals.adGmv / totals.adSpend : 0;
-      const sourceDeltaText = (current, previous) => {
-        const delta = current - previous;
-        if (!delta) return "持平";
-        return `${delta > 0 ? "+" : "-"}${money(Math.abs(delta))}`;
-      };
-      legend.innerHTML = slices.map((slice) => `
-        <span class="source-legend-item">
-          <i class="legend-dot" style="background:${slice.color}"></i>
-          <b>${slice.label}</b>
-          <strong>${money(slice.value)}<small>${pct(slice.value / total * 100)} · ${sourceDeltaText(slice.value, slice.previous)}</small></strong>
-        </span>
-      `).join("") + (totals.adGmv || totals.adSpend ? `
-        <span class="source-legend-item source-legend-ad" title="广告归因可能与联盟、商品卡或自然成交重叠，因此不计入交易来源占比">
-          <i class="legend-dot" style="background:#18885a"></i>
-          <b>广告归因</b>
-          <strong>${money(totals.adGmv)}<small>ROI ${adRoi ? adRoi.toFixed(2) : "-"}</small></strong>
-        </span>
-      ` : "");
-      const totalDelta = Number(totals.gmv || 0) - Number(priorTotals.gmv || 0);
-      const driver = [...slices].sort((a, b) => totalDelta === 0
-        ? b.value - a.value
-        : totalDelta > 0
-          ? (b.value - b.previous) - (a.value - a.previous)
-          : (a.value - a.previous) - (b.value - b.previous))[0];
-      const driverDelta = driver.value - driver.previous;
-      insight.innerHTML = totalDelta === 0
-        ? `<b>来源结构稳定：${driver.label}</b><span>本期占比 ${pct(driver.value / total * 100)}，较前 7 日持平</span>`
-        : `<b>${totalDelta > 0 ? "增长" : "下滑"}主因：${driver.label}</b><span>${driverDelta >= 0 ? "+" : "-"}${money(Math.abs(driverDelta))}，较前 7 日${driverDelta >= 0 ? "增加" : "减少"}</span>`;
-      canvas._sourceSegments = sliceMeta;
-      bindChartHover(canvas, (event) => {
-        const rect = canvas.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = event.clientY - rect.top;
-        const slice = canvas._sourceSegments.find((item) => x >= item.startX && x <= item.endX && y >= item.top && y <= item.bottom);
-        if (!slice) {
-          hideChartTooltip();
-          return;
-        }
-        const delta = slice.value - slice.previous;
-        showChartTooltip(event, `<b>${slice.label}</b><span>近 7 日：${money(slice.value)}</span><span>占比：${pct(slice.value / slice.total * 100)}</span><span>较前 7 日：${delta >= 0 ? "+" : "-"}${money(Math.abs(delta))}</span>`);
-      });
     }
 
     function renderEntries() {

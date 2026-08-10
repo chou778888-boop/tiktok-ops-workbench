@@ -84,7 +84,6 @@ window.__workbenchMainReady = true;
     let activeDataRangePreset = "today";
     let activeCustomDataDate = today;
     let activeReportDate = today;
-    let activeOverviewAnalysisMode = "gmv";
     const expandedTaskIds = new Set();
     let activeTaskCenterView = "mine";
     const TASK_HISTORY_PAGE_SIZE = 20;
