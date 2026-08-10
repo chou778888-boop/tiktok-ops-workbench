@@ -76,6 +76,14 @@ assert.match(premiumStyles, /\.overview-decision-brief\s*\{[\s\S]*?grid-template
 assert.match(premiumStyles, /\.overview-decision-metrics\s*\{[^}]*grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/, "桌面总盘四指标必须单行排布，避免把开场撑成大面积空白");
 assert.match(premiumStyles, /\.overview-command-bar\s*\{[\s\S]*?grid-area:\s*toolbar/);
 assert.match(premiumStyles, /\.overview-operating-panel\s*\{[\s\S]*?overflow:\s*hidden/);
+assert.match(premiumStyles, /--overview-type-caption:\s*13px/, "总览辅助内容必须达到 13px 清晰层级");
+assert.match(premiumStyles, /--overview-type-label:\s*14px/, "总览标签必须达到 14px 清晰层级");
+assert.match(premiumStyles, /--overview-type-body:\s*15px/, "总览正文必须达到 15px 阅读层级");
+assert.match(premiumStyles, /--overview-type-table:\s*14px/, "总览真实数据表格必须达到 14px 阅读层级");
+assert.match(premiumStyles, /\.panel-head h2\s*\{[^}]*font-size:\s*24px/, "总览分区标题必须对齐日报中心 24px 层级");
+assert.match(premiumStyles, /#sourceLegend \.source-legend-item strong small\s*\{[^}]*font-size:\s*var\(--overview-type-caption\)/, "成交来源金额说明必须达到辅助文字层级");
+assert.match(premiumStyles, /\.overview-source-insight\s*\{[^}]*font-size:\s*var\(--overview-type-caption\)/, "成交来源判断说明不得使用微缩字号");
+assert.match(premiumStyles, /\.panel-head \.badge\s*\{[^}]*font-size:\s*var\(--overview-type-caption\)/, "总览数量徽标必须保持可读");
 assert.match(premiumStyles, /\.overview-operating-stage\s*\{[\s\S]*?background:\s*linear-gradient\(145deg, #14221a 0%, var\(--color-pulse-instrument\) 100%\)/, "统一经营图必须使用深绿仪表画布");
 assert.match(premiumStyles, /#overviewOperatingChart\s*\{[\s\S]*?height:\s*clamp\(230px, 20vw, 300px\)/, "桌面统一图应保留足够判断高度但不能过度占屏");
 assert.match(premiumStyles, /\.overview-operating-summary\s*\{[\s\S]*?grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
@@ -121,4 +129,4 @@ assert.doesNotMatch(eventsSource, /data-overview-analysis-mode/);
 assert.match(profitTemplate, /renderProfitListingDetail/);
 assert.match(profitTemplate, /renderProfitSkuTrend/);
 
-console.log(JSON.stringify({ passed: 61, phase: "operating-pulse-overview-contract" }));
+console.log(JSON.stringify({ passed: 69, phase: "operating-pulse-overview-contract" }));

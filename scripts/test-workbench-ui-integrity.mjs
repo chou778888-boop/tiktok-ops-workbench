@@ -69,8 +69,9 @@ for (const file of ownerFiles) {
   assert.deepEqual(duplicates, [], `${file} 存在重复顶层选择器：${duplicates.join("、")}`);
 }
 
-const [tokens, overview, reports, tasks, costing, creators, academy] = await Promise.all([
+const [tokens, entry, overview, reports, tasks, costing, creators, academy] = await Promise.all([
   readFile("src/styles/tokens.css", "utf8"),
+  readFile("src/styles/modules/01-entry.css", "utf8"),
   readFile("src/styles/modules/19-premium-shell-overview.css", "utf8"),
   readFile("src/styles/modules/20-report-command-center.css", "utf8"),
   readFile("src/styles/modules/21-task-command-center.css", "utf8"),
@@ -80,6 +81,10 @@ const [tokens, overview, reports, tasks, costing, creators, academy] = await Pro
 ]);
 
 assert.match(tokens, /--text-view-title:\s*clamp\(/, "全工作台必须由设计令牌统一首屏标题尺度");
+assert.match(entry, /--entry-type-caption:\s*13px/, "登录页辅助内容必须达到 13px 清晰层级");
+assert.match(entry, /--entry-type-label:\s*14px/, "登录页标签必须达到 14px 清晰层级");
+assert.match(entry, /--entry-type-body:\s*15px/, "登录页正文必须达到 15px 阅读层级");
+assert.match(entry, /--entry-type-input:\s*16px/, "登录输入必须使用清晰且移动端安全的 16px 字号");
 for (const [name, source] of [
   ["总览", overview],
   ["日报", reports],
@@ -91,4 +96,4 @@ for (const [name, source] of [
   assert.match(source, /font-size:\s*var\(--text-view-title\)/, `${name}首屏标题必须消费统一标题令牌`);
 }
 
-console.log(JSON.stringify({ passed: ownerFiles.length + 7, phase: "workbench-ui-integrity" }));
+console.log(JSON.stringify({ passed: ownerFiles.length + 11, phase: "workbench-ui-integrity" }));

@@ -27,7 +27,8 @@ const runtime = Function(`${source}\nreturn {
   makeOverviewOperatingTrendModel: typeof makeOverviewOperatingTrendModel === "function" ? makeOverviewOperatingTrendModel : null,
   overviewOperatingRelationship: typeof overviewOperatingRelationship === "function" ? overviewOperatingRelationship : null,
   latestCompleteOverviewDay: typeof latestCompleteOverviewDay === "function" ? latestCompleteOverviewDay : null,
-  overviewRiskActionState: typeof overviewRiskActionState === "function" ? overviewRiskActionState : null
+  overviewRiskActionState: typeof overviewRiskActionState === "function" ? overviewRiskActionState : null,
+  overviewChartTypography: typeof overviewChartTypography === "function" ? overviewChartTypography : null
 };`)();
 const {
   makeOverviewPulseModel,
@@ -45,8 +46,13 @@ const {
   makeOverviewOperatingTrendModel,
   overviewOperatingRelationship,
   latestCompleteOverviewDay,
-  overviewRiskActionState
+  overviewRiskActionState,
+  overviewChartTypography
 } = runtime;
+
+assert.equal(typeof overviewChartTypography, "function", "总览 Canvas 必须使用可测试的统一字号模型");
+assert.deepEqual(overviewChartTypography(390), { axis: 12, endpoint: 12, endpointPillHeight: 24 });
+assert.deepEqual(overviewChartTypography(1280), { axis: 13, endpoint: 13, endpointPillHeight: 26 });
 
 assert.equal(typeof overviewRiskActionState, "function", "无风险时必须取消独占一行的大按钮");
 assert.deepEqual(overviewRiskActionState(null, 0), {
@@ -324,4 +330,4 @@ assert.equal(empty.signals.priceLabel, "等待成交数据");
 assert.equal(empty.signals.motionLabel, "等待同步数据");
 assert.equal(empty.signals.actionLabel, "等待经营判断");
 
-console.log(JSON.stringify({ passed: 68, phase: "overview-pulse-model" }));
+console.log(JSON.stringify({ passed: 71, phase: "overview-pulse-model" }));

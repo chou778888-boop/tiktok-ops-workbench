@@ -763,15 +763,16 @@
       const acid = rootStyles.getPropertyValue("--color-pulse-acid").trim() || "#78f58f";
       const orderColor = "#b7d8ff";
       const points = Array.isArray(model?.points) ? model.points : [];
+      const typography = overviewChartTypography(width);
       ctx.clearRect(0, 0, width, height);
       if (!points.length) return;
-      const pad = { left: width < 520 ? 42 : 66, right: width < 520 ? 38 : 58, top: 26, bottom: 42 };
+      const pad = { left: width < 520 ? 46 : 72, right: width < 520 ? 42 : 64, top: 28, bottom: 46 };
       const chartWidth = Math.max(1, width - pad.left - pad.right);
       const chartHeight = Math.max(1, height - pad.top - pad.bottom);
       const synced = points.filter((point) => point.synced);
       const maxGmv = Math.max(...synced.map((point) => Number(point.gmv || 0)), 1) * 1.12;
       const maxOrders = Math.max(...synced.map((point) => Number(point.orders || 0)), 1) * 1.12;
-      ctx.font = `${width < 520 ? 10 : 11}px -apple-system, BlinkMacSystemFont, sans-serif`;
+      ctx.font = `${typography.axis}px -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei UI", sans-serif`;
       ctx.textBaseline = "middle";
       for (let index = 0; index <= 4; index += 1) {
         const ratio = index / 4;
@@ -882,8 +883,8 @@
         ctx.fillRect(point.x - 3.5, point.ordersY - 3.5, 7, 7);
       });
       const drawEndpointLabel = ({ text, anchorX, anchorY, offsetY, fill, ink }) => {
-        const fontSize = width < 520 ? 9 : 10;
-        const pillHeight = width < 520 ? 20 : 22;
+        const fontSize = typography.endpoint;
+        const pillHeight = typography.endpointPillHeight;
         ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
         const pillWidth = Math.ceil(ctx.measureText(text).width) + 18;
         const preferRight = anchorX + 12 + pillWidth <= width - 6;

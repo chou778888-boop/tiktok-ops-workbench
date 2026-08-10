@@ -140,9 +140,10 @@
       });
       const loginPayload = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(loginPayload.error || "登录失败，请稍后重试");
-      await saveBrowserCredential(username, password, rememberCredentials);
       setLoginBusy(true, "正在载入团队数据…");
-      await activateWorkbench(await fetchBootstrap(true));
+      const bootstrapPromise = fetchBootstrap(true);
+      void saveBrowserCredential(username, password, rememberCredentials);
+      await activateWorkbench(await bootstrapPromise);
     } catch (loginError) {
       showLoginError(loginError.message);
       setLoginBusy(false);

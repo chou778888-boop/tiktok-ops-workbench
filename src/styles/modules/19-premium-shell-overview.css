@@ -345,6 +345,8 @@ body.workbench-entered #overview .overview-range-toolbar .data-range-custom inpu
   border-radius: 9px;
   color: var(--color-ink);
   background: rgba(255, 255, 255, 0.72);
+  font-size: var(--overview-type-body);
+  font-variant-numeric: tabular-nums;
   color-scheme: light;
 }
 
@@ -498,10 +500,10 @@ body.workbench-entered #overview .overview-decision-metrics {
 body.workbench-entered #overview .overview-decision-metrics .mini {
   display: grid;
   min-width: 0;
-  min-height: 60px;
+  min-height: 70px;
   padding: 8px 10px;
   align-content: center;
-  gap: 4px;
+  gap: 5px;
   border: 0;
   border-right: 1px solid rgba(18, 32, 27, 0.08);
   border-bottom: 0;
@@ -512,7 +514,7 @@ body.workbench-entered #overview .overview-decision-metrics .mini {
 body.workbench-entered #overview .overview-decision-metrics .mini:nth-child(2n) { border-right: 1px solid rgba(18, 32, 27, 0.08); }
 body.workbench-entered #overview .overview-decision-metrics .mini:nth-last-child(-n + 2) { border-bottom: 0; }
 body.workbench-entered #overview .overview-decision-metrics .mini span { color: #7a857e; font-size: 8px; font-weight: 720; }
-body.workbench-entered #overview .overview-decision-metrics .mini strong { color: var(--color-brand-ink); font-size: clamp(15px, 1.35vw, 21px); line-height: 1; font-weight: 800; white-space: nowrap; }
+body.workbench-entered #overview .overview-decision-metrics .mini strong { color: var(--color-brand-ink); font-size: clamp(18px, 1.55vw, 24px); line-height: 1; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 body.workbench-entered #overview .overview-decision-metrics .mini.featured strong { color: var(--color-pulse-acid); }
 body.workbench-entered #overview .overview-decision-metrics .mini small { color: #8a948e; font-size: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -1008,7 +1010,7 @@ body.workbench-entered #overview .overview-signal-briefs small {
 body.workbench-entered #overview .overview-signal-briefs strong {
   min-width: 0;
   color: var(--color-brand-ink);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.45;
   font-weight: 760;
   overflow-wrap: anywhere;
@@ -1233,13 +1235,13 @@ body.workbench-entered #overview .overview-source-insight {
   border-radius: 10px;
   color: #758179;
   background: rgba(255, 255, 255, 0.68);
-  font-size: 9px;
-  line-height: 1.4;
+  font-size: var(--overview-type-caption);
+  line-height: 1.45;
 }
 
 body.workbench-entered #overview .overview-source-insight b {
   color: #315e3c;
-  font-size: 11px;
+  font-size: 13px;
 }
 
 body.workbench-entered #overview .overview-source-insight span {
@@ -1267,7 +1269,7 @@ body.workbench-entered #overview .panel-head::after {
 
 body.workbench-entered #overview .panel-head h2 {
   color: var(--color-brand-ink);
-  font-size: 17px;
+  font-size: 24px;
   line-height: 1.22;
   text-wrap: balance;
 }
@@ -1286,7 +1288,7 @@ body.workbench-entered #overview .panel-head .badge {
   border-color: rgba(23, 107, 75, 0.12);
   color: var(--color-brand-green);
   background: rgba(23, 107, 75, 0.06);
-  font-size: 9px;
+  font-size: var(--overview-type-caption);
 }
 
 body.workbench-entered #overview .chart-card {
@@ -1339,7 +1341,7 @@ body.workbench-entered #overview #sourceLegend .source-legend-item strong {
 
 body.workbench-entered #overview #sourceLegend .source-legend-item strong small {
   color: #7b857f;
-  font-size: 8px;
+  font-size: var(--overview-type-caption);
   font-weight: 680;
 }
 
@@ -1428,8 +1430,8 @@ body.workbench-entered #overview .empty {
   border-radius: 12px;
   color: #748078;
   background: #f7f9f8;
-  font-size: 11px;
-  line-height: 1.65;
+  font-size: var(--overview-type-body);
+  line-height: 1.55;
   text-align: center;
   text-wrap: pretty;
 }
@@ -1805,7 +1807,7 @@ body.workbench-entered #overview .overview-operating-summary small {
 
 body.workbench-entered #overview .overview-operating-summary strong {
   color: var(--color-brand-ink);
-  font-size: 16px;
+  font-size: clamp(17px, 1.45vw, 21px);
   line-height: 1;
   font-weight: 820;
   font-variant-numeric: tabular-nums;
@@ -1893,7 +1895,7 @@ body.workbench-entered #overview .overview-evidence-head > div > span {
 body.workbench-entered #overview .overview-evidence-head h3 {
   margin: 0;
   color: var(--color-brand-ink);
-  font-size: 17px;
+  font-size: 20px;
   line-height: 1.2;
   font-weight: 780;
 }
@@ -1936,7 +1938,8 @@ body.workbench-entered #overview .overview-source-evidence .source-legend-item {
 body.workbench-entered #overview .overview-source-evidence .source-legend-item strong {
   grid-column: 1 / -1;
   color: var(--color-brand-ink);
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 body.workbench-entered #overview .overview-source-evidence .source-legend-item strong small {
@@ -2025,7 +2028,7 @@ body.workbench-entered #overview .overview-link-decision-metrics small {
 body.workbench-entered #overview .overview-link-decision-metrics strong {
   min-width: 0;
   color: var(--color-brand-ink);
-  font-size: clamp(13px, 1.15vw, 18px);
+  font-size: clamp(15px, 1.2vw, 19px);
   line-height: 1;
   font-weight: 820;
   font-variant-numeric: tabular-nums;
@@ -2231,5 +2234,88 @@ body.workbench-entered #overview .overview-link-decision .overview-signal-briefs
   body.workbench-entered #overview .overview-risk-action.is-compact-risk {
     width: auto;
     justify-self: start;
+  }
+}
+
+/* Overview typography scale: readable at real operating density without inflating the layout. */
+body.workbench-entered #overview {
+  --overview-type-caption: 13px;
+  --overview-type-label: 14px;
+  --overview-type-body: 15px;
+  --overview-type-table: 14px;
+}
+
+body.workbench-entered #overview :is(.kicker, .overview-decision-kicker, .overview-focus-kicker) {
+  font-size: var(--overview-type-label);
+}
+
+body.workbench-entered #overview .overview-command-context .data-range-meaning,
+body.workbench-entered #overview :is(.overview-section-kicker, .overview-evidence-head > div > span),
+body.workbench-entered #overview :is(.overview-source-footnote, .overview-source-evidence .source-legend-item strong small) {
+  font-size: var(--overview-type-caption);
+  line-height: 1.45;
+}
+
+body.workbench-entered #overview .overview-range-toolbar :is(.data-range-preset, .data-range-custom) {
+  font-size: var(--overview-type-label);
+}
+
+body.workbench-entered #overview .overview-decision-kicker b,
+body.workbench-entered #overview .overview-focus-kicker b {
+  font-size: var(--overview-type-caption);
+}
+
+body.workbench-entered #overview :is(.overview-decision-copy > p, .overview-profit-focus p) {
+  font-size: var(--overview-type-body);
+  line-height: 1.55;
+}
+
+body.workbench-entered #overview :is(.overview-decision-path, .overview-focus-path) {
+  font-size: var(--overview-type-label);
+  line-height: 1.45;
+}
+
+body.workbench-entered #overview .overview-sync-rhythm b,
+body.workbench-entered #overview .overview-operating-relationship strong {
+  font-size: var(--overview-type-label);
+}
+
+body.workbench-entered #overview .overview-sync-rhythm small,
+body.workbench-entered #overview .overview-operating-relationship,
+body.workbench-entered #overview :is(.overview-decision-metrics .mini span, .overview-decision-metrics .mini small),
+body.workbench-entered #overview :is(.overview-operating-summary small, .overview-link-decision-metrics small),
+body.workbench-entered #overview .overview-signal-briefs small {
+  font-size: var(--overview-type-caption);
+}
+
+body.workbench-entered #overview .overview-risk-action,
+body.workbench-entered #overview .overview-risk-action.is-compact-risk,
+body.workbench-entered #overview .overview-focus-action {
+  font-size: var(--overview-type-label);
+}
+
+body.workbench-entered #overview .overview-operating-head .sub,
+body.workbench-entered #overview .panel-head .sub,
+body.workbench-entered #overview .chart-empty-state span {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+body.workbench-entered #overview :is(thead th, tbody td) {
+  font-size: var(--overview-type-table);
+  line-height: 1.45;
+}
+
+body.workbench-entered #overview :is(tbody td small, .overview-risk-panel small) {
+  font-size: var(--overview-type-caption);
+}
+
+@media (max-width: 760px) {
+  body.workbench-entered #overview .overview-range-toolbar .data-range-custom input {
+    font-size: 16px;
+  }
+
+  body.workbench-entered #overview .overview-operating-summary strong {
+    font-size: clamp(14px, 4.3vw, 17px);
   }
 }

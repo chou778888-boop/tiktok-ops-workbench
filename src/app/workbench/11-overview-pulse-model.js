@@ -19,6 +19,13 @@
       return `$${Math.round(amount).toLocaleString("en-US")}`;
     }
 
+    function overviewChartTypography(width) {
+      const compact = Number(width) < 520;
+      return compact
+        ? { axis: 12, endpoint: 12, endpointPillHeight: 24 }
+        : { axis: 13, endpoint: 13, endpointPillHeight: 26 };
+    }
+
     function overviewModelNumber(value) {
       return Number.isFinite(Number(value)) ? Number(value) : 0;
     }
