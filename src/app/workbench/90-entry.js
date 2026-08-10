@@ -3,10 +3,12 @@
       if (!document.body.classList.contains("cover-active")) render();
       loadCloudState().then((loaded) => {
         cloudReady = Boolean(loaded);
+        const hasPendingCloudChanges = cloudReady
+          && !cloudPatchIsEmpty(buildCloudPatch(cloudBaseline, state));
+        if (hasPendingCloudChanges) saveCloudState();
         restoreReportFormForToday();
         if (document.body.classList.contains("cover-active")) renderEntranceSnapshot();
         else render();
-        if (cloudReady) saveCloudState();
         window.requestAnimationFrame(() => window.requestAnimationFrame(() => window.__workbenchMarkReady?.()));
       });
       scheduleCloudRefresh();

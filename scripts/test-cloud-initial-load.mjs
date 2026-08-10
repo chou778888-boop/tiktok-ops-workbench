@@ -43,4 +43,35 @@ assert.equal(loaded, true, "取得完整数据后必须完成云端初始化");
 assert.equal(context.cloudRevision, 206, "必须采用完整数据的云端版本");
 assert.equal(statuses.at(-1), "已同步", "不能停留在云端待初始化");
 
-console.log(JSON.stringify({ passed: 4, phase: "cloud-initial-full-state" }));
+const initializeStart = source.indexOf("function initializeWorkbench()");
+const initializeEnd = source.indexOf("function markCloudFormDirty", initializeStart);
+assert.ok(initializeStart >= 0 && initializeEnd > initializeStart, "必须能载入真实工作台初始化入口");
+let startupSaveCalls = 0;
+const startupContext = {
+  state: { local: true },
+  cloudBaseline: {},
+  cloudReady: false,
+  renderEntranceSnapshot() {},
+  render() { startupContext.state.renderNormalized = true; },
+  loadCloudState: async () => {
+    startupContext.state = { remote: true };
+    startupContext.cloudBaseline = { remote: true };
+    return true;
+  },
+  buildCloudPatch: (baseline, current) => baseline.remote === current.remote && Object.keys(current).length === 1
+    ? { empty: true }
+    : { empty: false },
+  cloudPatchIsEmpty: (patch) => patch.empty,
+  restoreReportFormForToday() {},
+  saveCloudState() { startupSaveCalls += 1; },
+  scheduleCloudRefresh() {},
+  scheduleReleaseCheck() {},
+  document: { body: { classList: { contains: () => false } } },
+  window: { requestAnimationFrame: (callback) => callback(), __workbenchMarkReady() {} }
+};
+vm.runInNewContext(`${source.slice(initializeStart, initializeEnd)}\nthis.initialize = initializeWorkbench;`, startupContext);
+startupContext.initialize();
+await new Promise((resolve) => setTimeout(resolve, 0));
+assert.equal(startupSaveCalls, 0, "纯启动渲染不得产生云端写入");
+
+console.log(JSON.stringify({ passed: 6, phase: "cloud-initial-full-state" }));
