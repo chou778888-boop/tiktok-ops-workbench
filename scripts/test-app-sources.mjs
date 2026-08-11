@@ -9,6 +9,7 @@ const profitModules = [
   "src/app/workbench/61-profit-domain.js",
   "src/app/workbench/62-profit-repository.js",
   "src/app/workbench/63-profit-selectors.js",
+  "src/app/workbench/64-profit-view-models.js",
   "src/app/workbench/65-profit-template.js"
 ];
 const costingIndex = bundle.files.indexOf("src/app/workbench/60-costing.js");

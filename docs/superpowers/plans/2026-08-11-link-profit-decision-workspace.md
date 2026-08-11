@@ -122,7 +122,7 @@ Implement the decision model with the exact action priority and return contract:
 function buildProfitListingDecisionModel(listingResult = {}) {
   const result = listingResult.result || {};
   const amount = profitNumber(result.finalProfit);
-  const financialDifference = Math.abs(profitNumber(result.financialReconciliationDifference));
+  const reconciliationDifference = Math.abs(profitNumber(result.reconciliationDifference));
   let state = {
     key: "healthy", tone: "healthy", title: "当前经营盈利",
     summary: "数据已完整，可继续查看经营建议。",
@@ -130,8 +130,8 @@ function buildProfitListingDecisionModel(listingResult = {}) {
   };
   if (profitNumber(result.pendingSkuCount) > 0) {
     state = { key: "pending", tone: "pending", title: "今日数据待同步", summary: "当前数据不足以形成今日利润判断。", action: { key: "view_sync", label: "查看同步状态" } };
-  } else if (financialDifference >= 0.01) {
-    state = { key: "reconciliation", tone: "warning", title: "结算口径待核对", summary: "经营数据与平台确认销售额存在差异。", action: { key: "review_reconciliation", label: "核对结算差异" } };
+  } else if (reconciliationDifference >= 0.01) {
+    state = { key: "reconciliation", tone: "warning", title: "链接与 SKU 汇总待核对", summary: "链接汇总与 SKU 汇总存在差异。", action: { key: "review_reconciliation", label: "核对汇总差异" } };
   } else if (result.profitCompleteness === "provisional") {
     state = { key: "expense_pending", tone: "warning", title: `当前暂算${amount < 0 ? "亏损" : "盈利"}`, summary: "平台已结算；补齐广告、样品和调整后才能确认最终利润。", action: { key: "complete_expenses", label: "补齐费用" } };
   } else if (amount < 0) {

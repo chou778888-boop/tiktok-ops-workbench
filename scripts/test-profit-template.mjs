@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
 
-const [html, manifest, domainSource, repositorySource, selectorSource, uiSource] = await Promise.all([
+const [html, manifest, domainSource, repositorySource, selectorSource, viewModelSource, uiSource] = await Promise.all([
   readFile("index.html", "utf8"),
   readFile("scripts/app-sources.mjs", "utf8"),
   readFile("src/app/workbench/61-profit-domain.js", "utf8"),
   readFile("src/app/workbench/62-profit-repository.js", "utf8"),
   readFile("src/app/workbench/63-profit-selectors.js", "utf8"),
+  readFile("src/app/workbench/64-profit-view-models.js", "utf8"),
   readFile("src/app/workbench/65-profit-template.js", "utf8")
 ]);
 
@@ -25,11 +26,11 @@ assert.doesNotMatch(html, /name="cost"/, "产品成本必须在产品主档统�
 assert.match(html, /计划调价/, "价格变化必须可标记为计划调价");
 assert.match(html, /数据修正/, "价格变化必须可标记为数据修正");
 
-for (const file of ["61-profit-domain.js", "62-profit-repository.js", "63-profit-selectors.js", "65-profit-template.js"]) {
+for (const file of ["61-profit-domain.js", "62-profit-repository.js", "63-profit-selectors.js", "64-profit-view-models.js", "65-profit-template.js"]) {
   assert.match(manifest, new RegExp(file.replaceAll(".", "\\.")), `${file} 必须进入生产构建清单`);
 }
 assert.ok(manifest.indexOf("61-profit-domain.js") < manifest.indexOf("65-profit-template.js"), "领域模块必须先于页面控制器载入");
-assert.doesNotMatch(`${domainSource}\n${repositorySource}\n${selectorSource}\n${uiSource}`, /\blocalStorage\b|\bsessionStorage\b|\bfetch\s*\(/, "演示利润工作台不得读写存储或网络");
+assert.doesNotMatch(`${domainSource}\n${repositorySource}\n${selectorSource}\n${viewModelSource}\n${uiSource}`, /\blocalStorage\b|\bsessionStorage\b|\bfetch\s*\(/, "演示利润工作台不得读写存储或网络");
 
 let id = 0;
 const context = vm.createContext({
@@ -37,7 +38,7 @@ const context = vm.createContext({
   console,
   crypto: { randomUUID: () => `test-id-${id += 1}` }
 });
-vm.runInContext(`${domainSource}\n${repositorySource}\n${selectorSource}\n${uiSource}`, context, { filename: "profit-workspace-bundle.js" });
+vm.runInContext(`${domainSource}\n${repositorySource}\n${selectorSource}\n${viewModelSource}\n${uiSource}`, context, { filename: "profit-workspace-bundle.js" });
 const api = vm.runInContext(`({
   profitDateWindow,
   calculateProfitSkuFact,
@@ -56,6 +57,11 @@ const api = vm.runInContext(`({
   selectListingSkuTrend,
   classifyProfitHealth,
   selectProfitAttentionItems,
+  buildProfitListingDecisionModel,
+  buildProfitTrendAvailability,
+  selectProfitFocusSkuRows,
+  buildProfitLedgerRows,
+  profitExpenseDraftComplete,
   createProfitWorkspaceState,
   profitChartModel,
   renderProfitTrendChart,
@@ -243,6 +249,34 @@ assert.equal(actualListingResult.result.provisionalProfit, 163.47);
 assert.equal(actualListingResult.result.profitCompleteness, "provisional");
 assert.equal(actualListingResult.sevenDay.days.length, 7);
 assert.equal(actualListingResult.sevenDay.days.filter((day) => day.result.gmv > 0).length, 1, "只有一个真实经营日，不得补造趋势");
+const pendingDecision = api.buildProfitListingDecisionModel(actualListingResult);
+assert.deepEqual(plain({
+  key: pendingDecision.key,
+  title: pendingDecision.title,
+  action: pendingDecision.action,
+  amountLabel: pendingDecision.amountLabel
+}), {
+  key: "expense_pending",
+  title: "当前暂算盈利",
+  action: { key: "complete_expenses", label: "补齐费用" },
+  amountLabel: "暂算利润"
+});
+const trendAvailability = api.buildProfitTrendAvailability(actualListingResult.sevenDay);
+assert.deepEqual(plain({
+  mode: trendAvailability.mode,
+  completeDayCount: trendAvailability.completeDayCount,
+  comparisonAllowed: trendAvailability.comparisonAllowed
+}), { mode: "insufficient", completeDayCount: 1, comparisonAllowed: false });
+const focusedSkuRows = api.selectProfitFocusSkuRows(actualListingResult.skuRows, 3);
+assert.equal(focusedSkuRows.length, 3);
+assert.equal(focusedSkuRows[0].sku.code, "JZZ-PINK", "零销量异常必须先于健康高贡献 SKU");
+assert.ok(focusedSkuRows.some((row) => row.sku.code === "JZZ-GREY"), "最高商品毛利 SKU 必须进入重点列表");
+const decisionLedger = api.buildProfitLedgerRows(actualListingResult.result);
+assert.deepEqual(plain(decisionLedger.map((row) => row.key)), [
+  "gmv", "net_product_sales", "financial_difference", "platform_cost",
+  "received", "product_cost", "internal_expenses", "profit"
+]);
+assert.equal(api.profitExpenseDraftComplete(actualListingResult.listing, actualListingResult.expense), false);
 actualRepository.updateProductCost(actualProduct.id, 12.5, "2026-08-03");
 assert.equal(actualRepository.getDailyFact(actualSkus[0].id, "2026-08-03").productCostSnapshot, 12.5, "统一产品成本必须批量作用到生效日后的全部链接 SKU");
 assert.equal(api.selectListingProfitResult(actualRepository, actualListing.id, "2026-08-03").result.productCostTotal, 487.5);
