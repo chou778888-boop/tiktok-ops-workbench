@@ -5,6 +5,12 @@ import {
   mapTikTokAdSpend,
   runProfitAutomaticSync
 } from "../_shared/profit-sync.js";
+import { createTikTokShopConnectionRepository } from "../_shared/tiktok-shop-connection-store.js";
+import {
+  decryptTikTokCredential,
+  encryptTikTokCredential,
+  refreshTikTokAuthorizationToken
+} from "../_shared/tiktok-shop-authorization.js";
 import { applyPatch, normalizeData, normalizePatch } from "./state.js";
 
 const responseHeaders = {
@@ -17,7 +23,7 @@ function json(status, body) {
   return new Response(JSON.stringify(body), { status, headers: responseHeaders });
 }
 
-function configuredConnections(env) {
+function connectionSettings(env) {
   let source;
   try {
     source = JSON.parse(String(env?.TIKTOK_SHOP_CONNECTIONS || "[]"));
@@ -28,8 +34,6 @@ function configuredConnections(env) {
     connection
       && typeof connection === "object"
       && String(connection.storeId || "")
-      && String(connection.shopCipher || "")
-      && String(connection.accessToken || "")
   )).map((connection, index) => ({
     id: String(connection.id || `connection-${index + 1}`),
     storeId: String(connection.storeId),
@@ -51,6 +55,95 @@ function configuredConnections(env) {
     )),
     status: connection.status === "disabled" ? "disabled" : "active"
   }));
+}
+
+function configuredConnections(env) {
+  return connectionSettings(env).filter((connection) => connection.shopCipher && connection.accessToken);
+}
+
+function parseScopes(value) {
+  if (Array.isArray(value)) return value.map(String);
+  try {
+    const parsed = JSON.parse(String(value || "[]"));
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function loadTikTokShopConnections(env, {
+  now = () => new Date(),
+  createRepository = createTikTokShopConnectionRepository,
+  decryptCredential = decryptTikTokCredential,
+  encryptCredential = encryptTikTokCredential,
+  refreshToken = refreshTikTokAuthorizationToken
+} = {}) {
+  const legacyConnections = configuredConnections(env);
+  if (!env?.DB || !env?.TK_TOKEN_ENCRYPTION_KEY) return legacyConnections;
+  const settingsByStore = new Map(connectionSettings(env).map((connection) => [connection.storeId, connection]));
+  const repository = createRepository(env.DB);
+  let rows;
+  try {
+    rows = await repository.listActiveConnections();
+  } catch (error) {
+    if (String(error?.message || "").includes("no such table")) return legacyConnections;
+    throw error;
+  }
+  const current = now();
+  const currentEpoch = Math.floor(current.getTime() / 1000);
+  const connections = [];
+  for (const row of rows) {
+    const storeId = String(row.store_id || "");
+    const settings = settingsByStore.get(storeId) || {};
+    let accessToken = await decryptCredential(row.access_token_cipher, env.TK_TOKEN_ENCRYPTION_KEY, {
+      context: `${storeId}:access`
+    });
+    let refreshTokenValue = await decryptCredential(row.refresh_token_cipher, env.TK_TOKEN_ENCRYPTION_KEY, {
+      context: `${storeId}:refresh`
+    });
+    let accessTokenExpiresAt = Number(row.access_token_expires_at || 0) || null;
+    let refreshTokenExpiresAt = Number(row.refresh_token_expires_at || 0) || null;
+    let grantedScopes = parseScopes(row.granted_scopes);
+    if (accessTokenExpiresAt && accessTokenExpiresAt <= currentEpoch + 5 * 60) {
+      const refreshed = await refreshToken({
+        appKey: env.TIKTOK_SHOP_APP_KEY,
+        appSecret: env.TIKTOK_SHOP_APP_SECRET,
+        refreshToken: refreshTokenValue
+      });
+      accessToken = refreshed.accessToken;
+      refreshTokenValue = refreshed.refreshToken;
+      accessTokenExpiresAt = refreshed.accessTokenExpiresAt;
+      refreshTokenExpiresAt = refreshed.refreshTokenExpiresAt || refreshTokenExpiresAt;
+      grantedScopes = refreshed.grantedScopes?.length ? refreshed.grantedScopes : grantedScopes;
+      await repository.updateTokens(storeId, {
+        accessTokenCipher: await encryptCredential(accessToken, env.TK_TOKEN_ENCRYPTION_KEY, {
+          context: `${storeId}:access`
+        }),
+        refreshTokenCipher: await encryptCredential(refreshTokenValue, env.TK_TOKEN_ENCRYPTION_KEY, {
+          context: `${storeId}:refresh`
+        }),
+        accessTokenExpiresAt,
+        refreshTokenExpiresAt,
+        grantedScopes,
+        updatedAt: current.toISOString()
+      });
+    }
+    connections.push({
+      ...settings,
+      id: String(settings.id || `authorized-${storeId}`),
+      storeId,
+      shopId: String(row.shop_id || ""),
+      shopCipher: String(row.shop_cipher || ""),
+      accessToken,
+      refreshToken: refreshTokenValue,
+      accessTokenExpiresAt,
+      refreshTokenExpiresAt,
+      grantedScopes,
+      status: "active"
+    });
+  }
+  const authorizedStores = new Set(connections.map((connection) => connection.storeId));
+  return [...connections, ...legacyConnections.filter((connection) => !authorizedStores.has(connection.storeId))];
 }
 
 async function readWorkbenchState(db) {
@@ -91,23 +184,33 @@ async function commitProfitCollections(db, collections, now, maxAttempts = 12) {
 export function createProfitSyncHandler({
   runSync = runProfitAutomaticSync,
   now = () => new Date(),
-  createAdsClient = createTikTokAdsClient
+  createAdsClient = createTikTokAdsClient,
+  loadConnections = loadTikTokShopConnections
 } = {}) {
   return async function handleProfitSync({ request, env, data = {} }) {
     const automation = automationAuthorized(request, env);
     if (!automation && data?.user?.role !== "admin") return json(403, { error: "仅管理员可触发利润同步" });
     if (!trustedMutationRequest(request)) return json(403, { error: "Cross-site write request blocked" });
-    const connections = configuredConnections(env);
-    if (!connections.length) {
-      return json(409, {
-        error: "尚未配置 TikTok Shop 店铺授权",
-        code: "PROFIT_SYNC_UNCONFIGURED"
-      });
-    }
     if (!env?.TIKTOK_SHOP_APP_KEY || !env?.TIKTOK_SHOP_APP_SECRET) {
       return json(409, {
         error: "尚未配置 TikTok Shop 应用密钥",
         code: "PROFIT_SYNC_APP_UNCONFIGURED"
+      });
+    }
+    let connections;
+    try {
+      connections = await loadConnections(env, { now });
+    } catch (error) {
+      return json(500, {
+        error: "读取 TikTok Shop 授权失败，请重新连接店铺",
+        code: "PROFIT_SYNC_AUTH_READ_FAILED",
+        retryable: false
+      });
+    }
+    if (!connections.length) {
+      return json(409, {
+        error: "尚未配置 TikTok Shop 店铺授权",
+        code: "PROFIT_SYNC_UNCONFIGURED"
       });
     }
     let body = {};

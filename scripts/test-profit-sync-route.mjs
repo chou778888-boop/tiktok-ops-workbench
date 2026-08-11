@@ -81,6 +81,22 @@ const unconfiguredResponse = await unconfiguredHandler({
 assert.equal(unconfiguredResponse.status, 409, "未配置店铺授权时必须返回可处理状态");
 assert.equal(unconfiguredDb.writes, 0, "未配置店铺授权时严禁写入空利润数据");
 
+const secretReadFailureHandler = createProfitSyncHandler({
+  loadConnections: async () => { throw new Error("cannot decrypt top-secret-token"); }
+});
+const secretReadFailureResponse = await secretReadFailureHandler({
+  request: new Request("https://example.com/api/profit-sync", { method: "POST" }),
+  env: {
+    DB: createDb(baseState),
+    TIKTOK_SHOP_APP_KEY: "app-key",
+    TIKTOK_SHOP_APP_SECRET: "app-secret"
+  },
+  data: { user: { role: "admin" } }
+});
+const secretReadFailurePayload = await secretReadFailureResponse.json();
+assert.equal(secretReadFailureResponse.status, 500);
+assert.equal(JSON.stringify(secretReadFailurePayload).includes("top-secret-token"), false, "读取授权失败不得把令牌或密文回显给浏览器");
+
 const syncedDb = createDb(baseState);
 let receivedConnections = [];
 let receivedAdSpend = [];
@@ -165,4 +181,4 @@ const rejectedAutomation = await authMiddleware({
 assert.equal(rejectedAutomation.status, 401, "错误定时任务密钥不能绕过登录认证");
 assert.equal(rejectedNext, 0);
 
-console.log(JSON.stringify({ passed: 17, phase: "profit-sync-route" }));
+console.log(JSON.stringify({ passed: 19, phase: "profit-sync-route" }));

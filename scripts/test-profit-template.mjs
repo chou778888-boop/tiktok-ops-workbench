@@ -34,6 +34,9 @@ assert.doesNotMatch(`${domainSource}\n${repositorySource}\n${selectorSource}\n${
 assert.match(uiSource, /requestProfitAutomaticSync\(\{ dateKey: profitWorkspaceState\.activeDate \}\)/, "立即同步必须调用真实利润同步接口");
 assert.match(uiSource, /refreshCloudState\(\{ force: true \}\)/, "同步完成后必须强制刷新统一云端状态");
 assert.doesNotMatch(uiSource, /data-profit-sync-preview/, "真实同步按钮不得继续使用预览语义");
+assert.match(uiSource, /data-profit-connect-shop/, "利润同步卡必须提供店铺授权入口");
+assert.match(uiSource, /requestTikTokShopAuthorization\(\{ storeId \}\)/, "授权入口必须绑定明确的工作台利润店铺");
+assert.match(uiSource, /stores\.length > 1/, "多店场景未选择店铺时不得自动猜测授权目标");
 
 let id = 0;
 const context = vm.createContext({

@@ -129,7 +129,9 @@
 .profit-sync-times { display: grid; gap: 5px; padding-inline: 14px; border-inline: 1px solid #dfe6e2; }
 .profit-sync-times span { display: flex; justify-content: space-between; gap: 14px; color: #818a85; font-size: 8px; white-space: nowrap; }
 .profit-sync-times b { color: #46554e; font-size: 9px; }
-.profit-sync-card > button { min-height: 34px; padding: 7px 11px; border: 1px solid #b9cec3; border-radius: 9px; color: #174d38; background: #f7fbf9; font-size: 9px; font-weight: 780; white-space: nowrap; }
+.profit-sync-actions { display: flex; align-items: center; gap: 7px; }
+.profit-sync-actions button { min-height: 34px; padding: 7px 11px; border: 1px solid #b9cec3; border-radius: 9px; color: #174d38; background: #f7fbf9; font-size: 9px; font-weight: 780; white-space: nowrap; }
+.profit-sync-actions button[data-profit-sync] { color: #f2fff8; border-color: #163d2e; background: #163d2e; }
 
 .profit-overview-layout {
   display: grid;
@@ -589,7 +591,8 @@
 .profit-template-shell :where(button, a):active { transform: translateY(1px); }
 .profit-template-shell * { scrollbar-color: #a8beb3 transparent; scrollbar-width: thin; }
 
-.profit-sync-card > button:hover { border-color: #7ea890; background: #edf6f1; }
+.profit-sync-actions button:hover { border-color: #7ea890; background: #edf6f1; }
+.profit-sync-actions button[data-profit-sync]:hover { border-color: #225b44; background: #225b44; }
 
 .profit-product-table-wrap,
 .profit-entry-table-wrap { border-color: var(--profit-line-strong); background: var(--profit-surface); }
@@ -902,7 +905,7 @@
   .profit-product-cards footer { display: flex; justify-content: space-between; margin-top: 11px; color: #456251; font-size: 9px; font-weight: 740; }
   .profit-attention-list { grid-template-columns: 1fr; }
   .profit-sync-card { grid-template-columns: 42px minmax(0, 1fr); padding: 13px; }
-  .profit-sync-card > button { grid-column: 2; justify-self: start; }
+  .profit-sync-actions { grid-column: 2; justify-self: start; }
   .profit-sync-times { grid-column: 2; width: 100%; }
   .profit-sync-times span { justify-content: space-between; }
   .profit-product-hero,
@@ -967,7 +970,7 @@
   .profit-block-title > b { align-self: flex-start; }
   .profit-sync-card { grid-template-columns: 1fr; }
   .profit-sync-icon { display: none; }
-  .profit-sync-card > button,
+  .profit-sync-actions,
   .profit-sync-times { grid-column: 1; }
   .profit-sync-copy b,
   .profit-sync-copy small { white-space: normal; }

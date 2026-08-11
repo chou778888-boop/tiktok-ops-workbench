@@ -16,6 +16,8 @@
 
 - `TIKTOK_SHOP_APP_KEY`
 - `TIKTOK_SHOP_APP_SECRET`
+- `TIKTOK_SHOP_AUTHORIZATION_URL`（Partner Center 中复制的 Seller Authorization Link）
+- `TK_TOKEN_ENCRYPTION_KEY`（独立随机密钥，至少 32 个字符）
 - `TIKTOK_SHOP_CONNECTIONS`
 - `TIKTOK_ADS_ACCESS_TOKEN`（未接广告账户时可暂不配置）
 - `TK_SYNC_SECRET`
@@ -27,10 +29,6 @@
   {
     "id": "us-store-1",
     "storeId": "工作台中的 profitStores.id",
-    "shopId": "TikTok Shop ID",
-    "shopCipher": "授权店铺 shop_cipher",
-    "accessToken": "店铺授权 access token",
-    "refreshToken": "店铺授权 refresh token",
     "storeTimezone": "America/Los_Angeles",
     "advertiserId": "广告账户 ID",
     "adMappings": [
@@ -42,6 +40,26 @@
   }
 ]
 ```
+
+一键授权版的 `TIKTOK_SHOP_CONNECTIONS` 只保存非敏感的时区和广告映射。TikTok Shop access token / refresh token 由回调服务使用 AES-256-GCM 加密后写入 `tiktok_shop_connections`，不得再手工写入配置。
+
+## 一键连接店铺
+
+1. 在 TikTok Shop Partner Center 的应用设置中，将 Redirect URL 配置为：
+
+   `https://tiktok-ops-workbench.pages.dev/api/tiktok-shop/authorization/callback`
+
+2. 在 `Manage API` 中只启用订单搜索、店铺授权信息、Finance Statements、Statement Transactions 和 Unsettled Transactions 等同步所需权限。
+3. 部署前应用迁移：
+
+   ```sh
+   npx wrangler d1 execute tiktok-ops-workbench --remote --file=migrations/0004_tiktok_shop_authorization.sql
+   ```
+
+4. 管理员进入“利润与成本 → 链接利润”。只有一个利润店铺时直接点击“连接店铺”；存在多个利润店铺时，必须先在上方选择目标店铺，再点击连接。
+5. 浏览器只允许跳转到 TikTok 官方授权域名。授权成功后回到工作台，授权码立即作废，令牌不会返回浏览器。
+
+安全约束：OAuth state 仅保存 SHA-256 哈希、绑定管理员与工作台店铺、10 分钟过期且只能消费一次；多平台店铺返回时禁止自动猜测映射；D1 中只保存 AES-GCM 密文，解密密钥仅存 Cloudflare Secret。
 
 工作台中的 `profitListings.platformListingId` 和 `profitListingSkus.platformSkuId` 必须先对应平台 `product_id`、`sku_id`。未知链接或 SKU 只进入同步诊断，不自动创建错误产品。
 

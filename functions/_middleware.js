@@ -14,6 +14,7 @@ export async function onRequest(context) {
   if (context.request.method === "OPTIONS") return context.next();
   if (url.pathname === "/api/auth/login") return context.next();
   if (url.pathname === "/api/bootstrap") return context.next();
+  if (url.pathname === "/api/tiktok-shop/authorization/callback" && context.request.method === "GET") return context.next();
   if (url.pathname === "/api/state" && url.searchParams.get("summary") === "1") return context.next();
   if (url.pathname === "/api/profit-sync" && automationAuthorized(context.request, context.env)) {
     context.data.automation = true;

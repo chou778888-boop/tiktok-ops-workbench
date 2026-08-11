@@ -1,5 +1,6 @@
     const PROFIT_PRICE_CHANGE_LABELS = { planned: "计划调价", correction: "数据修正" };
     let profitSyncInFlight = false;
+    let profitAuthorizationInFlight = false;
 
     function profitUiEscape(value) {
       return String(value ?? "")
@@ -210,14 +211,47 @@
       }
     }
 
+    async function connectTikTokShop(button) {
+      if (profitAuthorizationInFlight) return;
+      const stores = profitWorkspaceState.repository.getState().stores;
+      const storeId = profitWorkspaceState.storeFilter || (stores.length === 1 ? stores[0]?.id : "");
+      if (!storeId && stores.length > 1) {
+        showToast("请先在上方选择要授权的店铺");
+        return;
+      }
+      if (!storeId) {
+        showToast("请先建立利润店铺，再连接 TikTok Shop");
+        return;
+      }
+      profitAuthorizationInFlight = true;
+      if (button) {
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        button.textContent = "正在连接…";
+      }
+      try {
+        const result = await requestTikTokShopAuthorization({ storeId });
+        location.assign(result.authorizationUrl);
+      } catch (error) {
+        showToast(error?.message || "TikTok 店铺授权启动失败");
+        profitAuthorizationInFlight = false;
+        if (button?.isConnected) {
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+          button.textContent = "连接店铺";
+        }
+      }
+    }
+
     function renderProfitSyncCard(state) {
       const sync = state.repository.getState().syncStatus;
       const lastSyncLabel = `${profitUiDateLabel(String(sync.lastSyncedAt).slice(0, 10))} ${String(sync.lastSyncedAt).slice(11, 16)}`;
+      const canAuthorize = typeof window !== "undefined" && window.__workbenchUser?.role === "admin";
       return `<section class="profit-sync-card" aria-label="数据同步状态">
         <div class="profit-sync-icon"><i></i></div>
         <div class="profit-sync-copy"><span>店铺数据同步</span><b>${profitUiEscape(sync.message)}</b><small>${profitUiEscape(sync.source)} · 店铺经营时区 ${profitUiEscape(sync.storeTimezone)}</small></div>
         <div class="profit-sync-times"><span>最近核对 <b>${lastSyncLabel}</b></span><span>固定同步 <b>每天 17:00（北京时间）</b></span></div>
-        <button data-profit-sync type="button">立即同步</button>
+        <div class="profit-sync-actions">${canAuthorize ? '<button data-profit-connect-shop type="button">连接店铺</button>' : ""}<button data-profit-sync type="button">立即同步</button></div>
       </section>`;
     }
 
@@ -640,13 +674,15 @@
         const toggleSku = event.target.closest("[data-profit-toggle-sku]");
         const lifecycle = event.target.closest("[data-profit-set-lifecycle]");
         const syncButton = event.target.closest("[data-profit-sync]");
+        const connectShop = event.target.closest("[data-profit-connect-shop]");
         const applyProductCost = event.target.closest("[data-profit-apply-product-cost]");
         const primaryAction = event.target.closest("[data-profit-primary-action]");
         const toggleAllSkus = event.target.closest("[data-profit-toggle-all-skus]");
         const toggleTrend = event.target.closest("[data-profit-toggle-trend]");
         const closeExpense = event.target.closest("[data-profit-close-expense]");
         const saveExpense = event.target.closest("[data-profit-save-expense]");
-        if (syncButton) void syncProfitWorkspace(syncButton);
+        if (connectShop) void connectTikTokShop(connectShop);
+        else if (syncButton) void syncProfitWorkspace(syncButton);
         else if (productButton) applyProfitWorkspaceAction(profitWorkspaceState, { type: "openProduct", productId: productButton.dataset.profitOpenProduct });
         else if (applyProductCost) {
           const input = applyProductCost.parentElement?.querySelector("[data-profit-product-cost-input]");
@@ -784,6 +820,12 @@
       document.querySelectorAll("[data-profit-dialog-close]").forEach((button) => button.addEventListener("click", () => closeProfitDialog(button.dataset.profitDialogClose)));
       document.querySelectorAll(".profit-dialog").forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) closeProfitDialog(dialog.id); }));
       renderProfitTemplate();
+      const authorizationResultUrl = new URL(location.href);
+      if (authorizationResultUrl.searchParams.get("tiktok_shop") === "connected") {
+        showToast("TikTok 店铺已安全连接，可以开始同步");
+        authorizationResultUrl.searchParams.delete("tiktok_shop");
+        history.replaceState(null, "", `${authorizationResultUrl.pathname}${authorizationResultUrl.search}${authorizationResultUrl.hash}`);
+      }
     }
 
     if (typeof document !== "undefined") initProfitTemplate();
