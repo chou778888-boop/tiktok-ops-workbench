@@ -1,4 +1,5 @@
     const PROFIT_PRICE_CHANGE_LABELS = { planned: "计划调价", correction: "数据修正" };
+    let profitSyncInFlight = false;
 
     function profitUiEscape(value) {
       return String(value ?? "")
@@ -185,6 +186,30 @@
       return `<span class="profit-settlement-status ${settled ? "settled" : "estimated"}"><i></i>${settled ? "已结算" : "预估中"}</span>`;
     }
 
+    async function syncProfitWorkspace(button) {
+      if (profitSyncInFlight) return;
+      profitSyncInFlight = true;
+      if (button) {
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        button.textContent = "正在同步…";
+      }
+      try {
+        const result = await requestProfitAutomaticSync({ dateKey: profitWorkspaceState.activeDate });
+        await refreshCloudState({ force: true });
+        showToast(result.status === "partial" ? "经营数据已同步，部分数据源待重试" : "订单、结算与广告数据已同步");
+      } catch (error) {
+        showToast(error?.message || "利润数据同步失败，请稍后重试");
+      } finally {
+        profitSyncInFlight = false;
+        if (button?.isConnected) {
+          button.disabled = false;
+          button.removeAttribute("aria-busy");
+          button.textContent = "立即同步";
+        }
+      }
+    }
+
     function renderProfitSyncCard(state) {
       const sync = state.repository.getState().syncStatus;
       const lastSyncLabel = `${profitUiDateLabel(String(sync.lastSyncedAt).slice(0, 10))} ${String(sync.lastSyncedAt).slice(11, 16)}`;
@@ -192,7 +217,7 @@
         <div class="profit-sync-icon"><i></i></div>
         <div class="profit-sync-copy"><span>店铺数据同步</span><b>${profitUiEscape(sync.message)}</b><small>${profitUiEscape(sync.source)} · 店铺经营时区 ${profitUiEscape(sync.storeTimezone)}</small></div>
         <div class="profit-sync-times"><span>最近核对 <b>${lastSyncLabel}</b></span><span>固定同步 <b>每天 17:00（北京时间）</b></span></div>
-        <button data-profit-sync-preview type="button">立即同步</button>
+        <button data-profit-sync type="button">立即同步</button>
       </section>`;
     }
 
@@ -614,19 +639,15 @@
         const addSku = event.target.closest("[data-profit-add-sku]");
         const toggleSku = event.target.closest("[data-profit-toggle-sku]");
         const lifecycle = event.target.closest("[data-profit-set-lifecycle]");
-        const syncPreview = event.target.closest("[data-profit-sync-preview]");
+        const syncButton = event.target.closest("[data-profit-sync]");
         const applyProductCost = event.target.closest("[data-profit-apply-product-cost]");
         const primaryAction = event.target.closest("[data-profit-primary-action]");
         const toggleAllSkus = event.target.closest("[data-profit-toggle-all-skus]");
         const toggleTrend = event.target.closest("[data-profit-toggle-trend]");
         const closeExpense = event.target.closest("[data-profit-close-expense]");
         const saveExpense = event.target.closest("[data-profit-save-expense]");
-        if (syncPreview) {
-          profitWorkspaceState.repository.updateSyncStatus({
-            state: "synced",
-            message: "当前展示 8 月 3 日已交叉核对的真实样本"
-          });
-        } else if (productButton) applyProfitWorkspaceAction(profitWorkspaceState, { type: "openProduct", productId: productButton.dataset.profitOpenProduct });
+        if (syncButton) void syncProfitWorkspace(syncButton);
+        else if (productButton) applyProfitWorkspaceAction(profitWorkspaceState, { type: "openProduct", productId: productButton.dataset.profitOpenProduct });
         else if (applyProductCost) {
           const input = applyProductCost.parentElement?.querySelector("[data-profit-product-cost-input]");
           applyProfitWorkspaceAction(profitWorkspaceState, {

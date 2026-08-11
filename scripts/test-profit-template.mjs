@@ -26,11 +26,14 @@ assert.doesNotMatch(html, /name="cost"/, "产品成本必须在产品主档统�
 assert.match(html, /计划调价/, "价格变化必须可标记为计划调价");
 assert.match(html, /数据修正/, "价格变化必须可标记为数据修正");
 
-for (const file of ["61-profit-domain.js", "62-profit-repository.js", "63-profit-selectors.js", "64-profit-view-models.js", "65-profit-template.js"]) {
+for (const file of ["61-profit-domain.js", "62-profit-repository.js", "63-profit-selectors.js", "64-profit-view-models.js", "65-profit-sync-client.js", "65-profit-template.js"]) {
   assert.match(manifest, new RegExp(file.replaceAll(".", "\\.")), `${file} 必须进入生产构建清单`);
 }
 assert.ok(manifest.indexOf("61-profit-domain.js") < manifest.indexOf("65-profit-template.js"), "领域模块必须先于页面控制器载入");
 assert.doesNotMatch(`${domainSource}\n${repositorySource}\n${selectorSource}\n${viewModelSource}\n${uiSource}`, /\blocalStorage\b|\bsessionStorage\b|\bfetch\s*\(/, "演示利润工作台不得读写存储或网络");
+assert.match(uiSource, /requestProfitAutomaticSync\(\{ dateKey: profitWorkspaceState\.activeDate \}\)/, "立即同步必须调用真实利润同步接口");
+assert.match(uiSource, /refreshCloudState\(\{ force: true \}\)/, "同步完成后必须强制刷新统一云端状态");
+assert.doesNotMatch(uiSource, /data-profit-sync-preview/, "真实同步按钮不得继续使用预览语义");
 
 let id = 0;
 const context = vm.createContext({

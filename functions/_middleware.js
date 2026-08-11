@@ -1,4 +1,5 @@
 import { publicUser, requestSessionToken, sha256Hex } from "./_shared/auth.js";
+import { automationAuthorized } from "./_shared/automation-auth.js";
 
 function unauthorized() {
   return new Response(JSON.stringify({ error: "请先登录" }), {
@@ -14,6 +15,10 @@ export async function onRequest(context) {
   if (url.pathname === "/api/auth/login") return context.next();
   if (url.pathname === "/api/bootstrap") return context.next();
   if (url.pathname === "/api/state" && url.searchParams.get("summary") === "1") return context.next();
+  if (url.pathname === "/api/profit-sync" && automationAuthorized(context.request, context.env)) {
+    context.data.automation = true;
+    return context.next();
+  }
 
   const token = requestSessionToken(context.request);
   if (!token) return unauthorized();

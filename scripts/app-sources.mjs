@@ -14,6 +14,7 @@ export const appSourceFiles = [
   "src/app/workbench/62-profit-repository.js",
   "src/app/workbench/63-profit-selectors.js",
   "src/app/workbench/64-profit-view-models.js",
+  "src/app/workbench/65-profit-sync-client.js",
   "src/app/workbench/65-profit-template.js",
   "src/app/workbench/70-navigation.js",
   "src/app/workbench/80-events.js",
