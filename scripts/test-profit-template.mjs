@@ -65,6 +65,7 @@ const api = vm.runInContext(`({
   createProfitWorkspaceState,
   profitChartModel,
   renderProfitTrendChart,
+  renderProfitTrendEvidence,
   renderProfitProductOverview,
   renderProfitProductDetail,
   renderProfitListingDetail,
@@ -267,6 +268,23 @@ assert.deepEqual(plain({
   completeDayCount: trendAvailability.completeDayCount,
   comparisonAllowed: trendAvailability.comparisonAllowed
 }), { mode: "insufficient", completeDayCount: 1, comparisonAllowed: false });
+const completeSevenDayListing = plain(actualListingResult);
+completeSevenDayListing.sevenDay.days = api.profitDateWindow("2026-08-09", 7).map((dateKey, index) => ({
+  dateKey,
+  result: {
+    completedSkuCount: 1,
+    itemsSold: 12 + index,
+    gmv: (12 + index) * (16 + index * 0.2),
+    finalProfit: 40 + index
+  }
+}));
+const completeTrendModel = api.buildProfitTrendAvailability(completeSevenDayListing.sevenDay);
+assert.deepEqual(plain({ mode: completeTrendModel.mode, completeDayCount: completeTrendModel.completeDayCount, comparisonAllowed: completeTrendModel.comparisonAllowed }), { mode: "complete", completeDayCount: 7, comparisonAllowed: true });
+const collapsedCompleteTrend = api.renderProfitTrendEvidence({ trendExpanded: false }, completeSevenDayListing);
+assert.match(collapsedCompleteTrend, /data-profit-toggle-trend/);
+assert.doesNotMatch(collapsedCompleteTrend, /class="profit-trend-plot"/);
+const expandedCompleteTrend = api.renderProfitTrendEvidence({ trendExpanded: true }, completeSevenDayListing);
+assert.equal((expandedCompleteTrend.match(/class="profit-trend-bar/g) || []).length, 7, "完整七日展开后必须保留七个销量柱位置");
 const focusedSkuRows = api.selectProfitFocusSkuRows(actualListingResult.skuRows, 3);
 assert.equal(focusedSkuRows.length, 3);
 assert.equal(focusedSkuRows[0].sku.code, "JZZ-PINK", "零销量异常必须先于健康高贡献 SKU");
@@ -312,20 +330,58 @@ assert.equal(api.applyProfitWorkspaceAction(actualWorkspace, { type: "updateProd
 assert.equal(actualWorkspace.repository.getProduct("product-jzz").standardUnitCost, 12.6, "应用成本动作必须更新产品主档");
 api.applyProfitWorkspaceAction(actualWorkspace, { type: "backOverview" });
 assert.equal(api.applyProfitWorkspaceAction(actualWorkspace, { type: "openListing", listingId: "listing-jzz-main" }), true);
+assert.equal(actualWorkspace.allSkusExpanded, false);
+assert.equal(actualWorkspace.trendExpanded, false);
 let actualListingHtml = api.renderProfitListingDetail(actualWorkspace, "listing-jzz-main");
-for (const label of ["经营 GMV", "平台确认销售额", "经营与财务口径差异", "平台订单成本", "实际到手", "产品成本", "广告、样品与调整", "暂算利润"]) {
+assert.match(actualListingHtml, /class="profit-listing-toolbar"/);
+assert.match(actualListingHtml, /class="profit-decision-card expense_pending"/);
+assert.match(actualListingHtml, /当前暂算盈利/);
+assert.match(actualListingHtml, /data-profit-primary-action="complete_expenses"[^>]*>补齐费用/);
+assert.match(actualListingHtml, /数据完整度/);
+assert.match(actualListingHtml, /经营 GMV[\s\S]*成交均价[\s\S]*销量[\s\S]*产品成本/);
+assert.doesNotMatch(actualListingHtml, /class="profit-summary-band listing-summary"/);
+assert.equal((actualListingHtml.match(/data-profit-primary-action/g) || []).length, 1);
+assert.match(actualListingHtml, /class="profit-cause-grid"/);
+assert.match(actualListingHtml, /class="profit-focus-sku-table"/);
+assert.match(actualListingHtml, /数据不足，暂不形成趋势判断/);
+assert.doesNotMatch(actualListingHtml, /class="profit-trend-plot"/);
+assert.equal((actualListingHtml.match(/class="profit-focus-sku-row/g) || []).length, 3);
+for (const label of ["经营 GMV", "平台确认销售额", "经营与财务口径差异", "平台订单成本", "实际到手", "产品成本", "广告、样品及调整", "暂算利润"]) {
   assert.match(actualListingHtml, new RegExp(label), `真实利润桥缺少 ${label}`);
 }
-assert.match(actualListingHtml, /\+\$22\.08/);
+assert.match(actualListingHtml, /\$22\.08/);
 assert.match(actualListingHtml, /广告、样品待补/);
-assert.match(actualListingHtml, /value="" placeholder="待补"/, "未取得的内部费用输入框必须保持空白");
-assert.ok((actualListingHtml.match(/待同步/g) || []).length >= 6, "缺失经营日必须显示待同步，不得伪装成 0 销量");
 assert.match(actualListingHtml, /SKU 商品毛利/);
 assert.doesNotMatch(actualListingHtml, /SKU 贡献利润/);
 assert.doesNotMatch(actualListingHtml, /<span>最终利润<\/span>/);
+assert.equal(api.applyProfitWorkspaceAction(actualWorkspace, { type: "toggleAllSkus" }), true);
+assert.equal(actualWorkspace.allSkusExpanded, true);
+actualListingHtml = api.renderProfitListingDetail(actualWorkspace, "listing-jzz-main");
+assert.match(actualListingHtml, /class="profit-entry-section profit-all-sku-panel"/);
 api.applyProfitWorkspaceAction(actualWorkspace, { type: "toggleSkuTrend", listingSkuId: "listing-jzz-main-sku-grey" });
 actualListingHtml = api.renderProfitListingDetail(actualWorkspace, "listing-jzz-main");
 assert.match(actualListingHtml, /最近 7 天成交均价与动销/);
+assert.equal(api.applyProfitWorkspaceAction(actualWorkspace, { type: "openExpenseDrawer" }), true);
+assert.equal(actualWorkspace.expenseDrawerOpen, true);
+let drawerHtml = api.renderProfitListingDetail(actualWorkspace, "listing-jzz-main");
+assert.match(drawerHtml, /role="dialog"/);
+assert.match(drawerHtml, /aria-modal="true"/);
+assert.match(drawerHtml, /保存并确认最终利润/);
+assert.match(drawerHtml, /补录后利润预览/);
+assert.match(drawerHtml, /value="" placeholder="待补"/, "未取得的内部费用输入框必须保持空白");
+const workspaceExpenseBeforeDraft = actualWorkspace.repository.getDailyExpense("listing-jzz-main", "2026-08-03");
+assert.equal(api.applyProfitWorkspaceAction(actualWorkspace, { type: "updateExpenseDraft", field: "advertisingSpend", value: 10 }), true);
+assert.equal(actualWorkspace.repository.getDailyExpense("listing-jzz-main", "2026-08-03").advertisingSpend, workspaceExpenseBeforeDraft.advertisingSpend, "编辑草稿不得提前写入真实费用");
+const workspaceListingSampleId = actualWorkspace.repository.getListing("listing-jzz-main").sampleTypes[0].id;
+api.applyProfitWorkspaceAction(actualWorkspace, { type: "updateExpenseDraft", sampleTypeId: workspaceListingSampleId, value: 0 });
+api.applyProfitWorkspaceAction(actualWorkspace, { type: "updateExpenseDraft", field: "advertisingSpend", value: 0 });
+api.applyProfitWorkspaceAction(actualWorkspace, { type: "updateExpenseDraft", field: "adjustments", value: 0 });
+assert.equal(api.applyProfitWorkspaceAction(actualWorkspace, { type: "saveExpenseDraft" }), true);
+assert.equal(actualWorkspace.expenseDrawerOpen, false);
+assert.equal(api.selectListingProfitResult(actualWorkspace.repository, "listing-jzz-main", "2026-08-03").result.profitCompleteness, "complete");
+drawerHtml = api.renderProfitListingDetail(actualWorkspace, "listing-jzz-main");
+assert.match(drawerHtml, /最终利润/);
+assert.doesNotMatch(drawerHtml, /class="profit-decision-card expense_pending"/);
 
 const [styleManifest, profitStyles] = await Promise.all([
   readFile("src/styles/workbench.css", "utf8"),
@@ -344,17 +400,29 @@ for (const selector of [
   ".profit-entry-table-wrap",
   ".profit-sku-trend",
   ".profit-trend-chart",
-  ".profit-settlement-panel",
-  ".profit-settlement-primary",
   ".profit-settlement-status",
   ".profit-product-cost-control",
-  ".profit-expense-grid",
   ".profit-management-drawer",
   ".profit-price-change-choices",
   ".profit-mobile-entry-list"
 ]) {
   assert.match(profitStyles, new RegExp(selector.replace(".", "\\.")), `利润工作台样式缺少 ${selector}`);
 }
+for (const selector of [
+  ".profit-listing-toolbar",
+  ".profit-decision-card",
+  ".profit-decision-metrics",
+  ".profit-cause-grid",
+  ".profit-focus-sku-table",
+  ".profit-trend-evidence",
+  ".profit-expense-drawer"
+]) {
+  assert.match(profitStyles, new RegExp(selector.replace(".", "\\.")), `经营决策页样式缺少 ${selector}`);
+}
+assert.match(profitStyles, /\.profit-cause-grid\s*\{[^}]*grid-template-columns:\s*minmax\(280px,\s*2fr\) minmax\(0,\s*3fr\)/s);
+assert.match(profitStyles, /\.profit-decision-main\s+strong\s*\{[^}]*font-size:\s*clamp\(32px,/s);
+assert.match(profitStyles, /@media \(max-width: 900px\)[\s\S]*?\.profit-cause-grid\s*\{[^}]*grid-template-columns:\s*1fr/s);
+assert.match(profitStyles, /@media \(max-width: 640px\)[\s\S]*?\.profit-expense-drawer\s*\{[^}]*width:\s*100%/s);
 assert.match(profitStyles, /\.profit-product-table-wrap\s*\{[^}]*overflow-x:\s*auto/s, "产品表只允许在自身容器内横向滚动");
 assert.match(profitStyles, /\.profit-entry-table-wrap\s*\{[^}]*overflow-x:\s*auto/s, "SKU 表只允许在自身容器内横向滚动");
 assert.match(profitStyles, /\.profit-num\s*\{[^}]*text-align:\s*right/s, "金额和销量必须按数字语义右对齐");
@@ -367,6 +435,5 @@ for (const breakpoint of ["1180px", "900px", "640px", "420px"]) {
 assert.match(profitStyles, /@media \(max-width: 640px\)[\s\S]*?\.profit-entry-table-wrap\s*\{[^}]*display:\s*none/s, "手机端必须切换为易填写的 SKU 卡片");
 assert.match(profitStyles, /@media \(max-width: 640px\)[\s\S]*?\.profit-mobile-entry-list\s*\{[^}]*display:\s*grid/s, "手机端必须显示 SKU 填写卡片");
 assert.match(profitStyles, /@media \(max-width: 640px\)[\s\S]*?\.profit-sync-card\s*\{[^}]*grid-template-columns:\s*42px minmax\(0, 1fr\)/s, "手机端同步状态不得挤压文字和按钮");
-assert.match(profitStyles, /@media \(max-width: 420px\)[\s\S]*?\.profit-settlement-grid\s*\{[^}]*grid-template-columns:\s*1fr/s, "窄屏结算数字必须单列居中展示");
 
 console.log(JSON.stringify({ passed: 48, phase: "product-listing-profit-redesign" }));

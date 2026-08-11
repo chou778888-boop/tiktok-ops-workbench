@@ -160,8 +160,13 @@
         storeFilter: "",
         lifecycleFilter: "",
         expandedSkuIds: new Set(),
+        allSkusExpanded: false,
+        trendExpanded: false,
         historyExpanded: false,
         managementOpen: false,
+        expenseDrawerOpen: false,
+        expenseDraft: null,
+        expenseError: "",
         pendingPriceChange: null
       };
     }
@@ -304,8 +309,8 @@
       </aside></div>`;
     }
 
-    function renderProfitSevenDayStrip(listingResult) {
-      const points = listingResult.sevenDay.days.map((day) => {
+    function profitListingTrendPoints(listingResult) {
+      return listingResult.sevenDay.days.map((day) => {
         const dayCompleted = day.result.completedSkuCount > 0;
         return {
           dateKey: day.dateKey,
@@ -314,33 +319,92 @@
           finalProfit: dayCompleted ? day.result.finalProfit : null
         };
       });
-      return `<section class="profit-seven-day-section"><div class="profit-block-title"><div><span>趋势判断</span><h3>最近 7 天链接表现</h3><p>价格线判断调价幅度，销量柱判断动销变化；两者共用经营日期。</p></div><span class="profit-history-collapsed">更早记录已收起</span></div>${renderProfitTrendChart(points, { title: "最近 7 天成交均价与销量趋势" })}</section>`;
     }
 
-    function renderProfitBreakdown(state, listingResult) {
-      const result = listingResult.result;
-      const receivedLabel = result.profitStatus === "settled" ? "实际到手" : "预估到手";
-      const expensePending = result.profitCompleteness === "provisional";
-      const resultLabel = profitUiResultLabel(result);
-      const skuDifference = Math.abs(result.reconciliationDifference) >= 0.01 ? `<em>SKU 汇总差异 ${profitUiSignedMoney(result.reconciliationDifference)}</em>` : "";
-      return `<section class="profit-profit-breakdown">
-        <div class="profit-block-title profit-breakdown-head"><div><h3>当日利润拆解</h3><p>经营与财务口径分开呈现，避免重复扣费和虚假分摊。</p></div>${profitSettlementBadge(result)}</div>
-        <div class="profit-breakdown-ledger">
-          <div class="profit-breakdown-row"><span>经营 GMV<small>Product Analytics</small></span><b>${profitUiMoney(result.gmv)}</b></div>
-          <div class="profit-breakdown-row subtotal"><span>平台确认销售额<small>已含平台优惠 ${profitUiMoney(result.platformDiscounts)}</small></span><b>${profitUiMoney(result.netProductSales)}</b></div>
-          <div class="profit-breakdown-row reconciliation"><span>经营与财务口径差异</span><b>${profitUiSignedMoney(result.financialReconciliationDifference)}</b></div>
-          <div class="profit-breakdown-row deduction"><span>平台订单成本<small>运费及平台各项费用</small></span><b>− ${profitUiMoney(result.platformFees + result.shippingFee)}</b></div>
-          <div class="profit-breakdown-row subtotal"><span>${receivedLabel}</span><b>${profitUiMoney(result.receivedAmount)}</b></div>
-          <div class="profit-breakdown-row deduction"><span>产品成本</span><b>− ${profitUiMoney(result.productCostTotal)}</b></div>
-          <div class="profit-breakdown-row deduction ${expensePending ? "pending" : ""}"><span>广告、样品与调整</span><b>${expensePending ? "待补" : `− ${profitUiMoney(result.knownInternalExpenses)}`}</b></div>
-        </div>
-        <div class="profit-breakdown-result ${result.finalProfit < 0 ? "loss" : ""}"><span>${resultLabel}<small>${expensePending ? "广告、样品待补；补齐后转最终利润" : `利润率 ${profitUiPercent(result.contributionMargin)}`}</small></span><b>${profitUiMoney(result.finalProfit)}</b></div>
-        <footer><span>来源：${profitUiEscape(listingResult.settlement.source)}</span><span>${state.activeDate} · ${profitUiEscape(listingResult.listing.timezone)}</span>${skuDifference}</footer>
+    function renderProfitListingContext(state, row) {
+      return `<section class="profit-listing-toolbar">
+        <nav class="profit-breadcrumb" aria-label="链接利润层级"><button data-profit-back-overview type="button">产品总盘</button><span>/</span><button data-profit-back-product="${row.product.id}" type="button">${profitUiEscape(row.product.code)} 产品整体</button><span>/</span><b>${profitUiEscape(row.listing.displayName)}</b></nav>
+        <label class="profit-listing-date"><span>经营日期</span><input data-profit-date-filter type="date" value="${state.activeDate}" /></label>
+        <div class="profit-listing-identity"><span class="profit-code-mark">${profitUiEscape(row.product.code)}</span><div><small>${profitUiEscape(row.store?.name)} · ${profitUiEscape(row.listing.platformListingId)}</small><h2>${profitUiEscape(row.listing.displayName)}</h2><p>${profitUiEscape(row.product.name)} · 负责人 ${profitUiEscape(row.listing.ownerName)}</p></div></div>
+        <div class="profit-context-actions"><span class="profit-lifecycle ${row.listing.lifecycleStatus}">${profitLifecycleLabel(row.listing.lifecycleStatus)}</span><a href="${profitUiEscape(row.listing.url)}" target="_blank" rel="noopener noreferrer">打开商品页 ↗</a><button data-profit-open-management type="button">链接与 SKU 设置</button></div>
       </section>`;
     }
 
-    function renderProfitDecisionRow(state, listingResult) {
-      return `<div class="profit-decision-grid">${renderProfitSevenDayStrip(listingResult)}${renderProfitBreakdown(state, listingResult)}</div>`;
+    function profitDecisionMetricValue(metric) {
+      if (metric.key === "units") return `${profitNumber(metric.value).toLocaleString("en-US")} 件`;
+      return metric.value === null || metric.value === undefined ? "—" : profitUiMoney(metric.value);
+    }
+
+    function renderProfitDecisionCard(row, decision) {
+      const completeness = row.result.profitCompleteness === "provisional" ? "广告、样品待补" : "经营费用已完整";
+      const receivedLabel = row.result.profitStatus === "settled" ? "实际到手" : "预估到手";
+      return `<section class="profit-decision-card ${decision.key}" aria-labelledby="profitDecisionTitle">
+        <div class="profit-decision-main"><span class="profit-decision-status"><i></i>${profitUiEscape(row.health.label)}</span><small>${profitUiEscape(decision.amountLabel)}</small><h2 id="profitDecisionTitle">${profitUiEscape(decision.title)}</h2><strong class="${decision.amount < 0 ? "negative" : "positive"}">${profitUiMoney(decision.amount)}</strong><p>${profitUiEscape(decision.summary)}</p></div>
+        <div class="profit-decision-facts" aria-label="利润判断依据"><div><span>利润率</span><b>${profitUiPercent(decision.margin)}</b></div><div><span>${receivedLabel}</span><b>${profitUiMoney(decision.receivedAmount)}</b></div><div><span>数据完整度</span><b>${profitUiEscape(completeness)}</b></div></div>
+        <button class="profit-decision-action" data-profit-primary-action="${decision.action.key}" type="button">${profitUiEscape(decision.action.label)} <span>→</span></button>
+        <dl class="profit-decision-metrics">${decision.auxiliaryMetrics.map((metric) => `<div><dt>${profitUiEscape(metric.label)}</dt><dd>${profitDecisionMetricValue(metric)}</dd></div>`).join("")}</dl>
+      </section>`;
+    }
+
+    function renderProfitTrendState(title, description, meta = "") {
+      return `<section class="profit-trend-evidence compact"><div><span>近 7 天经营证据</span><h3>${profitUiEscape(title)}</h3><p>${profitUiEscape(description)}</p></div>${meta ? `<em>${profitUiEscape(meta)}</em>` : ""}</section>`;
+    }
+
+    function renderProfitTrendEvidence(state, listingResult) {
+      const availability = buildProfitTrendAvailability(listingResult.sevenDay);
+      if (availability.mode === "empty") return renderProfitTrendState("等待店铺数据同步", "暂无可用于趋势判断的完整经营日", "0/7 天");
+      if (availability.mode === "insufficient") return renderProfitTrendState(`${availability.completeDayCount}/7 天已同步`, "数据不足，暂不形成趋势判断", "周期未完整");
+      const points = profitListingTrendPoints(listingResult);
+      const summary = availability.mode === "partial"
+        ? "周期未完整，仅展示已同步日期，不生成环比结论。"
+        : "七个完整经营日已同步，可展开查看成交均价与销量变化。";
+      return `<section class="profit-trend-evidence ${availability.mode}"><div><span>近 7 天经营证据</span><h3>${availability.completeDayCount}/7 天已同步</h3><p>${summary}</p></div><button data-profit-toggle-trend aria-expanded="${state.trendExpanded}" type="button">${state.trendExpanded ? "收起完整趋势" : "展开完整趋势"}</button>${state.trendExpanded ? renderProfitTrendChart(points, { title: "最近 7 天成交均价与销量趋势", compact: true }) : ""}</section>`;
+    }
+
+    function renderProfitLedger(listingResult) {
+      const rows = buildProfitLedgerRows(listingResult.result);
+      return `<section class="profit-profit-breakdown"><div class="profit-block-title"><div><span>利润形成</span><h3>这笔利润如何形成</h3><p>平台到手、产品成本和内部费用分层核算。</p></div>${profitSettlementBadge(listingResult.result)}</div><div class="profit-breakdown-ledger">${rows.map((item) => {
+        const value = item.value === null ? "待补" : item.key === "financial_difference" ? profitUiSignedMoney(item.value) : profitUiMoney(item.value);
+        return `<div class="profit-breakdown-row ${item.kind}"><span>${profitUiEscape(item.label)}${item.detail ? `<small>${profitUiEscape(item.detail)}</small>` : ""}</span><b>${value}</b></div>`;
+      }).join("")}</div><footer><span>来源：${profitUiEscape(listingResult.settlement.source)}</span><span>${profitUiEscape(listingResult.listing.timezone)}</span></footer></section>`;
+    }
+
+    function renderProfitFocusSkuTable(state, listingResult) {
+      const activeRows = listingResult.skuRows.filter((item) => item.listingSku.active);
+      const focusRows = selectProfitFocusSkuRows(activeRows, 3);
+      return `<section class="profit-focus-sku"><div class="profit-block-title"><div><span>SKU 经营原因</span><h3>重点贡献与异常 SKU</h3><p>SKU 仅核算商品毛利；平台订单成本保留在链接层。</p></div><button data-profit-toggle-all-skus aria-expanded="${state.allSkusExpanded}" type="button">${state.allSkusExpanded ? "收起完整明细" : `查看全部 ${activeRows.length} 个 SKU`}</button></div><div class="profit-focus-sku-table" role="table" aria-label="重点 SKU 商品毛利"><div class="profit-focus-sku-head" role="row"><span>SKU / 规格</span><span>成交均价</span><span>销量</span><span>SKU 商品毛利</span><span>经营信号</span></div>${focusRows.map((item) => `<div class="profit-focus-sku-row" role="row"><div><b>${profitUiEscape(item.sku?.name)}</b><small>${profitUiEscape(item.sku?.code)}</small></div><strong>${item.result.averageTransactionPrice === null ? "—" : profitUiMoney(item.result.averageTransactionPrice)}</strong><strong>${item.result.itemsSold ?? "—"} 件</strong><strong class="${item.result.skuGrossProfit < 0 ? "negative" : "positive"}">${profitUiMoney(item.result.skuGrossProfit)}</strong><em class="signal-${item.focusPriority}">${profitUiEscape(item.focusSignal)}</em></div>`).join("")}</div></section>`;
+    }
+
+    function renderProfitCauseGrid(state, listingResult) {
+      return `<div class="profit-cause-grid">${renderProfitLedger(listingResult)}${renderProfitFocusSkuTable(state, listingResult)}</div>`;
+    }
+
+    function renderProfitAllSkuPanel(state, row, activeRows, inactiveRows) {
+      if (!state.allSkusExpanded) return "";
+      return `<section class="profit-entry-section profit-all-sku-panel">
+        <div class="profit-block-title"><div><span>完整经营证据</span><h3>全部 SKU 成交与商品毛利</h3><p>展开单个 SKU 可查看最近七天成交均价与动销。</p></div><div class="profit-entry-status">${profitStatusBadge(row.health)}<span>${state.activeDate}</span></div></div>
+        <div class="profit-entry-table-wrap"><table class="profit-entry-table"><thead><tr><th>SKU / 规格</th><th>成交均价</th><th>销量</th><th>SKU GMV</th><th>销量成本</th><th>SKU 商品毛利</th><th>近 7 天</th></tr></thead><tbody>${activeRows.map((item) => {
+          const expanded = state.expandedSkuIds.has(item.listingSku.id);
+          return `<tr class="profit-sku-entry-row" data-profit-sku-row="${item.listingSku.id}"><td><div class="profit-sku-name"><b>${profitUiEscape(item.sku?.name)}</b><small>${profitUiEscape(item.sku?.code)} · ${item.result.completed ? "已同步" : "待同步"}</small></div></td><td class="profit-num"><b>${item.result.averageTransactionPrice === null ? "—" : profitUiMoney(item.result.averageTransactionPrice)}</b></td><td class="profit-num"><b>${item.result.itemsSold ?? "—"}</b><small>件</small></td><td class="profit-num">${profitUiMoney(item.result.gmv)}</td><td class="profit-num">${profitUiMoney(item.result.productCostTotal)}</td><td class="profit-num ${item.result.skuGrossProfit < 0 ? "negative" : "positive"}"><b>${profitUiMoney(item.result.skuGrossProfit)}</b></td><td><div class="profit-trend-summary"><b>${profitUiSignedPercent(item.trend.unitChange)}</b><small>日均 ${item.trend.averageUnits.toFixed(1)} 件 · 均价 ${profitUiSignedPercent(item.trend.priceChange)}</small></div><button class="profit-expand-action" data-profit-sku-trend-toggle="${item.listingSku.id}" aria-expanded="${expanded}" type="button">查看趋势 ${expanded ? "↑" : "↓"}</button></td></tr>${renderProfitSkuTrend(item, expanded)}`;
+        }).join("")}</tbody></table></div>
+        <div class="profit-mobile-entry-list">${activeRows.map((item) => `<article><header><div><b>${profitUiEscape(item.sku?.name)}</b><small>${profitUiEscape(item.sku?.code)} · ${item.result.completed ? "已同步" : "待同步"}</small></div><strong class="${item.result.skuGrossProfit < 0 ? "negative" : "positive"}">${profitUiMoney(item.result.skuGrossProfit)}</strong></header><dl><div><dt>成交均价</dt><dd>${item.result.averageTransactionPrice === null ? "—" : profitUiMoney(item.result.averageTransactionPrice)}</dd></div><div><dt>销量</dt><dd>${item.result.itemsSold ?? "—"} 件</dd></div><div><dt>SKU GMV</dt><dd>${profitUiMoney(item.result.gmv)}</dd></div><div><dt>销量成本</dt><dd>${profitUiMoney(item.result.productCostTotal)}</dd></div></dl><footer><span>SKU 商品毛利</span><button data-profit-sku-trend-toggle="${item.listingSku.id}" type="button">查看 7 天趋势</button></footer>${state.expandedSkuIds.has(item.listingSku.id) ? `<div class="profit-mobile-chart">${renderProfitTrendChart(item.trend.points, { title: "最近 7 天成交均价与动销", compact: true })}</div>` : ""}</article>`).join("")}</div>
+        ${inactiveRows.length ? `<div class="profit-inactive-strip"><div><b>${inactiveRows.length} 个 SKU 已停用</b><span>历史数据仍保留，不进入今日汇总。</span></div><button data-profit-open-management type="button">查看并恢复</button></div>` : ""}
+      </section>`;
+    }
+
+    function profitExpensePreview(row, draft) {
+      const samples = row.listing.sampleTypes || [];
+      const sampleComplete = samples.every((sample) => draft?.sampleQuantities?.[sample.id] !== null && draft?.sampleQuantities?.[sample.id] !== undefined && draft?.sampleQuantities?.[sample.id] !== "");
+      const sampleCost = sampleComplete ? profitMoney(samples.reduce((sum, sample) => sum + profitNumber(draft.sampleQuantities?.[sample.id]) * profitNumber(sample.unitCost), 0)) : null;
+      return calculateListingContribution(row.skuRows.filter((item) => item.listingSku.active).map((item) => item.fact), { ...draft, sampleCost }, row.settlement);
+    }
+
+    function renderProfitExpenseDrawer(state, row) {
+      if (!state.expenseDrawerOpen || !state.expenseDraft) return "";
+      const draft = state.expenseDraft;
+      const samples = row.listing.sampleTypes || [];
+      const preview = profitExpensePreview(row, draft);
+      return `<div class="profit-expense-layer"><button class="profit-drawer-overlay" data-profit-close-expense type="button" aria-label="关闭费用补录"></button><aside class="profit-expense-drawer" role="dialog" aria-modal="true" aria-labelledby="profitExpenseTitle"><header><div><span>费用补录</span><h2 id="profitExpenseTitle">确认最终利润</h2><p>${profitUiEscape(row.listing.displayName)} · ${state.activeDate}</p></div><button data-profit-close-expense type="button" aria-label="关闭">×</button></header><div class="profit-expense-form">${samples.map((sample) => `<label><span>${profitUiEscape(sample.name)}数量</span><div class="profit-number-input units"><input data-profit-expense-draft data-sample-type-id="${sample.id}" type="number" min="0" step="1" value="${profitUiInputValue(draft.sampleQuantities?.[sample.id])}" placeholder="待补" /><span>份</span></div><small>${profitUiMoney(sample.unitCost)} / 份</small></label>`).join("")}<label><span>广告费</span><div class="profit-number-input money"><span>$</span><input data-profit-expense-draft data-field="advertisingSpend" type="number" min="0" step="0.01" value="${profitUiInputValue(draft.advertisingSpend)}" placeholder="待补" /></div><small>对应此链接当日支出</small></label><label><span>其他调整费用</span><div class="profit-number-input money"><span>$</span><input data-profit-expense-draft data-field="adjustments" type="number" min="0" step="0.01" value="${profitUiInputValue(draft.adjustments)}" placeholder="待补" /></div><small>确实无费用时填写 0</small></label><div class="profit-expense-preview"><span>补录后利润预览</span><b class="${preview.finalProfit < 0 ? "negative" : "positive"}">${profitUiMoney(preview.finalProfit)}</b><small>${profitExpenseDraftComplete(row.listing, draft) ? `利润率 ${profitUiPercent(preview.contributionMargin)}` : "仍有费用待补"}</small></div><div class="profit-expense-error" role="alert">${profitUiEscape(state.expenseError)}</div></div><footer><button data-profit-close-expense type="button">取消</button><button class="primary" data-profit-save-expense type="button">保存并确认最终利润</button></footer></aside></div>`;
     }
 
     function renderProfitListingDetail(state, listingId) {
@@ -348,30 +412,15 @@
       if (!row) return '<div class="profit-empty-state">未找到该商品链接。</div>';
       const activeRows = row.skuRows.filter((item) => item.listingSku.active);
       const inactiveRows = row.skuRows.filter((item) => !item.listingSku.active);
-      const expense = row.expense;
-      const samples = row.listing.sampleTypes || [];
+      const decision = buildProfitListingDecisionModel(row);
       return `<div class="profit-detail-page listing-detail">
-        <nav class="profit-breadcrumb"><button data-profit-back-overview type="button">产品总盘</button><span>/</span><button data-profit-back-product="${row.product.id}" type="button">${profitUiEscape(row.product.code)} 产品整体</button><span>/</span><b>${profitUiEscape(row.listing.displayName)}</b></nav>
-        <section class="profit-listing-context"><div><span class="profit-code-mark">${profitUiEscape(row.product.code)}</span><div><small>${profitUiEscape(row.store?.name)} · ${profitUiEscape(row.listing.platformListingId)}</small><h2>${profitUiEscape(row.listing.displayName)}</h2><p>${profitUiEscape(row.product.name)} · 负责人 ${profitUiEscape(row.listing.ownerName)} · ${state.activeDate}</p></div></div><div class="profit-context-actions"><span class="profit-lifecycle ${row.listing.lifecycleStatus}">${profitLifecycleLabel(row.listing.lifecycleStatus)}</span><a href="${profitUiEscape(row.listing.url)}" target="_blank" rel="noopener noreferrer">打开商品页 ↗</a><button data-profit-open-management type="button">链接与 SKU 设置</button></div></section>
-        <section class="profit-summary-band listing-summary">
-          ${renderProfitMetric("经营 GMV", profitUiMoney(row.result.gmv), { detail: `${row.result.itemsSold.toLocaleString("en-US")} 件 · ${activeRows.length} 个 SKU` })}
-          ${renderProfitMetric("成交均价", row.result.itemsSold ? profitUiMoney(row.result.gmv / row.result.itemsSold) : "—", { detail: "GMV ÷ 实际售出件数" })}
-          ${renderProfitMetric(row.result.profitStatus === "settled" ? "实际到手" : "预估到手", profitUiMoney(row.result.receivedAmount), { detail: row.result.profitStatus === "settled" ? "平台最终结算金额" : "结算后自动回填" })}
-          ${renderProfitMetric("销量成本", profitUiMoney(row.result.productCostTotal), { detail: `统一单件成本 ${profitUiMoney(row.product.standardUnitCost)}` })}
-          ${renderProfitMetric(profitUiResultLabel(row.result), profitUiMoney(row.result.finalProfit), { tone: row.result.finalProfit < 0 ? "negative" : "featured", detail: row.result.profitCompleteness === "provisional" ? "广告、样品待补" : `利润率 ${profitUiPercent(row.result.contributionMargin)}` })}
-        </section>
-        ${renderProfitDecisionRow(state, row)}
-        <section class="profit-entry-section">
-          <div class="profit-block-title"><div><span>动销优先</span><h3>SKU 成交与商品毛利</h3><p>SKU 商品毛利只扣统一产品成本；平台订单成本在链接层核算，不做比例伪分摊。</p></div><div class="profit-entry-status">${profitStatusBadge(row.health)}<span>${state.activeDate}</span></div></div>
-          <div class="profit-entry-table-wrap"><table class="profit-entry-table"><thead><tr><th>SKU / 规格</th><th>成交均价</th><th>销量</th><th>SKU GMV</th><th>销量成本</th><th>SKU 商品毛利</th><th>近 7 天</th></tr></thead><tbody>${activeRows.map((item) => {
-            const expanded = state.expandedSkuIds.has(item.listingSku.id);
-            return `<tr class="profit-sku-entry-row" data-profit-sku-row="${item.listingSku.id}"><td><div class="profit-sku-name"><b>${profitUiEscape(item.sku?.name)}</b><small>${profitUiEscape(item.sku?.code)} · ${item.result.completed ? "已同步" : "待同步"}</small></div></td><td class="profit-num"><b>${item.result.averageTransactionPrice === null ? "—" : profitUiMoney(item.result.averageTransactionPrice)}</b></td><td class="profit-num"><b>${item.result.itemsSold ?? "—"}</b><small>件</small></td><td class="profit-num">${profitUiMoney(item.result.gmv)}</td><td class="profit-num">${profitUiMoney(item.result.productCostTotal)}</td><td class="profit-num ${item.result.skuGrossProfit < 0 ? "negative" : "positive"}"><b>${profitUiMoney(item.result.skuGrossProfit)}</b></td><td><div class="profit-trend-summary"><b>${profitUiSignedPercent(item.trend.unitChange)}</b><small>日均 ${item.trend.averageUnits.toFixed(1)} 件 · 均价 ${profitUiSignedPercent(item.trend.priceChange)}</small></div><button class="profit-expand-action" data-profit-sku-trend-toggle="${item.listingSku.id}" aria-expanded="${expanded}" type="button">查看趋势 ${expanded ? "↑" : "↓"}</button></td></tr>${renderProfitSkuTrend(item, expanded)}`;
-          }).join("")}</tbody></table></div>
-          <div class="profit-mobile-entry-list">${activeRows.map((item) => `<article><header><div><b>${profitUiEscape(item.sku?.name)}</b><small>${profitUiEscape(item.sku?.code)} · ${item.result.completed ? "已同步" : "待同步"}</small></div><strong class="${item.result.skuGrossProfit < 0 ? "negative" : "positive"}">${profitUiMoney(item.result.skuGrossProfit)}</strong></header><dl><div><dt>成交均价</dt><dd>${item.result.averageTransactionPrice === null ? "—" : profitUiMoney(item.result.averageTransactionPrice)}</dd></div><div><dt>销量</dt><dd>${item.result.itemsSold ?? "—"} 件</dd></div><div><dt>SKU GMV</dt><dd>${profitUiMoney(item.result.gmv)}</dd></div><div><dt>销量成本</dt><dd>${profitUiMoney(item.result.productCostTotal)}</dd></div></dl><footer><span>SKU 商品毛利</span><button data-profit-sku-trend-toggle="${item.listingSku.id}" type="button">查看 7 天趋势</button></footer>${state.expandedSkuIds.has(item.listingSku.id) ? `<div class="profit-mobile-chart">${renderProfitTrendChart(item.trend.points, { title: "最近 7 天成交均价与动销", compact: true })}</div>` : ""}</article>`).join("")}</div>
-        </section>
-        <section class="profit-expense-section"><div class="profit-block-title"><div><span>团队维护</span><h3>链接广告与样品费用</h3><p>平台无法提供的费用只填写一次；空白代表待补，不会被系统误算为 0。</p></div></div><div class="profit-expense-grid">${samples.map((sample) => `<label><span>${profitUiEscape(sample.name)}数量</span><div class="profit-number-input units"><input data-profit-expense-input data-sample-type-id="${sample.id}" type="number" min="0" step="1" value="${profitUiInputValue(expense.sampleQuantities?.[sample.id])}" placeholder="待补" /><span>份</span></div><small>${profitUiMoney(sample.unitCost)} / 份</small></label>`).join("")}<label><span>广告费</span><div class="profit-number-input money"><span>$</span><input data-profit-expense-input data-field="advertisingSpend" type="number" min="0" step="0.01" value="${profitUiInputValue(expense.advertisingSpend)}" placeholder="待补" /></div><small>对应此链接当日支出</small></label><label><span>其他调整费用</span><div class="profit-number-input money"><span>$</span><input data-profit-expense-input data-field="adjustments" type="number" min="0" step="0.01" value="${profitUiInputValue(expense.adjustments)}" placeholder="待补" /></div><small>无调整也请填写 0</small></label><div class="profit-contribution-result"><span>${profitUiResultLabel(row.result)}</span><b class="${row.result.finalProfit < 0 ? "negative" : "positive"}">${profitUiMoney(row.result.finalProfit)}</b><small>${row.result.profitCompleteness === "provisional" ? "广告、样品待补；当前仅扣实际到手与产品成本" : `${profitUiMoney(row.result.receivedAmount)} − 成本与链接费用`}</small></div></div></section>
-        ${inactiveRows.length ? `<section class="profit-inactive-strip"><div><b>${inactiveRows.length} 个 SKU 已停用</b><span>历史数据仍保留，不进入今日汇总。</span></div><button data-profit-open-management type="button">查看并恢复</button></section>` : ""}
+        ${renderProfitListingContext(state, row)}
+        ${renderProfitDecisionCard(row, decision)}
+        ${renderProfitCauseGrid(state, row)}
+        ${renderProfitAllSkuPanel(state, row, activeRows, inactiveRows)}
+        ${renderProfitTrendEvidence(state, row)}
         ${renderProfitListingManagement(state, row)}
+        ${renderProfitExpenseDrawer(state, row)}
       </div>`;
     }
 
@@ -410,6 +459,12 @@
         state.activeProductId = listing.productId;
         state.activeListingId = listing.id;
         state.managementOpen = false;
+        state.expenseDrawerOpen = false;
+        state.expenseDraft = null;
+        state.expenseError = "";
+        state.allSkusExpanded = false;
+        state.trendExpanded = false;
+        state.expandedSkuIds.clear();
         return true;
       }
       if (action.type === "backOverview") {
@@ -424,6 +479,51 @@
         else state.expandedSkuIds.add(action.listingSkuId);
         return true;
       }
+      if (action.type === "toggleAllSkus") {
+        state.allSkusExpanded = !state.allSkusExpanded;
+        if (!state.allSkusExpanded) state.expandedSkuIds.clear();
+        return true;
+      }
+      if (action.type === "toggleTrend") {
+        state.trendExpanded = !state.trendExpanded;
+        return true;
+      }
+      if (action.type === "openExpenseDrawer") {
+        const row = selectListingProfitResult(state.repository, state.activeListingId, state.activeDate);
+        if (!row) return false;
+        state.expenseDrawerOpen = true;
+        state.expenseDraft = JSON.parse(JSON.stringify(row.expense));
+        state.expenseError = "";
+        return true;
+      }
+      if (action.type === "updateExpenseDraft" && state.expenseDrawerOpen && state.expenseDraft) {
+        if (action.sampleTypeId) {
+          state.expenseDraft.sampleQuantities = { ...state.expenseDraft.sampleQuantities, [action.sampleTypeId]: action.value };
+        } else if (action.field) state.expenseDraft[action.field] = action.value;
+        return true;
+      }
+      if (action.type === "closeExpenseDrawer") {
+        state.expenseDrawerOpen = false;
+        state.expenseDraft = null;
+        state.expenseError = "";
+        return true;
+      }
+      if (action.type === "saveExpenseDraft") {
+        const listing = state.repository.getListing(state.activeListingId);
+        if (!listing || !profitExpenseDraftComplete(listing, state.expenseDraft)) {
+          state.expenseError = "请填写全部费用；确实无费用时填写 0";
+          return false;
+        }
+        state.repository.updateDailyExpense(state.activeListingId, state.activeDate, {
+          sampleQuantities: state.expenseDraft.sampleQuantities,
+          advertisingSpend: state.expenseDraft.advertisingSpend,
+          adjustments: state.expenseDraft.adjustments
+        });
+        state.expenseDrawerOpen = false;
+        state.expenseDraft = null;
+        state.expenseError = "";
+        return true;
+      }
       if (action.type === "updateProductCost" && state.repository.getProduct(action.productId)) {
         state.repository.updateProductCost(action.productId, action.value, action.effectiveAt || state.activeDate);
         return true;
@@ -436,6 +536,19 @@
     function renderProfitTemplate() {
       const root = typeof document === "undefined" ? null : document.getElementById("profitTemplateRoot");
       if (root) root.innerHTML = renderProfitTemplateShell(profitWorkspaceState);
+    }
+
+    function focusProfitExpenseDrawer(preferredControl) {
+      const drawer = document.querySelector(".profit-expense-drawer");
+      if (!drawer) return;
+      const target = preferredControl
+        ? [...drawer.querySelectorAll("[data-profit-expense-draft]")].find((control) => control.dataset.sampleTypeId === preferredControl.sampleTypeId && control.dataset.field === preferredControl.field)
+        : drawer.querySelector("[data-profit-expense-draft]");
+      (target || drawer.querySelector("button"))?.focus();
+    }
+
+    function restoreProfitDecisionFocus() {
+      (document.querySelector("[data-profit-primary-action]") || document.querySelector("[data-profit-toggle-all-skus]") || document.getElementById("profitTemplateRoot"))?.focus?.();
     }
 
     function openProfitDialog(id) {
@@ -493,6 +606,7 @@
       root.dataset.profitReady = "true";
 
       root.addEventListener("click", (event) => {
+        const expenseWasOpen = profitWorkspaceState.expenseDrawerOpen;
         const productButton = event.target.closest("[data-profit-open-product]");
         const listingButton = event.target.closest("[data-profit-open-listing]");
         const skuTrend = event.target.closest("[data-profit-sku-trend-toggle]");
@@ -502,6 +616,11 @@
         const lifecycle = event.target.closest("[data-profit-set-lifecycle]");
         const syncPreview = event.target.closest("[data-profit-sync-preview]");
         const applyProductCost = event.target.closest("[data-profit-apply-product-cost]");
+        const primaryAction = event.target.closest("[data-profit-primary-action]");
+        const toggleAllSkus = event.target.closest("[data-profit-toggle-all-skus]");
+        const toggleTrend = event.target.closest("[data-profit-toggle-trend]");
+        const closeExpense = event.target.closest("[data-profit-close-expense]");
+        const saveExpense = event.target.closest("[data-profit-save-expense]");
         if (syncPreview) {
           profitWorkspaceState.repository.updateSyncStatus({
             state: "synced",
@@ -522,6 +641,19 @@
         else if (event.target.closest("[data-profit-back-overview]")) applyProfitWorkspaceAction(profitWorkspaceState, { type: "backOverview" });
         else if (event.target.closest("[data-profit-back-product]")) applyProfitWorkspaceAction(profitWorkspaceState, { type: "backProduct", productId: event.target.closest("[data-profit-back-product]").dataset.profitBackProduct });
         else if (skuTrend) applyProfitWorkspaceAction(profitWorkspaceState, { type: "toggleSkuTrend", listingSkuId: skuTrend.dataset.profitSkuTrendToggle });
+        else if (toggleAllSkus) applyProfitWorkspaceAction(profitWorkspaceState, { type: "toggleAllSkus" });
+        else if (toggleTrend) applyProfitWorkspaceAction(profitWorkspaceState, { type: "toggleTrend" });
+        else if (closeExpense) applyProfitWorkspaceAction(profitWorkspaceState, { type: "closeExpenseDrawer" });
+        else if (saveExpense) {
+          const saved = applyProfitWorkspaceAction(profitWorkspaceState, { type: "saveExpenseDraft" });
+          if (saved) showToast("费用已保存，最终利润已更新");
+        }
+        else if (primaryAction) {
+          const actionKey = primaryAction.dataset.profitPrimaryAction;
+          if (actionKey === "complete_expenses") applyProfitWorkspaceAction(profitWorkspaceState, { type: "openExpenseDrawer" });
+          else if (actionKey === "view_sync") showToast("店铺数据每日 17:00 同步");
+          else profitWorkspaceState.allSkusExpanded = true;
+        }
         else if (addListing) return prepareProfitLinkDialog(addListing.dataset.profitAddListing || profitWorkspaceState.activeProductId || "");
         else if (addSku) return prepareProfitSkuDialog(addSku.dataset.profitAddSku);
         else if (toggleSku) profitWorkspaceState.repository.toggleListingSku(toggleSku.dataset.profitToggleSku);
@@ -532,25 +664,61 @@
         else if (event.target.closest("[data-profit-close-management]")) profitWorkspaceState.managementOpen = false;
         else return;
         renderProfitTemplate();
+        if (profitWorkspaceState.expenseDrawerOpen && (!expenseWasOpen || saveExpense)) focusProfitExpenseDrawer();
+        else if (expenseWasOpen && !profitWorkspaceState.expenseDrawerOpen) restoreProfitDecisionFocus();
       });
 
       root.addEventListener("change", (event) => {
         const dateFilter = event.target.closest("[data-profit-date-filter]");
         const storeFilter = event.target.closest("[data-profit-store-filter]");
         const lifecycleFilter = event.target.closest("[data-profit-lifecycle-filter]");
-        const expenseInput = event.target.closest("[data-profit-expense-input]");
+        const expenseDraftInput = event.target.closest("[data-profit-expense-draft]");
         if (dateFilter) profitWorkspaceState.activeDate = dateFilter.value;
         else if (storeFilter) profitWorkspaceState.storeFilter = storeFilter.value;
         else if (lifecycleFilter) profitWorkspaceState.lifecycleFilter = lifecycleFilter.value;
-        else if (expenseInput) {
-          const inputValue = expenseInput.value === "" ? null : expenseInput.value;
-          if (expenseInput.dataset.sampleTypeId) {
-            profitWorkspaceState.repository.updateDailyExpense(profitWorkspaceState.activeListingId, profitWorkspaceState.activeDate, { sampleQuantities: { [expenseInput.dataset.sampleTypeId]: inputValue } });
-          } else {
-            profitWorkspaceState.repository.updateDailyExpense(profitWorkspaceState.activeListingId, profitWorkspaceState.activeDate, { [expenseInput.dataset.field]: inputValue });
-          }
+        else if (expenseDraftInput) {
+          applyProfitWorkspaceAction(profitWorkspaceState, {
+            type: "updateExpenseDraft",
+            sampleTypeId: expenseDraftInput.dataset.sampleTypeId,
+            field: expenseDraftInput.dataset.field,
+            value: expenseDraftInput.value === "" ? null : expenseDraftInput.value
+          });
         } else return;
         renderProfitTemplate();
+        if (expenseDraftInput) {
+          focusProfitExpenseDrawer({
+            sampleTypeId: expenseDraftInput.dataset.sampleTypeId,
+            field: expenseDraftInput.dataset.field
+          });
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Tab" && profitWorkspaceState.expenseDrawerOpen) {
+          const drawer = document.querySelector(".profit-expense-drawer");
+          const controls = drawer ? [...drawer.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')] : [];
+          if (controls.length) {
+            const first = controls[0];
+            const last = controls[controls.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+              event.preventDefault();
+              last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+              event.preventDefault();
+              first.focus();
+            }
+          }
+          return;
+        }
+        if (event.key !== "Escape") return;
+        if (profitWorkspaceState.expenseDrawerOpen) {
+          applyProfitWorkspaceAction(profitWorkspaceState, { type: "closeExpenseDrawer" });
+          renderProfitTemplate();
+          restoreProfitDecisionFocus();
+        } else if (profitWorkspaceState.managementOpen) {
+          profitWorkspaceState.managementOpen = false;
+          renderProfitTemplate();
+        }
       });
 
       document.getElementById("profitLinkForm")?.addEventListener("submit", (event) => {
