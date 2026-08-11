@@ -1,4 +1,5 @@
 import { automationAuthorized } from "../_shared/automation-auth.js";
+import { createEccangClient, runEccangAutomaticSync } from "../_shared/eccang-sync.js";
 import { apiSecurityHeaders, trustedMutationRequest } from "../_shared/http.js";
 import {
   createTikTokAdsClient,
@@ -18,6 +19,8 @@ const responseHeaders = {
   "cache-control": "no-store",
   ...apiSecurityHeaders()
 };
+
+const ECCANG_DEDICATED_APP_MARKER = "dedicated";
 
 function json(status, body) {
   return new Response(JSON.stringify(body), { status, headers: responseHeaders });
@@ -59,6 +62,45 @@ function connectionSettings(env) {
 
 function configuredConnections(env) {
   return connectionSettings(env).filter((connection) => connection.shopCipher && connection.accessToken);
+}
+
+function eccangConnectionSettings(env) {
+  let source;
+  try {
+    source = JSON.parse(String(env?.ECCANG_CONNECTIONS || "[]"));
+  } catch {
+    return [];
+  }
+  return (Array.isArray(source) ? source : []).filter((connection) => (
+    connection
+      && typeof connection === "object"
+      && String(connection.storeId || "")
+      && String(connection.userAccount || "")
+  )).map((connection, index) => ({
+    id: String(connection.id || `eccang-connection-${index + 1}`),
+    storeId: String(connection.storeId),
+    userAccount: String(connection.userAccount),
+    storeTimezone: String(connection.storeTimezone || "America/Los_Angeles"),
+    status: connection.status === "disabled" ? "disabled" : "active"
+  }));
+}
+
+function eccangConfigured(env) {
+  return Boolean(
+    env?.ECCANG_APP_ISOLATION === ECCANG_DEDICATED_APP_MARKER
+    && env?.ECCANG_APP_KEY
+    && env?.ECCANG_APP_SECRET
+    && env?.ECCANG_SERVICE_ID
+  );
+}
+
+function eccangSettingsPresent(env) {
+  return Boolean(
+    env?.ECCANG_APP_KEY
+    || env?.ECCANG_APP_SECRET
+    || env?.ECCANG_SERVICE_ID
+    || env?.ECCANG_CONNECTIONS
+  );
 }
 
 function parseScopes(value) {
@@ -183,34 +225,47 @@ async function commitProfitCollections(db, collections, now, maxAttempts = 12) {
 
 export function createProfitSyncHandler({
   runSync = runProfitAutomaticSync,
+  runEccangSync = runEccangAutomaticSync,
   now = () => new Date(),
   createAdsClient = createTikTokAdsClient,
+  createEccangClient: createEccangApiClient = createEccangClient,
   loadConnections = loadTikTokShopConnections
 } = {}) {
   return async function handleProfitSync({ request, env, data = {} }) {
     const automation = automationAuthorized(request, env);
     if (!automation && data?.user?.role !== "admin") return json(403, { error: "仅管理员可触发利润同步" });
     if (!trustedMutationRequest(request)) return json(403, { error: "Cross-site write request blocked" });
-    if (!env?.TIKTOK_SHOP_APP_KEY || !env?.TIKTOK_SHOP_APP_SECRET) {
+    if (eccangSettingsPresent(env) && env?.ECCANG_APP_ISOLATION !== ECCANG_DEDICATED_APP_MARKER) {
       return json(409, {
-        error: "尚未配置 TikTok Shop 应用密钥",
+        error: "E仓同步仅允许使用 TK 工作台独立应用",
+        code: "ECCANG_DEDICATED_APP_REQUIRED"
+      });
+    }
+    const useEccang = eccangConfigured(env);
+    if (!useEccang && (!env?.TIKTOK_SHOP_APP_KEY || !env?.TIKTOK_SHOP_APP_SECRET)) {
+      return json(409, {
+        error: "尚未配置 E仓或 TikTok Shop 数据源",
         code: "PROFIT_SYNC_APP_UNCONFIGURED"
       });
     }
     let connections;
-    try {
-      connections = await loadConnections(env, { now });
-    } catch (error) {
-      return json(500, {
-        error: "读取 TikTok Shop 授权失败，请重新连接店铺",
-        code: "PROFIT_SYNC_AUTH_READ_FAILED",
-        retryable: false
-      });
+    if (useEccang) {
+      connections = eccangConnectionSettings(env).filter((connection) => connection.status !== "disabled");
+    } else {
+      try {
+        connections = await loadConnections(env, { now });
+      } catch (error) {
+        return json(500, {
+          error: "读取 TikTok Shop 授权失败，请重新连接店铺",
+          code: "PROFIT_SYNC_AUTH_READ_FAILED",
+          retryable: false
+        });
+      }
     }
     if (!connections.length) {
       return json(409, {
-        error: "尚未配置 TikTok Shop 店铺授权",
-        code: "PROFIT_SYNC_UNCONFIGURED"
+        error: useEccang ? "尚未配置 E仓店铺账号映射" : "尚未配置 TikTok Shop 店铺授权",
+        code: useEccang ? "ECCANG_STORE_MAPPING_UNCONFIGURED" : "PROFIT_SYNC_UNCONFIGURED"
       });
     }
     let body = {};
@@ -226,26 +281,44 @@ export function createProfitSyncHandler({
     const startedAt = now();
     const current = await readWorkbenchState(env.DB);
     try {
-      const loadAdSpend = async (connection, { dateKey }) => {
-        if (!env?.TIKTOK_ADS_ACCESS_TOKEN || !connection?.advertiserId || !connection?.adMappings?.length) {
-          return [];
-        }
-        const client = createAdsClient({
-          accessToken: env.TIKTOK_ADS_ACCESS_TOKEN,
-          advertiserId: connection.advertiserId
+      let result;
+      if (useEccang) {
+        const client = createEccangApiClient({
+          appKey: env.ECCANG_APP_KEY,
+          appSecret: env.ECCANG_APP_SECRET,
+          serviceId: env.ECCANG_SERVICE_ID,
+          endpoint: env.ECCANG_API_BASE_URL || undefined
         });
-        const report = await client.loadDailyReport({ dateKey });
-        return mapTikTokAdSpend(report, connection, dateKey);
-      };
-      const result = await runSync({
-        state: current?.data || normalizeData(null),
-        connections,
-        dateKey: requestedDate || undefined,
-        syncedAt: startedAt.toISOString(),
-        appKey: env.TIKTOK_SHOP_APP_KEY,
-        appSecret: env.TIKTOK_SHOP_APP_SECRET,
-        loadAdSpend
-      });
+        result = await runEccangSync({
+          state: current?.data || normalizeData(null),
+          connections,
+          dateKey: requestedDate || undefined,
+          syncedAt: startedAt.toISOString(),
+          client,
+          now
+        });
+      } else {
+        const loadAdSpend = async (connection, { dateKey }) => {
+          if (!env?.TIKTOK_ADS_ACCESS_TOKEN || !connection?.advertiserId || !connection?.adMappings?.length) {
+            return [];
+          }
+          const client = createAdsClient({
+            accessToken: env.TIKTOK_ADS_ACCESS_TOKEN,
+            advertiserId: connection.advertiserId
+          });
+          const report = await client.loadDailyReport({ dateKey });
+          return mapTikTokAdSpend(report, connection, dateKey);
+        };
+        result = await runSync({
+          state: current?.data || normalizeData(null),
+          connections,
+          dateKey: requestedDate || undefined,
+          syncedAt: startedAt.toISOString(),
+          appKey: env.TIKTOK_SHOP_APP_KEY,
+          appSecret: env.TIKTOK_SHOP_APP_SECRET,
+          loadAdSpend
+        });
+      }
       if (result.status === "unconfigured" || !Object.keys(result.collections || {}).length) {
         return json(409, { error: "尚未配置可用店铺授权", code: "PROFIT_SYNC_UNCONFIGURED" });
       }
@@ -258,7 +331,7 @@ export function createProfitSyncHandler({
         diagnostics: result.diagnostics || []
       });
     } catch (error) {
-      const retryable = ["SYNC_CONFLICT", "TIKTOK_API_ERROR"].includes(error?.code);
+      const retryable = ["SYNC_CONFLICT", "TIKTOK_API_ERROR", "ECCANG_API_ERROR"].includes(error?.code);
       return json(retryable ? 503 : 500, {
         error: String(error?.message || "利润同步失败").slice(0, 240),
         code: error?.code || "PROFIT_SYNC_FAILED",
@@ -275,4 +348,4 @@ export async function onRequest(context) {
   return json(405, { error: "Method not allowed" });
 }
 
-export { commitProfitCollections, configuredConnections };
+export { commitProfitCollections, configuredConnections, eccangConnectionSettings };

@@ -1,18 +1,45 @@
-# TikTok 利润自动同步
+# 利润自动同步
 
-利润中心通过 TikTok Shop Open API 抓取订单、SKU 销售与财务结算，通过 TikTok Marketing API 抓取广告实付费用。同步只增量覆盖同一“链接 / SKU / 经营日”的平台字段，不删除工作台已有产品、链接、寄样费、内部调整或历史数据。
+利润中心通过 TK 工作台的独立 E仓应用只读同步 TikTok 销售订单和 SKU 销售数据。同步只增量覆盖同一“链接 / SKU / 经营日”的销量、订单数、GMV 与成交均价，不删除工作台已有产品、链接、费用、内部调整或历史数据。
+
+E仓请求只发生在每日 17:00 定时同步或管理员点击“立即同步”时。登录、首屏和页面切换只读取 D1 中已同步的结果，不会等待 E仓实时返回。
 
 ## 数据口径
 
-- 订单与 SKU：按店铺经营时区的完整自然日抓取，生成 GMV、件数、订单数和成交均价。
-- 实际到手：仅已结算的 Finance v202501 数据写入 `actualReceived` / `settlementAmount`；未结算的 v202507 数据只写预估到手。
-- 产品成本：继续来自工作台产品主档和生效日成本，不从平台重复抓取。
-- 广告费：优先使用 Marketing API 的 `billed_cost`，按明确的广告、广告组或计划映射到链接；没有映射时不猜测、不写零覆盖人工费用。
-- 容错：单店失败不丢弃其他店铺结果；广告失败不丢弃同店订单和结算结果，状态显示为“部分同步”。
+- 订单与 SKU：按店铺经营时区的完整自然日抓取，通过 E仓 `user_account` + 平台链接 + Seller SKU 映射，生成 GMV、件数、订单数和成交均价。
+- 权限边界：客户端只暴露 E仓 `getOrderList` 查询能力，不调用库存、采购、物流、成本、财务或任何新增/修改/删除接口。
+- 利润口径：E仓同步不写实际到手、平台费用、运费、广告费或产品成本；这些字段保留工作台原有数据及后续独立数据源，不以订单字段猜测。
+- 容错：单店失败不丢弃其他店铺结果；未映射链接或 SKU 只进入诊断，不自动创建错误产品。
 
 ## Pages 生产环境 Secrets
 
 在 Cloudflare Pages 项目中配置以下加密变量，禁止提交真实令牌到仓库：
+
+E仓主数据源：
+
+- `ECCANG_APP_ISOLATION=dedicated`（生产隔离确认开关；缺失或值不同会直接阻断 E仓同步）
+- `ECCANG_APP_KEY`（TK 工作台独立 E仓应用的 App Key）
+- `ECCANG_APP_SECRET`（TK 工作台独立 E仓应用的 App Secret）
+- `ECCANG_SERVICE_ID`（该应用授权状态页面中的服务 ID）
+- `ECCANG_CONNECTIONS`（非密钥的店铺映射 JSON）
+- `TK_SYNC_SECRET`
+
+`ECCANG_CONNECTIONS` 必须明确绑定工作台店铺和 E仓店铺账号，不使用模糊名称自动猜测：
+
+```json
+[
+  {
+    "id": "eccang-dreamweave",
+    "storeId": "工作台中的 profitStores.id",
+    "userAccount": "E仓 user_account 精确值",
+    "storeTimezone": "America/Los_Angeles"
+  }
+]
+```
+
+生产安全边界：不复用“帆软数跨境”的密钥、调用配额、IP 白名单或审计链路；独立应用只申请销售订单查询权限与独立服务 ID。即使误填了旧应用密钥，缺少独立应用隔离开关时同步路由也会拒绝执行，且不会降级调用其他数据源。调用只允许发往 `eccang.com` 官方 HTTPS 域名；密钥仅存 Cloudflare Secret，不返回浏览器。
+
+TikTok 补充数据源（未配置 E仓时仍可独立使用）：
 
 - `TIKTOK_SHOP_APP_KEY`
 - `TIKTOK_SHOP_APP_SECRET`

@@ -81,6 +81,97 @@ const unconfiguredResponse = await unconfiguredHandler({
 assert.equal(unconfiguredResponse.status, 409, "未配置店铺授权时必须返回可处理状态");
 assert.equal(unconfiguredDb.writes, 0, "未配置店铺授权时严禁写入空利润数据");
 
+const eccangDb = createDb(baseState);
+let receivedEccangConnections = [];
+let receivedEccangClientOptions = null;
+const eccangHandler = createProfitSyncHandler({
+  now: () => new Date("2026-08-11T09:05:00.000Z"),
+  createEccangClient: (options) => {
+    receivedEccangClientOptions = options;
+    return { provider: "eccang-test-client" };
+  },
+  runEccangSync: async ({ connections, client }) => {
+    receivedEccangConnections = connections;
+    assert.equal(client.provider, "eccang-test-client");
+    return {
+      status: "synced",
+      failures: [],
+      diagnostics: [{ connectionId: "eccang-dreamweave", matchedOrderCount: 2 }],
+      collections: {
+        profitDailyFacts: {
+          upserts: [{ id: "eccang-fact-1", listingId: "listing-1", listingSkuId: "listing-sku-1", dateKey: "2026-08-10", gmv: 36, itemsSold: 2 }],
+          deletes: []
+        },
+        profitSyncRecords: {
+          upserts: [{ id: "main", state: "synced", source: "E仓 Open API" }],
+          deletes: []
+        }
+      }
+    };
+  }
+});
+const eccangResponse = await eccangHandler({
+  request: new Request("https://example.com/api/profit-sync", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ dateKey: "2026-08-10" })
+  }),
+  env: {
+    DB: eccangDb,
+    ECCANG_APP_ISOLATION: "dedicated",
+    ECCANG_APP_KEY: "eccang-app-key",
+    ECCANG_APP_SECRET: "eccang-secret-value",
+    ECCANG_SERVICE_ID: "eccang-service-id",
+    ECCANG_CONNECTIONS: JSON.stringify([{
+      id: "eccang-dreamweave",
+      storeId: "store-1",
+      userAccount: "DreamWeave",
+      storeTimezone: "America/Los_Angeles"
+    }])
+  },
+  data: { user: { role: "admin" } }
+});
+const eccangPayload = await eccangResponse.json();
+assert.equal(eccangResponse.status, 200, "配置 E仓后不应再强制要求 TikTok 应用密钥");
+assert.equal(eccangDb.writes, 1, "E仓同步成功必须通过统一 CAS 写回云端状态");
+assert.equal(JSON.parse(eccangDb.row.data).profitDailyFacts[0].id, "eccang-fact-1");
+assert.deepEqual(receivedEccangConnections, [{
+  id: "eccang-dreamweave",
+  storeId: "store-1",
+  userAccount: "DreamWeave",
+  storeTimezone: "America/Los_Angeles",
+  status: "active"
+}], "路由只能向 E仓同步器传入明确的店铺账号映射");
+assert.equal(receivedEccangClientOptions.appKey, "eccang-app-key");
+assert.equal(receivedEccangClientOptions.appSecret, "eccang-secret-value");
+assert.equal(JSON.stringify(eccangPayload).includes("eccang-secret-value"), false, "E仓密钥不得出现在 API 响应中");
+
+const unisolatedEccangDb = createDb(baseState);
+const unisolatedEccangHandler = createProfitSyncHandler({
+  runSync: async () => { throw new Error("must not fall back to TikTok"); },
+  runEccangSync: async () => { throw new Error("must not use a shared E仓 app"); }
+});
+const unisolatedEccangResponse = await unisolatedEccangHandler({
+  request: new Request("https://example.com/api/profit-sync", { method: "POST" }),
+  env: {
+    DB: unisolatedEccangDb,
+    ECCANG_APP_KEY: "legacy-shared-app-key",
+    ECCANG_APP_SECRET: "legacy-shared-app-secret",
+    ECCANG_SERVICE_ID: "legacy-shared-service-id",
+    ECCANG_CONNECTIONS: JSON.stringify([{
+      storeId: "store-1",
+      userAccount: "DreamWeave"
+    }]),
+    TIKTOK_SHOP_APP_KEY: "app-key",
+    TIKTOK_SHOP_APP_SECRET: "app-secret"
+  },
+  data: { user: { role: "admin" } }
+});
+const unisolatedEccangPayload = await unisolatedEccangResponse.json();
+assert.equal(unisolatedEccangResponse.status, 409, "未声明独立应用时必须阻断 E仓同步");
+assert.equal(unisolatedEccangPayload.code, "ECCANG_DEDICATED_APP_REQUIRED");
+assert.equal(unisolatedEccangDb.writes, 0, "隔离校验失败时不能写入任何工作台数据");
+
 const secretReadFailureHandler = createProfitSyncHandler({
   loadConnections: async () => { throw new Error("cannot decrypt top-secret-token"); }
 });
