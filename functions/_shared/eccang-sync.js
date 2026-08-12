@@ -204,12 +204,224 @@ function buildStoreIndex(state, storeId) {
     const listing = listings.find((item) => item.id === listingSku.listingId);
     if (!listing) return [];
     const master = masters.get(listingSku.skuId);
-    const values = [listingSku.platformSkuId, master?.platformSkuId, master?.code]
+    const values = [
+      listingSku.platformSkuId,
+      listingSku.sellerSku,
+      master?.platformSkuId,
+      master?.sellerSku,
+      master?.code
+    ]
       .map((value) => String(value || "").trim().toLowerCase())
       .filter(Boolean);
     return [{ listing, listingSku, values }];
   });
   return { listings, listingById, candidates };
+}
+
+function emptyTrackedCollections() {
+  return {
+    profitStores: { upserts: [], deletes: [] },
+    profitProducts: { upserts: [], deletes: [] },
+    profitSkuMasters: { upserts: [], deletes: [] },
+    profitListings: { upserts: [], deletes: [] },
+    profitListingSkus: { upserts: [], deletes: [] },
+    profitProductCostHistory: { upserts: [], deletes: [] }
+  };
+}
+
+function pushTrackedRecord(state, collections, collectionName, record) {
+  const records = state[collectionName] || (state[collectionName] = []);
+  records.push(record);
+  collections[collectionName].upserts.push(record);
+}
+
+function trackedText(value) {
+  return String(value || "").trim();
+}
+
+export function prepareEccangTrackedListings({
+  state = {},
+  connection,
+  trackedListings = []
+} = {}) {
+  const prepared = {
+    ...state,
+    profitStores: [...(state.profitStores || [])],
+    profitProducts: [...(state.profitProducts || [])],
+    profitSkuMasters: [...(state.profitSkuMasters || [])],
+    profitListings: [...(state.profitListings || [])],
+    profitListingSkus: [...(state.profitListingSkus || [])],
+    profitProductCostHistory: [...(state.profitProductCostHistory || [])]
+  };
+  const collections = emptyTrackedCollections();
+  const diagnostics = {
+    provisionedListingCount: 0,
+    provisionedSkuCount: 0,
+    skippedTrackedListings: [],
+    skippedTrackedSkus: []
+  };
+  const storeId = trackedText(connection?.storeId);
+  const connectionId = trackedText(connection?.id);
+  let storeExists = prepared.profitStores.some((store) => trackedText(store?.id) === storeId);
+  const scopedListings = (Array.isArray(trackedListings) ? trackedListings : []).filter((listing) => (
+    trackedText(listing?.connectionId) === connectionId
+  ));
+
+  for (const tracked of scopedListings) {
+    const trackedId = trackedText(tracked?.id);
+    const productId = trackedText(tracked?.productId);
+    const platformListingId = trackedText(tracked?.platformListingId);
+    if (!storeExists) {
+      const storeName = trackedText(tracked?.storeName);
+      const storeByName = prepared.profitStores.find((store) => trackedText(store?.name) === storeName);
+      if (storeByName && trackedText(storeByName.id) !== storeId) {
+        diagnostics.skippedTrackedListings.push({ id: trackedId || platformListingId || "unknown", reason: "store_name_conflict" });
+        continue;
+      }
+      if (storeName) {
+        pushTrackedRecord(prepared, collections, "profitStores", {
+          id: storeId,
+          name: storeName,
+          accountName: trackedText(tracked?.storeAccountName),
+          status: "active"
+        });
+        storeExists = true;
+      }
+    }
+    if (!storeExists || !trackedId || !productId || !platformListingId || !Array.isArray(tracked?.skus)) {
+      diagnostics.skippedTrackedListings.push({
+        id: trackedId || platformListingId || "unknown",
+        reason: storeExists ? "invalid_manifest" : "store_not_found"
+      });
+      continue;
+    }
+
+    const listingById = prepared.profitListings.find((listing) => trackedText(listing?.id) === trackedId);
+    const listingByPlatformId = prepared.profitListings.find((listing) => (
+      trackedText(listing?.storeId) === storeId
+      && trackedText(listing?.platformListingId) === platformListingId
+    ));
+    if (listingById && (
+      trackedText(listingById.storeId) !== storeId
+      || trackedText(listingById.platformListingId) !== platformListingId
+    )) {
+      diagnostics.skippedTrackedListings.push({ id: trackedId, reason: "listing_id_conflict" });
+      continue;
+    }
+    if (listingById && listingByPlatformId && listingById.id !== listingByPlatformId.id) {
+      diagnostics.skippedTrackedListings.push({ id: trackedId, reason: "platform_listing_conflict" });
+      continue;
+    }
+
+    let product = prepared.profitProducts.find((item) => trackedText(item?.id) === productId);
+    const listing = listingById || listingByPlatformId;
+    if (listing && trackedText(listing.productId) !== productId) {
+      diagnostics.skippedTrackedListings.push({ id: trackedId, reason: "product_mapping_conflict" });
+      continue;
+    }
+    if (!product) {
+      product = {
+        id: productId,
+        code: trackedText(tracked?.productCode),
+        name: trackedText(tracked?.productName),
+        category: trackedText(tracked?.category || "寝具"),
+        standardUnitCost: money(tracked?.standardUnitCost),
+        costEffectiveAt: trackedText(tracked?.costEffectiveAt),
+        status: "active"
+      };
+      if (!product.code || !product.name) {
+        diagnostics.skippedTrackedListings.push({ id: trackedId, reason: "invalid_product" });
+        continue;
+      }
+      pushTrackedRecord(prepared, collections, "profitProducts", product);
+      if (product.costEffectiveAt) {
+        pushTrackedRecord(prepared, collections, "profitProductCostHistory", {
+          id: `${productId}-cost-${product.costEffectiveAt}`,
+          productId,
+          standardUnitCost: product.standardUnitCost,
+          effectiveAt: product.costEffectiveAt
+        });
+      }
+    }
+
+    let resolvedListing = listing;
+    if (!resolvedListing) {
+      resolvedListing = {
+        id: trackedId,
+        productId,
+        storeId,
+        platformListingId,
+        url: trackedText(tracked?.url),
+        displayName: trackedText(tracked?.displayName || tracked?.productName),
+        currency: trackedText(tracked?.currency || "USD"),
+        timezone: trackedText(tracked?.timezone || connection?.storeTimezone || "America/Los_Angeles"),
+        lifecycleStatus: "active",
+        launchedAt: trackedText(tracked?.launchedAt),
+        delistedAt: null,
+        sampleTypes: Array.isArray(tracked?.sampleTypes) ? tracked.sampleTypes : []
+      };
+      pushTrackedRecord(prepared, collections, "profitListings", resolvedListing);
+      diagnostics.provisionedListingCount += 1;
+    }
+
+    for (const sku of tracked.skus) {
+      const skuId = trackedText(sku?.skuId);
+      const listingSkuId = trackedText(sku?.listingSkuId);
+      const sellerSku = trackedText(sku?.sellerSku);
+      const platformSkuId = trackedText(sku?.platformSkuId);
+      if (!skuId || !listingSkuId || !sellerSku) continue;
+      let master = prepared.profitSkuMasters.find((item) => trackedText(item?.id) === skuId);
+      if (master && (
+        trackedText(master.productId) !== productId
+        || ![trackedText(master.sellerSku), trackedText(master.code)].filter(Boolean).some((value) => value.toLowerCase() === sellerSku.toLowerCase())
+      )) {
+        diagnostics.skippedTrackedSkus.push({ id: listingSkuId, reason: "sku_master_conflict" });
+        continue;
+      }
+      if (!master) {
+        master = {
+          id: skuId,
+          productId,
+          code: sellerSku,
+          sellerSku,
+          name: trackedText(sku?.name || sellerSku),
+          specification: trackedText(sku?.specification || sku?.name),
+          platformSkuId,
+          standardCost: money(sku?.standardCost ?? product.standardUnitCost),
+          currency: trackedText(tracked?.currency || "USD"),
+          status: sku?.active === false ? "inactive" : "active"
+        };
+        pushTrackedRecord(prepared, collections, "profitSkuMasters", master);
+      }
+      const listingSkuById = prepared.profitListingSkus.find((item) => trackedText(item?.id) === listingSkuId);
+      if (listingSkuById && (
+        trackedText(listingSkuById.listingId) !== resolvedListing.id
+        || trackedText(listingSkuById.skuId) !== skuId
+      )) {
+        diagnostics.skippedTrackedSkus.push({ id: listingSkuId, reason: "listing_sku_id_conflict" });
+        continue;
+      }
+      const existingListingSku = listingSkuById || prepared.profitListingSkus.find((item) => (
+        trackedText(item?.listingId) === resolvedListing.id
+        && sellerSku.toLowerCase() === trackedText(item?.sellerSku).toLowerCase()
+      ));
+      if (existingListingSku) continue;
+      pushTrackedRecord(prepared, collections, "profitListingSkus", {
+        id: listingSkuId,
+        listingId: resolvedListing.id,
+        skuId,
+        platformSkuId,
+        sellerSku,
+        active: sku?.active !== false,
+        storeCostOverride: money(sku?.standardCost ?? product.standardUnitCost),
+        commissionRateOverride: sku?.commissionRateOverride ?? null,
+        activatedAt: trackedText(tracked?.launchedAt),
+        deactivatedAt: null
+      });
+      diagnostics.provisionedSkuCount += 1;
+    }
+  }
+  return { state: prepared, collections, diagnostics };
 }
 
 function matchLine(index, line) {
@@ -312,6 +524,7 @@ function dateTimeRange(dateKey) {
 export async function runEccangAutomaticSync({
   state = {},
   connections = [],
+  trackedListings = [],
   dateKey,
   syncedAt = new Date().toISOString(),
   client,
@@ -328,15 +541,16 @@ export async function runEccangAutomaticSync({
   const diagnostics = [];
   let partial = false;
   for (const connection of active) {
-    const patch = createEccangProfitSyncPatch({ state, connection, dateKey: syncDate, orders, syncedAt });
-    Object.entries(patch.collections || {}).forEach(([name, operations]) => {
+    const prepared = prepareEccangTrackedListings({ state, connection, trackedListings });
+    const patch = createEccangProfitSyncPatch({ state: prepared.state, connection, dateKey: syncDate, orders, syncedAt });
+    Object.entries({ ...prepared.collections, ...(patch.collections || {}) }).forEach(([name, operations]) => {
       if (!collections[name]) collections[name] = { upserts: [], deletes: [] };
       const byId = new Map(collections[name].upserts.map((record) => [String(record.id), record]));
       (operations.upserts || []).forEach((record) => byId.set(String(record.id), record));
       collections[name].upserts = [...byId.values()];
       collections[name].deletes = [...new Set([...(collections[name].deletes || []), ...(operations.deletes || [])])];
     });
-    diagnostics.push({ connectionId: connection.id, ...patch.diagnostics });
+    diagnostics.push({ connectionId: connection.id, ...prepared.diagnostics, ...patch.diagnostics });
     if (patch.status !== "synced") partial = true;
   }
   collections.profitSyncRecords = {

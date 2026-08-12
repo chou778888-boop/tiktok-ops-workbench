@@ -3,6 +3,7 @@ import {
   canonicalEccangSignInput,
   createEccangClient,
   createEccangProfitSyncPatch,
+  prepareEccangTrackedListings,
   signEccangRequest
 } from "../functions/_shared/eccang-sync.js";
 
@@ -189,4 +190,95 @@ assert.deepEqual(
 assert.equal(patch.collections.profitDailySettlements.upserts[0].settlementAmount, null, "销售只读同步不得伪装成结算数据");
 assert.equal(patch.collections.profitDailySettlements.upserts[0].source, "E仓 Open API");
 
-console.log(JSON.stringify({ passed: 18, phase: "eccang-profit-sync" }));
+const trackedState = {
+  profitStores: [{ id: "store-example", name: "Example Store" }],
+  profitProducts: [],
+  profitSkuMasters: [],
+  profitListings: [],
+  profitListingSkus: [],
+  profitProductCostHistory: [],
+  profitDailyFacts: [],
+  profitDailyExpenses: [],
+  profitDailySettlements: [],
+  profitSyncRecords: []
+};
+const trackedConnection = {
+  id: "eccang-example-store",
+  storeId: "store-example",
+  userAccount: "ExampleAccount",
+  storeTimezone: "America/Los_Angeles"
+};
+const trackedManifest = [{
+  connectionId: "eccang-example-store",
+  id: "listing-example-product",
+  productId: "product-example",
+  productCode: "EXAMPLE",
+  productName: "Example Product",
+  standardUnitCost: 10,
+  costEffectiveAt: "2026-08-05",
+  platformListingId: "1234567890123456789",
+  launchedAt: "2026-08-05",
+  skus: [{
+    skuId: "product-example-sku-white",
+    listingSkuId: "listing-example-product-sku-white",
+    sellerSku: "EXAMPLE-WHITE",
+    platformSkuId: "1234567890123456790",
+    name: "White",
+    standardCost: 10
+  }]
+}];
+const preparedTracked = prepareEccangTrackedListings({
+  state: trackedState,
+  connection: trackedConnection,
+  trackedListings: trackedManifest
+});
+assert.equal(preparedTracked.diagnostics.provisionedListingCount, 1, "明确允许的链接可由后台增量建立映射");
+assert.equal(preparedTracked.diagnostics.provisionedSkuCount, 1);
+assert.equal(preparedTracked.collections.profitListings.upserts[0].platformListingId, "1234567890123456789");
+assert.equal(preparedTracked.collections.profitListingSkus.upserts[0].sellerSku, "EXAMPLE-WHITE");
+assert.equal(preparedTracked.collections.profitListingSkus.deletes.length, 0, "后台建档不得删除已有数据");
+
+const preparedWithNewStore = prepareEccangTrackedListings({
+  state: { ...trackedState, profitStores: [] },
+  connection: trackedConnection,
+  trackedListings: [{ ...trackedManifest[0], storeName: "Example Store" }]
+});
+assert.deepEqual(
+  preparedWithNewStore.collections.profitStores.upserts,
+  [{ id: "store-example", name: "Example Store", accountName: "", status: "active" }],
+  "明确店铺 ID 与名称时可在后台增量建立利润店铺"
+);
+assert.equal(preparedWithNewStore.collections.profitStores.deletes.length, 0);
+
+const trackedSalesPatch = createEccangProfitSyncPatch({
+  state: preparedTracked.state,
+  connection: trackedConnection,
+  dateKey: "2026-08-11",
+  orders: [{
+    order_id: "ERP-MT-1",
+    order_code: "TK-MT-1",
+    user_account: "ExampleAccount",
+    order_details: [{
+      product_id: "1234567890123456789",
+      product_sku_org: "EXAMPLE-WHITE",
+      unit_price: "11.99",
+      qty: "2"
+    }]
+  }],
+  syncedAt: "2026-08-12T09:05:00.000Z"
+});
+assert.equal(trackedSalesPatch.diagnostics.matchedOrderCount, 1, "E仓 Seller SKU 必须匹配后台显式映射");
+assert.deepEqual(
+  trackedSalesPatch.collections.profitDailyFacts.upserts.map((fact) => ({ gmv: fact.gmv, itemsSold: fact.itemsSold })),
+  [{ gmv: 23.98, itemsSold: 2 }]
+);
+
+const missingStoreTracked = prepareEccangTrackedListings({
+  state: { ...trackedState, profitStores: [] },
+  connection: trackedConnection,
+  trackedListings: trackedManifest
+});
+assert.equal(missingStoreTracked.collections.profitListings.upserts.length, 0, "找不到精确店铺 ID 时禁止自动猜测建档");
+assert.equal(missingStoreTracked.diagnostics.skippedTrackedListings[0].reason, "store_not_found");
+
+console.log(JSON.stringify({ passed: 29, phase: "eccang-profit-sync" }));

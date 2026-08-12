@@ -1,0 +1,32 @@
+[
+  {
+    "connectionId": "eccang-example-store",
+    "storeName": "Example Store",
+    "id": "listing-example-product",
+    "productId": "product-example",
+    "productCode": "EXAMPLE",
+    "productName": "Example Product",
+    "category": "Example Category",
+    "standardUnitCost": 10,
+    "costEffectiveAt": "2026-01-01",
+    "platformListingId": "1234567890123456789",
+    "displayName": "Example Store · Example Product",
+    "url": "https://seller-us.tiktok.com/compass/product-analysis/detail?id=1234567890123456789",
+    "currency": "USD",
+    "timezone": "America/Los_Angeles",
+    "launchedAt": "2026-01-01",
+    "sampleTypes": [
+      { "id": "sample-example", "name": "标准寄样", "unitCost": 10 }
+    ],
+    "skus": [
+      {
+        "skuId": "product-example-sku-white",
+        "listingSkuId": "listing-example-product-sku-white",
+        "sellerSku": "EXAMPLE-WHITE",
+        "platformSkuId": "1234567890123456790",
+        "name": "White",
+        "standardCost": 10
+      }
+    ]
+  }
+]

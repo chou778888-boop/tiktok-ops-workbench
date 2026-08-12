@@ -83,6 +83,7 @@ assert.equal(unconfiguredDb.writes, 0, "未配置店铺授权时严禁写入空�
 
 const eccangDb = createDb(baseState);
 let receivedEccangConnections = [];
+let receivedTrackedListings = [];
 let receivedEccangClientOptions = null;
 const eccangHandler = createProfitSyncHandler({
   now: () => new Date("2026-08-11T09:05:00.000Z"),
@@ -90,8 +91,9 @@ const eccangHandler = createProfitSyncHandler({
     receivedEccangClientOptions = options;
     return { provider: "eccang-test-client" };
   },
-  runEccangSync: async ({ connections, client }) => {
+  runEccangSync: async ({ connections, trackedListings, client }) => {
     receivedEccangConnections = connections;
+    receivedTrackedListings = trackedListings;
     assert.equal(client.provider, "eccang-test-client");
     return {
       status: "synced",
@@ -122,6 +124,13 @@ const eccangResponse = await eccangHandler({
     ECCANG_APP_KEY: "eccang-app-key",
     ECCANG_APP_SECRET: "eccang-secret-value",
     ECCANG_SERVICE_ID: "eccang-service-id",
+    ECCANG_TRACKED_LISTINGS: JSON.stringify([{
+      connectionId: "eccang-dreamweave",
+      id: "listing-example-product",
+      productId: "product-example",
+      platformListingId: "1234567890123456789",
+      skus: []
+    }]),
     ECCANG_CONNECTIONS: JSON.stringify([{
       id: "eccang-dreamweave",
       storeId: "store-1",
@@ -144,6 +153,7 @@ assert.deepEqual(receivedEccangConnections, [{
 }], "路由只能向 E仓同步器传入明确的店铺账号映射");
 assert.equal(receivedEccangClientOptions.appKey, "eccang-app-key");
 assert.equal(receivedEccangClientOptions.appSecret, "eccang-secret-value");
+assert.equal(receivedTrackedListings[0].platformListingId, "1234567890123456789", "路由必须把后台跟踪清单传给 E仓同步器");
 assert.equal(JSON.stringify(eccangPayload).includes("eccang-secret-value"), false, "E仓密钥不得出现在 API 响应中");
 
 const unisolatedEccangDb = createDb(baseState);

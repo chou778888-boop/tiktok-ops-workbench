@@ -85,6 +85,24 @@ function eccangConnectionSettings(env) {
   }));
 }
 
+function eccangTrackedListingSettings(env) {
+  let source;
+  try {
+    source = JSON.parse(String(env?.ECCANG_TRACKED_LISTINGS || "[]"));
+  } catch {
+    return [];
+  }
+  return (Array.isArray(source) ? source : []).filter((listing) => (
+    listing
+      && typeof listing === "object"
+      && String(listing.connectionId || "")
+      && String(listing.id || "")
+      && String(listing.productId || "")
+      && String(listing.platformListingId || "")
+      && Array.isArray(listing.skus)
+  ));
+}
+
 function eccangConfigured(env) {
   return Boolean(
     env?.ECCANG_APP_ISOLATION === ECCANG_DEDICATED_APP_MARKER
@@ -292,6 +310,7 @@ export function createProfitSyncHandler({
         result = await runEccangSync({
           state: current?.data || normalizeData(null),
           connections,
+          trackedListings: eccangTrackedListingSettings(env),
           dateKey: requestedDate || undefined,
           syncedAt: startedAt.toISOString(),
           client,
@@ -348,4 +367,9 @@ export async function onRequest(context) {
   return json(405, { error: "Method not allowed" });
 }
 
-export { commitProfitCollections, configuredConnections, eccangConnectionSettings };
+export {
+  commitProfitCollections,
+  configuredConnections,
+  eccangConnectionSettings,
+  eccangTrackedListingSettings
+};

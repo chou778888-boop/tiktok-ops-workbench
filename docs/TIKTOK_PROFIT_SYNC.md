@@ -22,6 +22,7 @@ E仓主数据源：
 - `ECCANG_APP_SECRET`（TK 工作台独立 E仓应用的 App Secret）
 - `ECCANG_SERVICE_ID`（该应用授权状态页面中的服务 ID）
 - `ECCANG_CONNECTIONS`（非密钥的店铺映射 JSON）
+- `ECCANG_TRACKED_LISTINGS`（非密钥的精确链接 / SKU 跟踪清单）
 - `TK_SYNC_SECRET`
 
 `ECCANG_CONNECTIONS` 必须明确绑定工作台店铺和 E仓店铺账号，不使用模糊名称自动猜测：
@@ -36,6 +37,10 @@ E仓主数据源：
   }
 ]
 ```
+
+`ECCANG_TRACKED_LISTINGS` 用于在首次后台同步时增量建立已批准的产品、链接和 Seller SKU 映射。它不会覆盖同 ID 的既有业务记录，也不会删除任何工作台数据；链接 ID、产品 ID 或店铺归属冲突时直接跳过并写入诊断。字段结构见脱敏模板 `config/eccang-tracked-listings.example.json`；真实商品 ID、SKU 与成本只保存在 Cloudflare 后台变量中，不提交 Git。
+
+该模板不包含密钥。部署时把文件内容保存为 Pages 的 `ECCANG_TRACKED_LISTINGS` 变量，并保证其中 `connectionId` 对应 `ECCANG_CONNECTIONS` 的 `id`。店铺仍必须由 `storeId` 精确绑定；若该 ID 尚未建档，只允许用清单中的精确 `storeName` 增量创建，发现同名不同 ID 时立即停止，绝不做相似名称猜测。
 
 生产安全边界：不复用“帆软数跨境”的密钥、调用配额、IP 白名单或审计链路；独立应用只申请销售订单查询权限与独立服务 ID。即使误填了旧应用密钥，缺少独立应用隔离开关时同步路由也会拒绝执行，且不会降级调用其他数据源。调用只允许发往 `eccang.com` 官方 HTTPS 域名；密钥仅存 Cloudflare Secret，不返回浏览器。
 
@@ -106,3 +111,13 @@ npm run predeploy:check
 ```
 
 页面“立即同步”仅管理员可用，调用同一服务并在成功后强制刷新统一云端状态。定时任务和人工触发使用相同的幂等 ID，重复同步同一天不会生成重复记录。
+
+首次接入历史链接时不需要打开店铺页面。管理员可在后台终端按经营日回填，命令逐日调用同一幂等同步接口，失败即停止且不会删除历史数据：
+
+```sh
+WORKBENCH_URL=https://tiktok-ops-workbench.pages.dev \
+TK_SYNC_SECRET='从 Cloudflare Secret 注入，不写入仓库' \
+TK_BACKFILL_FROM=2026-08-05 \
+TK_BACKFILL_TO=2026-08-11 \
+npm run backfill:profit-sync
+```
